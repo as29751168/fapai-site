@@ -114,20 +114,20 @@ details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-w
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
     "name": NAME, "alternateName": ["104法拍網", "透明房訊", "一零四法拍網股份有限公司"], "url": SITE + "/",
-    "telephone": ["+886-986-678-928", "+886-918-313-888", "+886-2-2270-0888", "+886-3-338-8220"],
+    "telephone": ["+886-918-313-888", "+886-986-678-928", "+886-2-2270-0888", "+886-3-338-8220"],
     "address": [{"@type": "PostalAddress", "streetAddress": "金城路二段396號11樓", "addressLocality": "土城區", "addressRegion": "新北市", "addressCountry": "TW"},
                 {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
     "areaServed": "TW", "sameAs": list(LINKS.values())[1:3],
     "knowsAbout": ["法拍屋", "法拍屋代標", "不點交物件處理", "撤封代償", "產權調查", "法拍屋貸款"],
 }
 
-FAB = (f'<div class="fab"><a href="tel:0986678928" aria-label="電話諮詢"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></a>'
+FAB = (f'<div class="fab"><a href="tel:0918313888" aria-label="電話諮詢"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></a>'
        f'<a class="l" href="{LINKS["LINE"]}" target="_blank" rel="noopener" aria-label="LINE 諮詢">LINE</a></div>')
 
 def contact_box():
     btn = "".join(f'<a class="btn{" line" if k=="LINE" else ""}" href="{e(v)}" target="_blank" rel="noopener">{e(k)}</a>' for k, v in LINKS.items())
     return f'''<section class="box" id="contact"><h2>聯絡我們</h2>
-<p><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a><br><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a></p>
+<p><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a><br><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a></p>
 <p>透明房訊雜誌社／一零四法拍網股份有限公司<br>台北 <a href="tel:0222700888">(02)2270-0888</a>　桃園 <a href="tel:033388220">(03)338-8220</a>　傳真 (02)2274-0884</p>
 <p>{e(ADDR[0])}<br>{e(ADDR[1])}</p><p>服務：法拍屋評估、代標、不點交物件處理、撤封代償、產權疑難雜症排除</p><div>{btn}</div></section>'''
 
@@ -142,7 +142,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0986678928">電話諮詢</a></div></header>
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a></div></header>
 {pre}<main>{body}</main>
 <footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
@@ -155,7 +155,7 @@ def card(x):
     img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
     price = re.sub(r"^售", "", x["價格"])
     old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
-    top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"]]))
+    top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"], "新上架" if _within(x.get("新增日", "")) else "", "降價" if _within(x.get("異動日", "")) and x.get("降價前", 0) else ""]))
     text = f'{x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
     return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}" data-f="{first_price(x)}">'
             f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
@@ -209,7 +209,7 @@ def detail_page(x):
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
-    cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0986678928">打電話</a></div>'
+    cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
     return page(full_title, desc, f'/h/{x["編號"]}', body + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
 
@@ -220,6 +220,45 @@ FAQ = [
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
     ("本站資料多久更新一次？", "每天早上自動更新一次物件價格、拍次與開標日期，實際內容請以法院公告為準。"),
 ]
+
+def _today():
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).date()
+
+def _within(d, days=7):
+    try: return 0 <= (_today() - datetime.date.fromisoformat(d)).days <= days
+    except Exception: return False
+
+def new_items(): return [x for x in ITEMS if _within(x.get("新增日", ""))]
+def changed_items(): return [x for x in ITEMS if _within(x.get("異動日", ""))]
+def _rank(x): return {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3)
+
+def drafts():
+    pool = sorted(upcoming(14), key=lambda x: (_rank(x), date_key(x)))[:5]
+    if not pool: pool = sorted([x for x in ITEMS if round_of(x) >= 3], key=lambda x: (_rank(x), price_num(x["價格"])))[:5]
+    nw = len(new_items())
+    fb = ["【本週開標・精選法拍屋】", ""]
+    ln = ["📢 本週法拍精選", ""]
+    for i, x in enumerate(pool, 1):
+        inf = x.get("資訊", {})
+        r = round_of(x)
+        desc = f'第{r}拍｜開標 {inf.get("開標日期", "")}｜底價 {re.sub(r"^售", "", x["價格"])}'
+        link = f'{SITE}/h/{x["編號"]}'
+        fb += [f'{i}. {area_of(x)}｜{x["地址"]}', f'   {desc}', f'   👉 {link}?utm_source=fb', ""]
+        ln += [f'{i}. {area_of(x)} {x["地址"]}', f'   {desc}', f'   {link}?utm_source=line', ""]
+    if nw:
+        fb.append(f'本週新增 {nw} 筆物件，完整清單看網站 ↓')
+        ln.append(f'本週新增 {nw} 筆，完整清單：')
+    fb += [f'{SITE}/?utm_source=fb', "", "想了解代標、產權調查與貸款，歡迎私訊或來電 林小姐 Anna 0986-678-928 😊", "", "#法拍屋 #法拍 #法拍屋代標 #透明房訊 #104法拍網"]
+    ln += [f'{SITE}/?utm_source=line', "", "有興趣請直接回覆，或聯絡林小姐 Anna 0986-678-928"]
+    return "\n".join(fb), "\n".join(ln)
+
+def post_page():
+    fb, ln = drafts()
+    box = lambda i, t, txt: (f'<section class="box"><h2>{t}</h2><textarea id="{i}" rows="14" style="width:100%;font-size:15px;padding:10px;border:1px solid #ccc;border-radius:6px">{e(txt)}</textarea>'
+                             f'<button class="btn" type="button" onclick="var t=document.getElementById(\'{i}\');t.select();try{{navigator.clipboard.writeText(t.value)}}catch(e){{document.execCommand(\'copy\')}};this.textContent=\'已複製\'">複製貼文</button></section>')
+    body = ('<h1>本週貼文草稿</h1><p>每天早上自動更新。按「複製貼文」後，貼到粉絲專頁或 LINE 社群即可發佈。（此頁不會被搜尋引擎收錄）</p>'
+            + box("fb", "粉絲專頁貼文", fb) + box("ln", "LINE 社群推播", ln))
+    return page("貼文草稿｜" + NAME, "本週貼文草稿", "/post", body, None, None, "", "", False).replace("index,follow", "noindex,nofollow")
 
 def hero_banner():
     import random
@@ -240,7 +279,11 @@ def hero_banner():
 def hero_html():
     h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
          f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
-         f'<a href="tel:0986678928">電話諮詢 林小姐 Anna</a></div>')
+         f'<a href="tel:0918313888">電話諮詢 黃先生 Pitt</a><a href="tel:0986678928">電話諮詢 林小姐 Anna</a></div>')
+    nw = new_items()[:6]
+    if nw: h += '<h2 class="sec">本週新增</h2><div class="grid">' + "".join(card(x) for x in nw) + "</div>"
+    dr = changed_items()[:6]
+    if dr: h += '<h2 class="sec">降價・降拍更新</h2><div class="grid">' + "".join(card(x) for x in dr) + "</div>"
     wk = upcoming(30)[:8]
     if wk:
         rows = "".join(f'<tr><td>{e("%d拍" % round_of(x) if round_of(x) else "—")}</td><td>{e(x["資訊"].get("開標日期", ""))}</td><td><a href="/h/{e(x["編號"])}">{e(x["地址"])}</a></td><td class="rt">{e(x["價格"])}</td></tr>' for x in wk)
@@ -266,6 +309,7 @@ cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>
 var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'}
 [].forEach.call(document.querySelectorAll('.qk button'),function(b){b.addEventListener('click',function(){if(b.dataset.c){$('c').value=b.dataset.c;areas()}if(b.dataset.r){$('r').value=b.dataset.r;chipsOn()}f();$('list').scrollIntoView({behavior:'smooth'})})});
 var rc=$('rc');function chipsOn(){[].forEach.call(rc.querySelectorAll('button'),function(b){b.className=b.dataset.v===$('r').value?'on':''})}rc.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('r').value=b.dataset.v;chipsOn();f()});
+var go=$('go');function done(){if(document.activeElement)document.activeElement.blur();f();$('n').scrollIntoView({behavior:'smooth',block:'start'})}go.addEventListener('click',done);$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();done()}});
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();f()})});
 $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});areas();chipsOn();f()})();</script>"""
     body = (f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
@@ -273,7 +317,7 @@ $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''}
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
             f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
             f'<button type="button" data-v="3">第3拍（{sum(1 for x in ITEMS if round_of(x)==3)}）</button><button type="button" data-v="4">第4拍以上（{sum(1 for x in ITEMS if round_of(x)>=4)}）</button></div>'
-            f'<div class="bar"><input id="q" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
+            f'<div class="bar"><input id="q" type="search" enterkeyhint="search" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><button id="go" type="button">搜尋</button><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
             f'<select id="y" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select>'
             f'<input type="hidden" id="r">'
             f'<select id="j" aria-label="點交情形"><option value="">點交不拘</option><option>點交</option><option>不點交</option><option>其他</option></select>'
@@ -315,6 +359,7 @@ if __name__ == "__main__":
     write("site/robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/): 全部法拍屋物件與搜尋\n" + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 聯絡\n- 林小姐 Anna：{PHONE_A}\n- 黃先生 Pitt：{PHONE_P}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
+          f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
+    write("site/post.html", post_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls))
