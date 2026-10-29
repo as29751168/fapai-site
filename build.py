@@ -50,6 +50,17 @@ def deliver_of(x):
     v = m.group(1).strip() if m else ""
     return "不點交" if v.startswith("不點交") else "點交" if v.startswith("點交") else ("其他" if v else "")
 
+def upcoming(days=7):
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).date()
+    out = []
+    for x in ITEMS:
+        m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", x.get("資訊", {}).get("開標日期", ""))
+        if not m: continue
+        try: d = datetime.date(int(m.group(1)) + 1911, int(m.group(2)), int(m.group(3)))
+        except ValueError: continue
+        if 0 <= (d - today).days <= days: out.append((d, x))
+    return [x for d, x in sorted(out, key=lambda t: t[0])]
+
 SPEC_ORDER = ["案號", "總登記坪數", "每坪單價"]
 DETAIL_KEYS = ["銷售狀態", "格局", "社區/大樓", "屋齡", "車位", "座向", "所在樓層", "管理費", "管委會", "中庭", "電梯", "邊間", "增建", "是否凶宅", "無障礙環境", "法拍件", "拍次", "開標日期"]
 SIZE_KEYS = ["主建物", "附屬建物", "公共設施", "停車位", "土地登記總坪數", "總坪數"]
@@ -73,6 +84,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 6px;b
 .btn{display:inline-block;margin:6px 8px 0 0;padding:9px 15px;border-radius:6px;background:#1f3a4d;color:#fff!important;text-decoration:none;font-size:14px}.btn.line{background:#06c755}
 .cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
 .bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
+.cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:8px 12px;display:flex;gap:8px;z-index:9}.cta a,.cta button{flex:1;text-align:center;padding:12px;border-radius:8px;font-size:16px;border:0;color:#fff;text-decoration:none;cursor:pointer;font-family:inherit}.cta .l{background:#06c755}.cta .t{background:#1f3a4d}
+.hero{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.hero a{padding:10px 16px;border-radius:8px;color:#fff;text-decoration:none;font-size:15px;background:#1f3a4d}.hero a.l{background:#06c755}.hero a.f{background:#1877f2}
 .areas a{display:inline-block;margin:3px 6px 3px 0;font-size:14px}footer{text-align:center;color:#888;font-size:13px;padding:24px}
 details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-weight:700}
 @media(max-width:640px){h1{font-size:19px}}"""
@@ -169,7 +182,10 @@ def detail_page(x):
               {"@type": "ListItem", "position": 3, "name": x["地址"]}]}]
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
-    return page(full_title, desc, f'/h/{x["編號"]}', body, ld, ph[0] if ph else None)
+    ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
+    cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0986678928">打電話</a></div>'
+           f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
+    return page(full_title, desc, f'/h/{x["編號"]}', body + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>")
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
@@ -178,6 +194,16 @@ FAQ = [
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
     ("本站資料多久更新一次？", "每天早上自動更新一次物件價格、拍次與開標日期，實際內容請以法院公告為準。"),
 ]
+
+def hero_html():
+    h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
+         f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
+         f'<a href="tel:0986678928">電話諮詢 林小姐 Anna</a></div>')
+    wk = upcoming(7)[:6]
+    if wk: h += '<section class="box"><h2>本週開標（7 天內）</h2><div class="grid">' + "".join(card(x) for x in wk) + "</div></section>"
+    top = sorted([x for x in ITEMS if round_of(x) >= 3], key=lambda x: (price_num(x["價格"]), date_key(x)))[:6]
+    if top: h += '<section class="box"><h2>第 3 拍以上精選（價格低到高）</h2><div class="grid">' + "".join(card(x) for x in top) + "</div></section>"
+    return h
 
 def index_page():
     cities = sorted({area_of(x)[:2] for x in ITEMS})
@@ -197,6 +223,7 @@ F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas(
 $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();f()});areas();f()})();</script>"""
     body = (f'<h1>法拍屋查詢｜法拍屋代標｜透明房訊 104法拍網</h1>'
             f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
+            + hero_html() +
             f'<div class="bar"><input id="q" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
             f'<select id="y" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select>'
             f'<select id="r" aria-label="拍次"><option value="">拍次不拘</option><option value="1">第1拍</option><option value="2">第2拍</option><option value="3">第3拍</option><option value="4">第4拍以上</option></select>'
