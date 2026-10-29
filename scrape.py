@@ -31,6 +31,14 @@ def detail(hid):
     for k, v in re.findall(r'detail-house-key"><h4>(.*?)</h4></div>\s*<span>：</span>\s*<div[^>]*class="detail-house-value"[^>]*>(.*?)</div>', h, flags=re.S):
         k, v = txt(k), txt(v)
         if k and v and k != "瀏覽人次": info[k] = v
+    m = re.search(r"【法院筆錄】(.*?)(?=<font|<iframe|$)", h, flags=re.S)
+    if m:
+        lines = [txt(x) for x in re.split(r"<br\s*/?>", m.group(1))]
+        lines = [x for x in lines if x]
+        sched = [x for x in lines if re.match(r"第.{1,2}拍", x)]
+        notes = [x for x in lines if x not in sched]
+        if notes: info["筆錄"] = "\n".join(notes)
+        if sched: info["拍賣紀錄"] = "\n".join(sched)
     time.sleep(0.3)
     return info
 
