@@ -112,6 +112,9 @@ details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-w
 .lg{background:#18a999;color:#fff!important;padding:7px 14px;border-radius:20px;font-size:14px;text-decoration:none;white-space:nowrap}.mb{background:none;border:1px solid #1f3a4d;color:#1f3a4d;border-radius:8px;font-size:20px;line-height:1;padding:5px 10px;cursor:pointer}
 #dr{position:fixed;inset:0;z-index:60;display:none}#dr.on{display:block}#dr .bk{position:absolute;inset:0;background:rgba(0,0,0,.5)}#dr .pn{position:absolute;right:0;top:0;bottom:0;width:78%;max-width:320px;background:#1a7f8a;color:#fff;padding:20px 22px;overflow:auto}#dr .pn a{display:block;color:#fff;text-decoration:none;font-size:18px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.2)}#dr .x{background:none;border:0;color:#fff;font-size:28px;float:right;cursor:pointer}
 .mf label{display:block;margin:10px 0 4px;font-weight:700}.mf input,.mf select,.mf textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:16px}
+.hin .tm{display:block;margin:0 auto 6px;height:230px;width:auto;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+@media(min-width:900px){.hin{text-align:left;padding-right:380px;min-height:420px}.hin .tm{position:absolute;right:24px;top:24px;height:380px;margin:0}.cta2,.stats,.qk{justify-content:flex-start}}
+.team{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.team img{width:230px;max-width:100%;height:auto;border-radius:16px}.team ol{flex:1;min-width:230px;margin:0;padding-left:20px}.team li{margin:6px 0}
 @media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}"""
 
 ORG = {
@@ -289,8 +292,8 @@ def hero_banner():
         x += w + rnd.randint(3, 10)
     roof = '<path d="M880 250 L960 180 L1040 250 M900 250 V300 M1020 250 V300" fill="none" stroke="#d9b97a" stroke-width="3" opacity=".55"/>'
     svg = f'<svg class="sky" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">{"".join(rects)}{roof}</svg>'
-    return (f'<section class="hero2">{svg}<div class="hin"><p class="eyebrow">TOMIN REALTY · 1986 年成立</p><h1>透明房訊｜法拍屋查詢與代標</h1>'
-            f'<p class="sub">讓法拍更透明，讓您安心買到好房</p>'
+    return (f'<section class="hero2">{svg}<div class="hin"><img class="tm" src="/img/team1.jpg" alt="黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問" width="582" height="800" onerror="this.remove()"><p class="eyebrow">透明房訊｜法拍屋查詢與代標</p><h1>法拍屋怎麼買不踩雷？<br>夫妻雙人顧問幫你把關</h1>'
+            f'<p class="sub">同樣價格，兩個人幫你看產權、現場與底價</p>'
             f'<div class="cta2"><a class="b1" href="#list">瀏覽全部物件</a><a class="b2" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></div>'
             f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span><span><b>代標</b>・產權調查・貸款諮詢</span></div>'
             f'<div class="qk"><button type="button" data-c="台北">台北</button><button type="button" data-c="新北">新北</button><button type="button" data-c="桃園">桃園</button><button type="button" data-r="3+">第3拍以上</button></div></div></section>')
@@ -299,6 +302,9 @@ def hero_html():
     h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
          f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
          f'<a href="tel:0918313888">電話諮詢 黃先生 Pitt</a><a href="tel:0986678928">電話諮詢 林小姐 Anna</a></div>')
+    h += ('<section class="box team"><img src="/img/team2.jpg" alt="黃先生 Pitt 與林小姐 Anna 研究格局圖" width="583" height="800" loading="lazy" onerror="this.remove()">'
+          '<div><h2>同樣價格，兩個人幫你把關</h2><ol><li><b>產權調查</b>：查清楚有沒有占用、抵押、不點交風險</li><li><b>現場勘查</b>：兩人分工看屋況與周邊</li><li><b>代標到交屋</b>：出價策略、貸款、點交一次處理</li></ol>'
+          '<p><a class="btn line" href="/member#ask">委託代標留言</a> <a class="btn" href="tel:0918313888">電話洽詢</a></p></div></section>')
     nw = new_items()[:6]
     if nw: h += '<h2 class="sec">本週新增</h2><div class="grid">' + "".join(card(x) for x in nw) + "</div>"
     dr = changed_items()[:6]
