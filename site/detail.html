@@ -54,7 +54,7 @@ Promise.all([fetch('data.json?'+Date.now()).then(r=>r.json()), fetch('photos.jso
     (ph ? '<img src="https://www.104woo.com.tw/' + encodeURI(ph) + '" alt="">' : '<div class="noimg">照片請洽業務</div>') +
     '<div class="b"><span class="tag">' + esc(x['狀態']) + '</span><h1>' + esc(x['地址']) + '</h1>' +
     '<div class="price">' + (x['原價'] ? '<s>' + esc(x['原價']) + '</s>' : '') + esc(x['價格']) + '</div>' +
-    '<table><tr><td>地區</td><td>' + esc(x['區域']) + '</td></tr><tr><td>類型</td><td>' + esc(x['類型']) + '</td></tr><tr><td>格局／坪數</td><td>' + esc(x['格局坪數']) + '</td></tr><tr><td>物件編號</td><td>' + esc(x['編號']) + '</td></tr></table></div></div>';
+    '<table><tr><td>地區</td><td>' + esc(x['區域']) + '</td></tr><tr><td>類型</td><td>' + esc(x['類型']) + '</td></tr><tr><td>格局／坪數</td><td>' + esc(x['格局坪數']) + '</td></tr><tr><td>物件編號</td><td>' + esc(x['編號']) + '</td></tr>' + Object.entries(x['資訊']||{}).map(([k,v]) => '<tr><td>' + esc(k) + '</td><td>' + esc(v) + '</td></tr>').join('') + '</table></div></div>';
 });
 </script>
 </body>
