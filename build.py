@@ -84,7 +84,7 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 6px;b
 .card{background:#fff;border:1px solid #e2e2de;border-radius:8px;overflow:hidden;text-decoration:none;color:inherit;display:block}
 .card img,.card .noimg{width:100%;height:160px;object-fit:cover;display:block;border-radius:0}.card .b{padding:10px 12px}.card h3{margin:0 0 4px;font-size:15px;line-height:1.4}
 .card .m{font-size:13px;color:#666}.card .p{margin-top:6px;font-size:17px;font-weight:700;color:#b3261e}.card .p s{font-size:13px;font-weight:400;color:#999;margin-right:6px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.bar input,.bar select{padding:9px 10px;border:1px solid #ccc;border-radius:6px;font-size:15px;background:#fff}.bar input{flex:1;min-width:180px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}#n{scroll-margin-top:70px}.bar input,.bar select{padding:9px 10px;border:1px solid #ccc;border-radius:6px;font-size:16px;background:#fff}.bar input{flex:1;min-width:180px}
 .btn{display:inline-block;margin:6px 8px 0 0;padding:9px 15px;border-radius:6px;background:#1f3a4d;color:#fff!important;text-decoration:none;font-size:14px}.btn.line{background:#06c755}
 .cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
 .bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
@@ -109,6 +109,9 @@ h2.sec{font-family:"Noto Serif TC","Songti TC",serif;text-align:center;font-size
 .card{transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.09)}
 .areas a{display:inline-block;margin:3px 6px 3px 0;font-size:14px}footer{text-align:center;color:#888;font-size:13px;padding:24px}
 details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-weight:700}
+.lg{background:#18a999;color:#fff!important;padding:7px 14px;border-radius:20px;font-size:14px;text-decoration:none;white-space:nowrap}.mb{background:none;border:1px solid #1f3a4d;color:#1f3a4d;border-radius:8px;font-size:20px;line-height:1;padding:5px 10px;cursor:pointer}
+#dr{position:fixed;inset:0;z-index:60;display:none}#dr.on{display:block}#dr .bk{position:absolute;inset:0;background:rgba(0,0,0,.5)}#dr .pn{position:absolute;right:0;top:0;bottom:0;width:78%;max-width:320px;background:#1a7f8a;color:#fff;padding:20px 22px;overflow:auto}#dr .pn a{display:block;color:#fff;text-decoration:none;font-size:18px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.2)}#dr .x{background:none;border:0;color:#fff;font-size:28px;float:right;cursor:pointer}
+.mf label{display:block;margin:10px 0 4px;font-weight:700}.mf input,.mf select,.mf textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:16px}
 @media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}"""
 
 ORG = {
@@ -142,9 +145,25 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a></div></header>
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/member">登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
+
+DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
+          '<a href="/">首頁</a><a href="/#list">物件列表</a><a href="/#n">本週新增・降價</a><a href="/#areas">各區法拍屋</a><a href="/member">會員登入／註冊</a><a href="/member#ask">委託代標留言</a><a href="/#faq">常見問題</a>'
+          f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
+          '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
+
+def member_page():
+    body = ('<h1>會員專區・委託代標留言</h1>'
+            '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。Google／LINE 一鍵登入即將開放，目前請先加入 LINE 社群或直接聯絡我們，專人協助建立會員資料。</p>'
+            f'<p><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
+            '<section class="box" id="ask"><h2>委託代標・物件諮詢留言</h2><p>留下需求，我們會盡快與您聯絡。</p><form class="mf" id="mf">'
+            '<label>姓名</label><input id="mn" required autocomplete="name"><label>聯絡電話</label><input id="mp" type="tel" required autocomplete="tel">'
+            '<label>想了解的物件（案號／地址，可留空）</label><input id="mo"><label>需求</label><select id="mt"><option>委託代標</option><option>產權調查／不點交處理</option><option>貸款諮詢</option><option>其他</option></select>'
+            '<label>預算區間／其他說明</label><textarea id="mm" rows="4"></textarea><p><button class="btn line" type="submit" style="border:0;cursor:pointer">送出並開啟 LINE</button></p></form></section>'
+            f'<script>document.getElementById("mf").onsubmit=function(ev){{ev.preventDefault();var g=function(i){{return document.getElementById(i).value}};var t="【委託留言】\\n姓名："+g("mn")+"\\n電話："+g("mp")+"\\n物件："+g("mo")+"\\n需求："+g("mt")+"\\n說明："+g("mm");try{{navigator.clipboard.writeText(t)}}catch(e){{}};alert("內容已複製，請在 LINE 貼上送出，我們會盡快回覆您。");window.open({jd(LINKS["LINE"])},"_blank")}}</script>')
+    return page("會員登入・委託代標留言｜" + NAME, "透明房訊會員專區與法拍屋委託代標留言，專人回覆。", "/member", body)
 
 def card(x):
     ph = photos(x)
@@ -216,7 +235,7 @@ def detail_page(x):
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
     ("法拍屋的「拍次」是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以各物件「拍賣紀錄」及法院公告為準。"),
-    ("可以委託代標嗎？需要準備什麼？", "可以。透明房訊104法拍網提供法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢，請透過電話或 LINE 聯絡林小姐 Anna 或黃先生 Pitt。"),
+    ("可以委託代標嗎？需要準備什麼？", "可以。透明房訊104法拍網提供法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢，請透過電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
     ("本站資料多久更新一次？", "每天早上自動更新一次物件價格、拍次與開標日期，實際內容請以法院公告為準。"),
 ]
@@ -248,8 +267,8 @@ def drafts():
     if nw:
         fb.append(f'本週新增 {nw} 筆物件，完整清單看網站 ↓')
         ln.append(f'本週新增 {nw} 筆，完整清單：')
-    fb += [f'{SITE}/?utm_source=fb', "", "想了解代標、產權調查與貸款，歡迎私訊或來電 林小姐 Anna 0986-678-928 😊", "", "#法拍屋 #法拍 #法拍屋代標 #透明房訊 #104法拍網"]
-    ln += [f'{SITE}/?utm_source=line', "", "有興趣請直接回覆，或聯絡林小姐 Anna 0986-678-928"]
+    fb += [f'{SITE}/?utm_source=fb', "", "想了解代標、產權調查與貸款，歡迎私訊或來電 黃先生 Pitt 0918-313-888、林小姐 Anna 0986-678-928 😊", "", "#法拍屋 #法拍 #法拍屋代標 #透明房訊 #104法拍網"]
+    ln += [f'{SITE}/?utm_source=line', "", "有興趣請直接回覆，或聯絡 黃先生 Pitt 0918-313-888、林小姐 Anna 0986-678-928"]
     return "\n".join(fb), "\n".join(ln)
 
 def post_page():
@@ -330,14 +349,14 @@ $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''}
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]},
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
     first = next((photos(x)[0] for x in ITEMS if photos(x)), None)
-    return page(f"法拍屋查詢｜法拍屋代標｜{NAME}", f"全台法拍屋、金拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, first, "", hero_banner())
+    return page(f"法拍屋查詢｜法拍屋代標｜{NAME}", f"全台法拍屋、金拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, SITE + "/og.jpg", "", hero_banner())
 
 def area_page(a, xs):
     title = f"{a}法拍屋｜{len(xs)}筆物件｜{NAME}"
     desc = f"{a}法拍屋物件列表，共{len(xs)}筆，含拍次、開標日期、底標價與法院筆錄；提供{a}法拍屋代標、產權調查與貸款諮詢。"
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a)}法拍屋（{len(xs)}筆）</h1><p>{e(desc)}</p><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
-    return title, page(title, desc, f"/area/{slug(a)}", body, ld)
+    return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
 
 def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
@@ -346,7 +365,7 @@ def write(path, s):
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/index.html", index_page())
-    urls = [("/", 1.0)]
+    urls = [("/", 1.0), ("/member", 0.5)]
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8))
     areas = {}
@@ -361,5 +380,6 @@ if __name__ == "__main__":
           f"## 主要頁面\n- [物件列表]({SITE}/): 全部法拍屋物件與搜尋\n" + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
           f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
     write("site/post.html", post_page())
+    write("site/member.html", member_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls))
