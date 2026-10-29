@@ -292,7 +292,7 @@ def hero_banner():
         x += w + rnd.randint(3, 10)
     roof = '<path d="M880 250 L960 180 L1040 250 M900 250 V300 M1020 250 V300" fill="none" stroke="#d9b97a" stroke-width="3" opacity=".55"/>'
     svg = f'<svg class="sky" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">{"".join(rects)}{roof}</svg>'
-    return (f'<section class="hero2">{svg}<div class="hin"><img class="tm" src="/img/team1.jpg" alt="黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問" width="582" height="800" onerror="this.remove()"><p class="eyebrow">透明房訊｜法拍屋查詢與代標</p><h1>法拍屋怎麼買不踩雷？<br>夫妻雙人顧問幫你把關</h1>'
+    return (f'<section class="hero2">{svg}<div class="hin"><img class="tm" src="/brand/team1.jpg" alt="黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問" width="582" height="800" onerror="this.remove()"><p class="eyebrow">透明房訊｜法拍屋查詢與代標</p><h1>法拍屋怎麼買不踩雷？<br>夫妻雙人顧問幫你把關</h1>'
             f'<p class="sub">同樣價格，兩個人幫你看產權、現場與底價</p>'
             f'<div class="cta2"><a class="b1" href="#list">瀏覽全部物件</a><a class="b2" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></div>'
             f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span><span><b>代標</b>・產權調查・貸款諮詢</span></div>'
