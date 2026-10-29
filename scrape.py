@@ -53,7 +53,7 @@ def toro_all(page_size=50):
             out.append({"來源": "鑫創法拍", "地址": g(r'class="product-address">(.*?)</div>'), "拍賣日": date.strip(), "狀態": status.strip(),
                         "拍次點交": g(r"<span>(\d拍[^<]*)</span>"), "類型": tp, "坪數": area,
                         "底價": g(r'class="product-price1"><span>底價</span>(.*?)</div>'),
-                        "圖片": urljoin(TORO, img), "連結": urljoin(TORO, href)})
+                        "連結": urljoin(TORO, href)})
         page += 1; time.sleep(1)
     return out
 
