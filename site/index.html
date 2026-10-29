@@ -70,6 +70,7 @@ footer{text-align:center;color:#888;font-size:13px;padding:24px}
         <a id="lnFb" href="#" target="_blank" rel="noopener">粉絲專頁</a>
         <a id="lnIg" href="#" target="_blank" rel="noopener">Instagram</a>
         <a id="lnYt" href="#" target="_blank" rel="noopener">YouTube</a>
+        <a id="lnGrp" href="#" target="_blank" rel="noopener">LINE 社群</a>
       </div>
     </div>
   </section>
@@ -79,12 +80,13 @@ footer{text-align:center;color:#888;font-size:13px;padding:24px}
 <script>
 // ★ 只要改這裡：貼上你的連結；留空的社群按鈕會自動隱藏
 const LINKS = {
-  line: '',   // 例：https://line.me/R/ti/p/@xxxx
-  fb:   '',   // 粉絲專頁網址
+  line: 'https://line.me/ti/p/MJcPvp3nG8',
+  fb:   'https://www.facebook.com/share/1CnLq9vuJd/?mibextid=wwXIfr',
   ig:   '',
-  yt:   ''
+  grp:  'https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default',
+  yt:   'https://youtube.com/@anna-n9999?si=laOYfE2Bm2VMPYDa',
 };
-for (const [k,id] of [['line','lnLine'],['fb','lnFb'],['ig','lnIg'],['yt','lnYt']]) {
+for (const [k,id] of [['line','lnLine'],['fb','lnFb'],['ig','lnIg'],['yt','lnYt'],['grp','lnGrp']]) {
   const a = document.getElementById(id);
   if (LINKS[k]) a.href = LINKS[k]; else a.style.display = 'none';
 }
