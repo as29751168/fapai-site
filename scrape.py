@@ -65,9 +65,38 @@ def s104(max_pages=40):
         time.sleep(1)
     return out
 
+def track(items):
+    """記錄每件物件首次出現日與價格／拍次變動（data/seen.json），用於「本週新增」「降價降拍」"""
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d")
+    p = "data/seen.json"
+    first_run = not os.path.exists(p)
+    seen = {} if first_run else json.load(open(p, encoding="utf-8"))
+    def num(t):
+        m = re.search(r"([\d.,]+)\s*(億|萬)?", t or "")
+        if not m: return 0
+        return int(float(m.group(1).replace(",", "")) * (100000000 if m.group(2) == "億" else 10000 if m.group(2) == "萬" else 1))
+    for x in items:
+        i, pr = x["編號"], num(x["價格"])
+        r = (x.get("資訊") or {}).get("拍次", "")
+        rd = int(r) if r.isdigit() else 0
+        s0 = seen.get(i)
+        if s0 is None:
+            s0 = seen[i] = {"first": "" if first_run else today, "price": pr, "round": rd}
+        else:
+            ch = False
+            if pr and s0["price"] and pr < s0["price"]:
+                s0["old"], s0["price"], ch = s0["price"], pr, True
+            if rd > s0.get("round", 0):
+                s0["round"], ch = rd, True
+            if ch: s0["changed"] = today
+        x["新增日"], x["異動日"], x["降價前"] = s0["first"], s0.get("changed", ""), s0.get("old", 0)
+    os.makedirs("data", exist_ok=True)
+    json.dump(seen, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+
 if __name__ == "__main__":
     data = {"更新時間": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
             "104": s104()}
     clear_images()
+    track(data["104"])
     json.dump(data, open("site/data.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(len(data["104"]), "筆 104")
