@@ -1,5 +1,5 @@
 """每日抓取：104法拍網物件列表 -> site/data.json"""
-import json, re, time, datetime, urllib.request, html as H
+import json, os, re, time, datetime, urllib.request, html as H
 from urllib.parse import urljoin, unquote
 
 UA = {"User-Agent": "Mozilla/5.0 (fapai-site daily sync)"}
@@ -14,6 +14,19 @@ def get(url):
     raise err
 
 def txt(s): return H.unescape(re.sub(r"<[^>]+>", "", s)).strip()
+
+def save_img(url, hid):
+    """把照片存到網站自己的 img/ 資料夾（原站只有 http，直接引用會被瀏覽器擋掉）"""
+    if not url: return ""
+    path = f"site/img/{hid}.jpg"
+    if not os.path.exists(path):
+        try:
+            os.makedirs("site/img", exist_ok=True)
+            data = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read()
+            open(path, "wb").write(data)
+        except Exception:
+            return ""
+    return f"img/{hid}.jpg"
 
 def s104(max_pages=40):
     out, seen = [], set()
@@ -32,7 +45,7 @@ def s104(max_pages=40):
                         "區域": H.unescape(g(r'itemprop="description" content="([^"]*)"')),
                         "類型": cells[0] if cells else "", "格局坪數": cells[1] if len(cells) > 1 else "",
                         "原價": prices[0] if len(prices) > 1 else "", "價格": prices[-1] if prices else "",
-                        "狀態": g(r"alt='([^']*)' /></div><div class=\"cssListImg"), "圖片": g(r'data-original="([^"]+)"'),
+                        "狀態": g(r"alt='([^']*)' /></div><div class=\"cssListImg"), "圖片": save_img(g(r'data-original="([^"]+)"'), hid),
                         "連結": f"http://www.xn--104-yz0f900ahup.tw/{hid}.htm"})
         if not new: break
         time.sleep(1)
