@@ -37,7 +37,7 @@ def s104(max_pages=40):
                         "類型": cells[0] if cells else "", "格局坪數": cells[1] if len(cells) > 1 else "",
                         "原價": prices[0] if len(prices) > 1 else "", "價格": prices[-1] if prices else "",
                         "狀態": g(r"alt='([^']*)' /></div><div class=\"cssListImg"), "圖片": "",
-                        "連結": f"http://www.xn--104-yz0f900ahup.tw/{hid}.htm"})
+                        })
         if not new: break
         time.sleep(1)
     return out
