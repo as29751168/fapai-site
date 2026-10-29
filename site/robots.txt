@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tomin104.pages.dev/sitemap.xml
+Sitemap: https://tomin104.com/sitemap.xml
