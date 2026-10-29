@@ -3,7 +3,7 @@
 """
 import html, json, os, re, shutil, urllib.parse, datetime
 
-SITE = "https://tomin104.pages.dev"          # 綁定自己的網域後，改這裡即可
+SITE = "https://tomin104.com"          # 網站正式網址
 NAME = "透明房訊｜104法拍網"
 PHONE_A, PHONE_P = "0986-678-928", "0918-313-888"
 LINKS = {
