@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>透明房訊｜104法拍網 法拍屋物件查詢</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#222;background:#f6f6f4}
+header{background:#1f3a4d;color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:20px}
+header small{opacity:.75}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.bar input,.bar select{padding:9px 10px;border:1px solid #ccc;border-radius:6px;font-size:15px;background:#fff}
+.bar input{flex:1;min-width:180px}
+.tabs button{padding:8px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;cursor:pointer;font-size:15px}
+.tabs button.on{background:#1f3a4d;color:#fff}
+.count{margin:8px 0;color:#666;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:#fff;border:1px solid #e2e2de;border-radius:8px;overflow:hidden;text-decoration:none;color:inherit;display:block}
+.card img{width:100%;height:160px;object-fit:cover;display:block;background:#ddd}
+.card .b{padding:10px 12px}
+.card h3{margin:0 0 4px;font-size:15px;line-height:1.4}
+.card .m{font-size:13px;color:#666}
+.card .p{margin-top:6px;font-size:17px;font-weight:700;color:#b3261e}
+.card .p s{font-size:13px;font-weight:400;color:#999;margin-right:6px}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:10px;background:#e8eef2;color:#1f3a4d;margin-right:4px}
+.contact{background:#fff;border:1px solid #e2e2de;border-radius:8px;padding:16px;margin-top:28px}
+.contact h2{margin:0 0 8px;font-size:18px}
+.contact p{margin:4px 0;font-size:15px;line-height:1.6}
+.links a{display:inline-block;margin:6px 8px 0 0;padding:8px 14px;border-radius:6px;background:#1f3a4d;color:#fff;text-decoration:none;font-size:14px}
+table{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+th,td{padding:9px 8px;border-bottom:1px solid #eee;text-align:left}
+th{background:#f0f0ec}
+tr:hover td{background:#fafaf7}
+td a{color:#1f3a4d}
+footer{text-align:center;color:#888;font-size:13px;padding:24px}
+.line{position:fixed;right:14px;bottom:14px;background:#06c755;color:#fff;padding:12px 16px;border-radius:24px;text-decoration:none;font-size:15px}
+@media(max-width:640px){th:nth-child(n+5),td:nth-child(n+5){display:none}}
+</style>
+</head>
+<body>
+<header><h1>透明房訊｜104法拍網</h1><small>專業法拍 · 誠信服務 · 成功為您　林宸妍 0986-678-928（同 LINE）　</small><small id="upd"></small></header>
+<main>
+  <div class="tabs bar">
+    <button data-t="104" class="on">104待標物件</button>
+    <button data-t="全部">鑫創全部物件</button>
+    <button data-t="新增">近期新增／復拍</button>
+    <button data-t="結果">拍定／停拍／撤回／流標</button>
+  </div>
+  <div class="bar">
+    <input id="q" placeholder="搜尋地址、社區名稱…">
+    <select id="city"><option value="">縣市不拘</option></select>
+    <select id="type"><option value="">類型不拘</option></select>
+    <select id="sort"><option value="">預設排序</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option></select>
+  </div>
+  <div class="count" id="cnt"></div>
+  <div id="out"></div>
+  <section class="contact" id="contact">
+    <div>
+      <h2>聯絡我們</h2>
+      <p><b>林宸妍</b>　<a href="tel:0986678928">0986-678-928</a>（同 LINE）</p>
+      <p>透明房訊雜誌社／一零四法拍網股份有限公司</p>
+      <p>台北：<a href="tel:0222700888">(02)2270-0888</a><br>桃園：<a href="tel:033388220">(03)338-8220</a><br>傳真：(02)2274-0884</p>
+      <p>新北市土城區金城路二段396號11樓<br>桃園市桃園區莊敬路一段346號4樓</p>
+      <p>服務：法拍屋評估、不點交物件處理、撤封代償、產權疑難雜症排除</p>
+      <div class="links">
+        <a id="lnLine" href="#" target="_blank" rel="noopener">加入 LINE</a>
+        <a id="lnFb" href="#" target="_blank" rel="noopener">粉絲專頁</a>
+        <a id="lnIg" href="#" target="_blank" rel="noopener">Instagram</a>
+        <a id="lnYt" href="#" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>© 透明房訊｜104法拍網　資料每日自動更新，實際拍賣資訊請以法院公告為準。</footer>
+<a class="line" href="#" id="lineBtn">LINE 諮詢</a>
+<script>
+// ★ 只要改這裡：貼上你的連結；留空的社群按鈕會自動隱藏
+const LINKS = {
+  line: '',   // 例：https://line.me/R/ti/p/@xxxx
+  fb:   '',   // 粉絲專頁網址
+  ig:   '',
+  yt:   ''
+};
+for (const [k,id] of [['line','lnLine'],['fb','lnFb'],['ig','lnIg'],['yt','lnYt']]) {
+  const a = document.getElementById(id);
+  if (LINKS[k]) a.href = LINKS[k]; else a.style.display = 'none';
+}
+const lb = document.getElementById('lineBtn');
+if (LINKS.line) lb.href = LINKS.line; else { lb.href = '#contact'; lb.textContent = '聯絡我們'; }
+
+const $ = s => document.querySelector(s);
+let D, tab = '104';
+const num = s => { const m = String(s||'').replace(/,/g,'').match(/([\d.]+)(億|萬)?/); return m ? parseFloat(m[1])*(m[2]==='億'?10000:m[2]==='萬'?1:0.0001) : 0; };
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{
+  D = d; $('#upd').textContent = '資料更新：' + d['更新時間'];
+  const cities = [...new Set([...d['104'].map(x=>x['區域'].slice(0,2)), ...d['鑫創全部'].map(x=>x['地址'].slice(0,2))])].sort();
+  cities.forEach(c => $('#city').insertAdjacentHTML('beforeend', `<option>${c}</option>`));
+  const types = [...new Set([...d['104'].map(x=>x['類型']), ...d['鑫創全部'].map(x=>x['類型'])])].sort();
+  types.forEach(c => $('#type').insertAdjacentHTML('beforeend', `<option>${esc(c)}</option>`));
+  render();
+});
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); tab = b.dataset.t; render();
+});
+['#q','#city','#type','#sort'].forEach(s => $(s).oninput = render);
+
+function render(){
+  if(!D) return;
+  const q = $('#q').value.trim(), city = $('#city').value, type = $('#type').value, sort = $('#sort').value;
+  if(tab === '104'){
+    let L = D['104'].filter(x => (!q || (x['地址']+x['區域']).includes(q)) && (!city || x['區域'].startsWith(city)) && (!type || x['類型']===type));
+    if(sort) L.sort((a,b)=> (num(a['價格'])-num(b['價格'])) * (sort==='pa'?1:-1));
+    $('#cnt').textContent = `共 ${L.length} 筆`;
+    $('#out').innerHTML = '<div class="grid">' + L.map(x => `
+      <a class="card" href="${esc(x['連結'])}" target="_blank" rel="noopener">
+        <img loading="lazy" src="${esc(x['圖片'])}" alt="">
+        <div class="b"><h3>${esc(x['地址'])}</h3>
+        <div class="m"><span class="tag">${esc(x['狀態'])}</span>${esc(x['區域'])}</div>
+        <div class="m">${esc(x['類型'])}｜${esc(x['格局坪數'])}</div>
+        <div class="p">${x['原價']?`<s>${esc(x['原價'])}</s>`:''}${esc(x['價格'])}</div></div></a>`).join('') + '</div>';
+  } else if(tab === '全部'){
+    let L = D['鑫創全部'].filter(x => (!q || x['地址'].includes(q)) && (!city || x['地址'].startsWith(city)) && (!type || x['類型']===type));
+    if(sort) L.sort((a,b)=> (num(a['底價'])-num(b['底價'])) * (sort==='pa'?1:-1));
+    $('#cnt').textContent = `共 ${L.length} 筆`;
+    $('#out').innerHTML = '<div class="grid">' + L.map(x => `
+      <a class="card" href="${esc(x['連結'])}" target="_blank" rel="noopener">
+        <img loading="lazy" src="${esc(x['圖片'])}" alt="">
+        <div class="b"><h3>${esc(x['地址'])}</h3>
+        <div class="m"><span class="tag">${esc(x['狀態'])}</span>${esc(x['拍次點交'])}</div>
+        <div class="m">${esc(x['類型'])}｜${esc(x['坪數'])}｜拍賣日 ${esc(x['拍賣日'])}</div>
+        <div class="p">底價 ${esc(x['底價'])}</div></div></a>`).join('') + '</div>';
+  } else {
+    const k = tab === '新增' ? '新增/復拍' : '拍定/停拍/撤回/流標';
+    const L = D['鑫創'].filter(x => x['分類']===k && (!q || x['地址'].includes(q)));
+    $('#cnt').textContent = `共 ${L.length} 筆`;
+    const cols = Object.keys(L[0]||{}).filter(c=>!['來源','分類','連結'].includes(c));
+    $('#out').innerHTML = `<table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th></th></tr></thead><tbody>` +
+      L.map(x=>`<tr>${cols.map(c=>`<td>${esc(x[c])}</td>`).join('')}<td><a href="${esc(x['連結'])}" target="_blank" rel="noopener">詳情</a></td></tr>`).join('') + '</tbody></table>';
+  }
+}
+</script>
+</body>
+</html>
