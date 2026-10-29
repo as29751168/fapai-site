@@ -95,6 +95,8 @@ let D, tab = '104';
 const num = s => { const m = String(s||'').replace(/,/g,'').match(/([\d.]+)(億|萬)?/); return m ? parseFloat(m[1])*(m[2]==='億'?10000:m[2]==='萬'?1:0.0001) : 0; };
 const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+let P = {};
+fetch('photos.json').then(r=>r.json()).then(j=>{ P = j; if(D) render(); }).catch(()=>{});
 fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{
   D = d; $('#upd').textContent = '資料更新：' + d['更新時間'];
   const cities = [...new Set(d['104'].map(x=>x['區域'].slice(0,2)))].sort();
@@ -119,7 +121,7 @@ function render(){
     $('#cnt').textContent = `共 ${L.length} 筆`;
     $('#out').innerHTML = '<div class="grid">' + L.map(x => `
       <a class="card" href="${esc(x['連結'])}" target="_blank" rel="noopener">
-        ${x['圖片']?`<img loading="lazy" src="${esc(x['圖片'])}" alt="">`:'<div class="noimg">照片請洽業務</div>'}
+        ${P[x['編號'].slice(2)]?`<img loading="lazy" src="https://www.104woo.com.tw/${encodeURI(P[x['編號'].slice(2)])}" alt="">`:'<div style="height:160px;background:#e8eef2;color:#6b7c88;display:flex;align-items:center;justify-content:center;font-size:14px">照片請洽業務</div>'}
         <div class="b"><h3>${esc(x['地址'])}</h3>
         <div class="m"><span class="tag">${esc(x['狀態'])}</span>${esc(x['區域'])}</div>
         <div class="m">${esc(x['類型'])}｜${esc(x['格局坪數'])}</div>
