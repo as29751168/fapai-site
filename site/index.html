@@ -41,13 +41,10 @@ footer{text-align:center;color:#888;font-size:13px;padding:24px}
 </style>
 </head>
 <body>
-<header><h1>透明房訊｜104法拍網</h1><small>專業法拍 · 誠信服務 · 成功為您　林宸妍 0986-678-928（同 LINE）　</small><small id="upd"></small></header>
+<header><h1>透明房訊｜104法拍網</h1><small>專業法拍 · 誠信服務 · 成功為您　林小姐 Anna 0986-678-928　黃先生 Pitt 0918-313-888　</small><small id="upd"></small></header>
 <main>
-  <div class="tabs bar">
+  <div class="tabs bar" style="display:none">
     <button data-t="104" class="on">104待標物件</button>
-    <button data-t="全部">鑫創全部物件</button>
-    <button data-t="新增">近期新增／復拍</button>
-    <button data-t="結果">拍定／停拍／撤回／流標</button>
   </div>
   <div class="bar">
     <input id="q" placeholder="搜尋地址、社區名稱…">
@@ -60,7 +57,7 @@ footer{text-align:center;color:#888;font-size:13px;padding:24px}
   <section class="contact" id="contact">
     <div>
       <h2>聯絡我們</h2>
-      <p><b>林宸妍</b>　<a href="tel:0986678928">0986-678-928</a>（同 LINE）</p>
+      <p><b>林小姐 Anna</b>　<a href="tel:0986678928">0986-678-928</a><br><b>黃先生 Pitt</b>　<a href="tel:0918313888">0918-313-888</a></p>
       <p>透明房訊雜誌社／一零四法拍網股份有限公司</p>
       <p>台北：<a href="tel:0222700888">(02)2270-0888</a><br>桃園：<a href="tel:033388220">(03)338-8220</a><br>傳真：(02)2274-0884</p>
       <p>新北市土城區金城路二段396號11樓<br>桃園市桃園區莊敬路一段346號4樓</p>
@@ -80,11 +77,11 @@ footer{text-align:center;color:#888;font-size:13px;padding:24px}
 <script>
 // ★ 只要改這裡：貼上你的連結；留空的社群按鈕會自動隱藏
 const LINKS = {
-  line: 'https://line.me/ti/p/MJcPvp3nG8',
-  fb:   'https://www.facebook.com/share/1CnLq9vuJd/?mibextid=wwXIfr',
+  line: 'https://line.me/ti/p/MJcPvp3nG8',   // 例：https://line.me/R/ti/p/@xxxx
+  fb:   'https://www.facebook.com/share/1CnLq9vuJd/?mibextid=wwXIfr',   // 粉絲專頁網址
   ig:   '',
-  grp:  'https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default',
   yt:   'https://youtube.com/@anna-n9999?si=laOYfE2Bm2VMPYDa',
+  grp:  'https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default'
 };
 for (const [k,id] of [['line','lnLine'],['fb','lnFb'],['ig','lnIg'],['yt','lnYt'],['grp','lnGrp']]) {
   const a = document.getElementById(id);
@@ -100,9 +97,9 @@ const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;',
 
 fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{
   D = d; $('#upd').textContent = '資料更新：' + d['更新時間'];
-  const cities = [...new Set([...d['104'].map(x=>x['區域'].slice(0,2)), ...d['鑫創全部'].map(x=>x['地址'].slice(0,2))])].sort();
+  const cities = [...new Set(d['104'].map(x=>x['區域'].slice(0,2)))].sort();
   cities.forEach(c => $('#city').insertAdjacentHTML('beforeend', `<option>${c}</option>`));
-  const types = [...new Set([...d['104'].map(x=>x['類型']), ...d['鑫創全部'].map(x=>x['類型'])])].sort();
+  const types = [...new Set(d['104'].map(x=>x['類型']))].sort();
   types.forEach(c => $('#type').insertAdjacentHTML('beforeend', `<option>${esc(c)}</option>`));
   render();
 });
@@ -127,24 +124,6 @@ function render(){
         <div class="m"><span class="tag">${esc(x['狀態'])}</span>${esc(x['區域'])}</div>
         <div class="m">${esc(x['類型'])}｜${esc(x['格局坪數'])}</div>
         <div class="p">${x['原價']?`<s>${esc(x['原價'])}</s>`:''}${esc(x['價格'])}</div></div></a>`).join('') + '</div>';
-  } else if(tab === '全部'){
-    let L = D['鑫創全部'].filter(x => (!q || x['地址'].includes(q)) && (!city || x['地址'].startsWith(city)) && (!type || x['類型']===type));
-    if(sort) L.sort((a,b)=> (num(a['底價'])-num(b['底價'])) * (sort==='pa'?1:-1));
-    $('#cnt').textContent = `共 ${L.length} 筆`;
-    $('#out').innerHTML = '<div class="grid">' + L.map(x => `
-      <a class="card" href="${esc(x['連結'])}" target="_blank" rel="noopener">
-
-        <div class="b"><h3>${esc(x['地址'])}</h3>
-        <div class="m"><span class="tag">${esc(x['狀態'])}</span>${esc(x['拍次點交'])}</div>
-        <div class="m">${esc(x['類型'])}｜${esc(x['坪數'])}｜拍賣日 ${esc(x['拍賣日'])}</div>
-        <div class="p">底價 ${esc(x['底價'])}</div></div></a>`).join('') + '</div>';
-  } else {
-    const k = tab === '新增' ? '新增/復拍' : '拍定/停拍/撤回/流標';
-    const L = D['鑫創'].filter(x => x['分類']===k && (!q || x['地址'].includes(q)));
-    $('#cnt').textContent = `共 ${L.length} 筆`;
-    const cols = Object.keys(L[0]||{}).filter(c=>!['來源','分類','連結'].includes(c));
-    $('#out').innerHTML = `<table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th></th></tr></thead><tbody>` +
-      L.map(x=>`<tr>${cols.map(c=>`<td>${esc(x[c])}</td>`).join('')}<td><a href="${esc(x['連結'])}" target="_blank" rel="noopener">詳情</a></td></tr>`).join('') + '</tbody></table>';
   }
 }
 </script>
