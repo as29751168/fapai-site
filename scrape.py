@@ -19,6 +19,21 @@ def clear_images():
     """不使用 104法拍屋.tw 的照片：每次執行都清掉網站內舊照片"""
     shutil.rmtree("site/img", ignore_errors=True)
 
+def detail(hid):
+    """讀取物件的結構化資料（案號、拍次、開標日期、坪數、屋齡、樓層…），不取文字說明與聯絡人"""
+    try:
+        h = get(f"http://www.xn--104-yz0f900ahup.tw/{hid}.htm")
+    except Exception:
+        return {}
+    info = {}
+    for k, v in re.findall(r'<li id="cphCenter_li(?:CaseNum|MgmtPingSu|UnitPrice)"><span>(.*?)：</span>(.*?)</li>', h, flags=re.S):
+        info[txt(k)] = txt(v)
+    for k, v in re.findall(r'detail-house-key"><h4>(.*?)</h4></div>\s*<span>：</span>\s*<div[^>]*class="detail-house-value"[^>]*>(.*?)</div>', h, flags=re.S):
+        k, v = txt(k), txt(v)
+        if k and v and k != "瀏覽人次": info[k] = v
+    time.sleep(0.3)
+    return info
+
 def s104(max_pages=40):
     out, seen = [], set()
     for p in range(1, max_pages + 1):
@@ -37,7 +52,7 @@ def s104(max_pages=40):
                         "類型": cells[0] if cells else "", "格局坪數": cells[1] if len(cells) > 1 else "",
                         "原價": prices[0] if len(prices) > 1 else "", "價格": prices[-1] if prices else "",
                         "狀態": g(r"alt='([^']*)' /></div><div class=\"cssListImg"), "圖片": "",
-                        })
+                        "資訊": detail(hid)})
         if not new: break
         time.sleep(1)
     return out
