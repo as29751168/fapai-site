@@ -39,6 +39,16 @@ def title_of(x):
     t = re.sub(r"^[^【]*?(?=【)", "", x["地址"]) if False else x["地址"]
     return t
 def slug(s): return urllib.parse.quote(s)
+def round_of(x):
+    r = x.get("資訊", {}).get("拍次", "")
+    return int(r) if r.isdigit() else 0
+def date_key(x):
+    m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", x.get("資訊", {}).get("開標日期", ""))
+    return int(m.group(1)) * 10000 + int(m.group(2)) * 100 + int(m.group(3)) if m else 99999999
+def deliver_of(x):
+    m = re.search(r"點交情形→([^●\n]+)", x.get("資訊", {}).get("筆錄", ""))
+    v = m.group(1).strip() if m else ""
+    return "不點交" if v.startswith("不點交") else "點交" if v.startswith("點交") else ("其他" if v else "")
 
 SPEC_ORDER = ["案號", "總登記坪數", "每坪單價"]
 DETAIL_KEYS = ["銷售狀態", "格局", "社區/大樓", "屋齡", "車位", "座向", "所在樓層", "管理費", "管委會", "中庭", "電梯", "邊間", "增建", "是否凶宅", "無障礙環境", "法拍件", "拍次", "開標日期"]
@@ -61,6 +71,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 6px;b
 .card .m{font-size:13px;color:#666}.card .p{margin-top:6px;font-size:17px;font-weight:700;color:#b3261e}.card .p s{font-size:13px;font-weight:400;color:#999;margin-right:6px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.bar input,.bar select{padding:9px 10px;border:1px solid #ccc;border-radius:6px;font-size:15px;background:#fff}.bar input{flex:1;min-width:180px}
 .btn{display:inline-block;margin:6px 8px 0 0;padding:9px 15px;border-radius:6px;background:#1f3a4d;color:#fff!important;text-decoration:none;font-size:14px}.btn.line{background:#06c755}
+.cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
+.bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
 .areas a{display:inline-block;margin:3px 6px 3px 0;font-size:14px}footer{text-align:center;color:#888;font-size:13px;padding:24px}
 details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-weight:700}
 @media(max-width:640px){h1{font-size:19px}}"""
@@ -99,12 +111,16 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head=""):
 
 def card(x):
     ph = photos(x)
+    inf = x.get("資訊", {})
+    r = round_of(x)
+    badge = f'<span class="rd{"" if r else " n"}">{"第%d拍" % r if r else "拍次洽詢"}</span>'
     img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
-    inf = x.get("資訊", {})
-    sub = " ".join(filter(None, [f'第{inf["拍次"]}拍' if inf.get("拍次") else "", f'開標 {inf["開標日期"]}' if inf.get("開標日期") else ""]))
+    dv = deliver_of(x)
+    sub = " ".join(filter(None, [f'開標 {inf["開標日期"]}' if inf.get("開標日期") else "", dv]))
     text = f'{x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
-    return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}">{img}'
+    return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}">'
+            f'<div class="cv">{img}{badge}</div>'
             f'<div class="b"><h3>{e(x["地址"])}</h3><div class="m"><span class="tag">{e(x["狀態"])}</span>{e(area_of(x))}</div>'
             f'<div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><div class="m">{e(sub)}</div><div class="p">{pr}</div></div></a>')
 
@@ -171,14 +187,22 @@ def index_page():
     opts = lambda a: "".join(f"<option>{e(i)}</option>" for i in a)
     al = "".join(f'<a href="/area/{slug(a)}">{e(a)}（{len(v)}）</a>' for a, v in sorted(areas.items()))
     faq = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in FAQ)
-    js = """<script>(function(){var q=document.getElementById('q'),c=document.getElementById('c'),t=document.getElementById('t'),s=document.getElementById('s'),g=document.getElementById('g'),n=document.getElementById('n');
-var cards=[].slice.call(g.children);function f(){var k=q.value.trim(),a=0;cards.forEach(function(d){var ok=(!k||d.dataset.t.indexOf(k)>-1)&&(!c.value||d.dataset.c===c.value)&&(!t.value||d.dataset.y===t.value);d.style.display=ok?'':'none';if(ok)a++});
-if(s.value){cards.sort(function(x,y){return (x.dataset.p-y.dataset.p)*(s.value==='a'?1:-1)}).forEach(function(d){g.appendChild(d)})}n.textContent='共 '+a+' 筆'}
-[q,c,t,s].forEach(function(e){e.addEventListener('input',f)});f()})();</script>"""
+    js = """<script>(function(){var $=function(i){return document.getElementById(i)},g=$('g'),n=$('n'),cards=[].slice.call(g.children),orig=cards.slice();
+var F=['q','c','a','y','r','j','pr','s'];
+function areas(){var c=$('c').value,seen={},o='<option value="">地區不拘</option>';cards.forEach(function(d){if((!c||d.dataset.c===c)&&!seen[d.dataset.a]){seen[d.dataset.a]=1}});Object.keys(seen).sort().forEach(function(k){o+='<option>'+k+'</option>'});var cur=$('a').value;$('a').innerHTML=o;if(seen[cur])$('a').value=cur}
+function f(){var k=$('q').value.trim(),c=$('c').value,a=$('a').value,y=$('y').value,r=$('r').value,j=$('j').value,pr=$('pr').value,s=$('s').value,cnt=0,lo=0,hi=1e9;if(pr){var p=pr.split('-');lo=+p[0]*10000;hi=+p[1]*10000}
+cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:rr===+r))&&(!j||D.j===j)&&(!pr||(p>=lo&&p<hi));d.style.display=ok?'':'none';if(ok)cnt++});
+var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'}
+F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();f()})});
+$('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();f()});areas();f()})();</script>"""
     body = (f'<h1>法拍屋查詢｜法拍屋代標｜透明房訊 104法拍網</h1>'
             f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
-            f'<div class="bar"><input id="q" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select>'
-            f'<select id="t" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select><select id="s" aria-label="排序"><option value="">預設排序</option><option value="a">價格低→高</option><option value="d">價格高→低</option></select></div>'
+            f'<div class="bar"><input id="q" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
+            f'<select id="y" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select>'
+            f'<select id="r" aria-label="拍次"><option value="">拍次不拘</option><option value="1">第1拍</option><option value="2">第2拍</option><option value="3">第3拍</option><option value="4">第4拍以上</option></select>'
+            f'<select id="j" aria-label="點交情形"><option value="">點交不拘</option><option>點交</option><option>不點交</option><option>其他</option></select>'
+            f'<select id="pr" aria-label="價格"><option value="">價格不拘</option><option value="0-500">500萬以下</option><option value="500-1000">500～1000萬</option><option value="1000-2000">1000～2000萬</option><option value="2000-3000">2000～3000萬</option><option value="3000-1000000">3000萬以上</option></select>'
+            f'<select id="s" aria-label="排序"><option value="">預設排序</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
             f'<div id="n" class="m"></div><div class="grid" id="g">{"".join(card(x) for x in ITEMS)}</div>'
             f'<section class="box areas"><h2>依地區找法拍屋</h2>{al}</section>'
             f'<section class="box"><h2>法拍屋常見問題</h2>{faq}</section>' + contact_box() + js)
