@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>物件資訊｜透明房訊｜104法拍網</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#222;background:#f6f6f4}
+header{background:#1f3a4d;color:#fff;padding:14px 16px}
+header a{color:#fff;text-decoration:none;font-size:18px;font-weight:700}
+main{max-width:760px;margin:0 auto;padding:16px}
+.back{display:inline-block;margin-bottom:12px;color:#1f3a4d;text-decoration:none;font-size:14px}
+.box{background:#fff;border:1px solid #e2e2de;border-radius:8px;overflow:hidden;margin-bottom:16px}
+.box img{width:100%;max-height:420px;object-fit:cover;display:block}
+.noimg{height:200px;background:#e8eef2;color:#6b7c88;display:flex;align-items:center;justify-content:center}
+.b{padding:16px}
+h1{font-size:20px;line-height:1.4;margin:0 0 8px}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:#e8eef2;color:#1f3a4d;margin-bottom:8px}
+.price{font-size:26px;font-weight:700;color:#b3261e;margin:8px 0}
+.price s{font-size:15px;font-weight:400;color:#999;margin-right:8px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:9px 0;border-bottom:1px solid #eee}
+td:first-child{color:#666;width:90px}
+.contact p{margin:6px 0;line-height:1.6}
+.contact a{color:#1f3a4d}
+.btn{display:inline-block;margin:8px 8px 0 0;padding:10px 16px;border-radius:6px;background:#06c755;color:#fff!important;text-decoration:none}
+.btn.d{background:#1f3a4d}
+footer{text-align:center;color:#888;font-size:13px;padding:24px}
+</style>
+</head>
+<body>
+<header><a href="./">透明房訊｜104法拍網</a></header>
+<main>
+  <a class="back" href="./">← 返回物件列表</a>
+  <div id="out"></div>
+  <div class="box contact"><div class="b">
+    <h2 style="margin:0 0 8px;font-size:17px">想了解這個物件？歡迎聯絡我們</h2>
+    <p><b>林小姐 Anna</b>　<a href="tel:0986678928">0986-678-928</a><br><b>黃先生 Pitt</b>　<a href="tel:0918313888">0918-313-888</a></p>
+    <a class="btn" href="https://line.me/ti/p/MJcPvp3nG8" target="_blank" rel="noopener">LINE 諮詢 Anna</a>
+    <a class="btn d" href="tel:0986678928">撥打電話</a>
+  </div></div>
+</main>
+<footer>© 透明房訊｜104法拍網　實際拍賣資訊請以法院公告為準。</footer>
+<script>
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const id = new URLSearchParams(location.search).get('id') || '';
+Promise.all([fetch('data.json?'+Date.now()).then(r=>r.json()), fetch('photos.json').then(r=>r.json()).catch(()=>({}))]).then(([d,P])=>{
+  const x = d['104'].find(i => i['編號'] === id);
+  if(!x){ document.getElementById('out').innerHTML = '<div class="box"><div class="b">找不到這個物件，可能已拍定或下架。</div></div>'; return; }
+  const ph = P[id.slice(2)];
+  document.title = x['地址'] + '｜透明房訊｜104法拍網';
+  document.getElementById('out').innerHTML = '<div class="box">' +
+    (ph ? '<img src="https://www.104woo.com.tw/' + encodeURI(ph) + '" alt="">' : '<div class="noimg">照片請洽業務</div>') +
+    '<div class="b"><span class="tag">' + esc(x['狀態']) + '</span><h1>' + esc(x['地址']) + '</h1>' +
+    '<div class="price">' + (x['原價'] ? '<s>' + esc(x['原價']) + '</s>' : '') + esc(x['價格']) + '</div>' +
+    '<table><tr><td>地區</td><td>' + esc(x['區域']) + '</td></tr><tr><td>類型</td><td>' + esc(x['類型']) + '</td></tr><tr><td>格局／坪數</td><td>' + esc(x['格局坪數']) + '</td></tr><tr><td>物件編號</td><td>' + esc(x['編號']) + '</td></tr></table></div></div>';
+});
+</script>
+</body>
+</html>
