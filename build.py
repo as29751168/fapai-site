@@ -16,7 +16,7 @@ ADDR = ["新北市土城區金城路二段396號11樓", "桃園市桃園區莊�
 PHOTO_BASE = "https://www.104woo.com.tw/"
 
 D = json.load(open("site/data.json", encoding="utf-8"))
-ITEMS = D["104"]
+ITEMS = sorted(D["104"], key=lambda x: {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
 UPDATED = D["更新時間"]
 try:
     P = json.load(open("site/photos.json", encoding="utf-8"))
@@ -86,9 +86,26 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 6px;b
 .bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
 .cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:8px 12px;display:flex;gap:8px;z-index:9}.cta a,.cta button{flex:1;text-align:center;padding:12px;border-radius:8px;font-size:16px;border:0;color:#fff;text-decoration:none;cursor:pointer;font-family:inherit}.cta .l{background:#06c755}.cta .t{background:#1f3a4d}
 .hero{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.hero a{padding:10px 16px;border-radius:8px;color:#fff;text-decoration:none;font-size:15px;background:#1f3a4d}.hero a.l{background:#06c755}.hero a.f{background:#1877f2}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;align-items:center}.chips button{padding:8px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:20px;font-size:15px;cursor:pointer;font-family:inherit}.chips button.on{background:#1f3a4d;color:#fff}
+.hd{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}header.top{background:#fff;border-bottom:1px solid #e6e2d8;position:sticky;top:0;z-index:20;color:#222;padding:0}
+header.top a.logo{font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:19px;color:#1f3a4d;letter-spacing:1px}.logo i{color:#b8893b;font-style:normal}
+.hd nav{margin-left:auto;display:flex;gap:16px;font-size:14px}.hd nav a{color:#1f3a4d;text-decoration:none;font-weight:400;font-size:14px}header.top a.tel{background:#1f3a4d;color:#fff;padding:7px 14px;border-radius:20px;font-size:14px;font-weight:400;white-space:nowrap}
+.hero2{position:relative;background:linear-gradient(160deg,#16303f,#1f3a4d 55%,#2c5068);color:#fff;overflow:hidden}.hero2 .sky{position:absolute;left:0;bottom:0;width:100%;height:100%}
+.hin{position:relative;max-width:1100px;margin:0 auto;padding:52px 16px 40px;text-align:center}.eyebrow{letter-spacing:3px;color:#d9b97a;font-size:13px;margin:0}
+.hero2 h1{font-family:"Noto Serif TC","Songti TC",serif;font-size:34px;margin:10px 0 6px;color:#fff;letter-spacing:1px}.sub{font-size:17px;opacity:.92;margin:0 0 18px}
+.cta2 a{display:inline-block;margin:4px;padding:12px 24px;border-radius:30px;text-decoration:none;font-size:16px;color:#fff}.cta2 .b1{background:#b8893b}.cta2 .b2{background:#06c755}
+.stats{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin:22px 0 12px;font-size:14px}.stats b{color:#d9b97a;font-size:21px;margin-right:4px}
+.qk button{margin:4px;padding:8px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.08);color:#fff;font-size:15px;cursor:pointer;font-family:inherit}
+h2.sec{font-family:"Noto Serif TC","Songti TC",serif;text-align:center;font-size:21px;color:#b8893b;border:1px solid #b8893b;padding:10px;margin:30px 0 16px;border-radius:2px;background:#fff}
+.tbl td,.tbl th{padding:12px 6px}.tbl td:nth-child(1),.tbl td:nth-child(2),.tbl th:nth-child(1),.tbl th:nth-child(2){white-space:nowrap}.tbl th{font-weight:700;color:#b8893b;width:auto}.tbl td:first-child{color:#222;width:auto}.tbl a{color:#1f3a4d;text-decoration:none;border-bottom:1px dotted #1f3a4d}
+.fab{position:fixed;right:12px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:15}.fab a{width:52px;height:52px;border-radius:14px;background:#111;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-weight:700;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.25)}.fab a.l{background:#06c755}
+.ch{background:#1f3a4d;color:#fff;text-align:center;padding:7px;font-size:14px;font-family:"Noto Serif TC","Songti TC",serif}.rd2{position:absolute;right:10px;bottom:10px;background:#fff;color:#b3261e;padding:4px 12px;border-radius:8px;font-weight:700;font-size:14px;box-shadow:0 1px 4px rgba(0,0,0,.2)}.rd{display:none}
+.card .b h3{font-family:"Noto Serif TC","Songti TC",serif;font-size:16px;margin:4px 0 10px;min-height:44px}.card .pr{display:flex;justify-content:flex-start;gap:14px;align-items:baseline;border-top:1px solid #e6e2d8;padding-top:8px;color:#b8893b}.card .pr b{font-family:"Noto Serif TC","Songti TC",serif;font-size:20px;color:#222}.card .pr s{font-size:13px;color:#999;margin-right:6px;font-weight:400}
+.card .noimg{display:flex}
+.card{transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.09)}
 .areas a{display:inline-block;margin:3px 6px 3px 0;font-size:14px}footer{text-align:center;color:#888;font-size:13px;padding:24px}
 details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-weight:700}
-@media(max-width:640px){h1{font-size:19px}}"""
+@media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}"""
 
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
@@ -100,6 +117,9 @@ ORG = {
     "knowsAbout": ["法拍屋", "法拍屋代標", "不點交物件處理", "撤封代償", "產權調查", "法拍屋貸款"],
 }
 
+FAB = (f'<div class="fab"><a href="tel:0986678928" aria-label="電話諮詢"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></a>'
+       f'<a class="l" href="{LINKS["LINE"]}" target="_blank" rel="noopener" aria-label="LINE 諮詢">LINE</a></div>')
+
 def contact_box():
     btn = "".join(f'<a class="btn{" line" if k=="LINE" else ""}" href="{e(v)}" target="_blank" rel="noopener">{e(k)}</a>' for k, v in LINKS.items())
     return f'''<section class="box" id="contact"><h2>聯絡我們</h2>
@@ -107,7 +127,7 @@ def contact_box():
 <p>透明房訊雜誌社／一零四法拍網股份有限公司<br>台北 <a href="tel:0222700888">(02)2270-0888</a>　桃園 <a href="tel:033388220">(03)338-8220</a>　傳真 (02)2274-0884</p>
 <p>{e(ADDR[0])}<br>{e(ADDR[1])}</p><p>服務：法拍屋評估、代標、不點交物件處理、撤封代償、產權疑難雜症排除</p><div>{btn}</div></section>'''
 
-def page(title, desc, path, body, jsonld=None, image=None, extra_head=""):
+def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True):
     url = SITE + path
     ld = "".join(f'<script type="application/ld+json">{jd(o)}</script>' for o in (jsonld or []))
     og_img = f'<meta property="og:image" content="{e(image)}"><meta name="twitter:card" content="summary_large_image">' if image else '<meta name="twitter:card" content="summary">'
@@ -118,24 +138,25 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head=""):
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><a href="/">{e(NAME)}</a><small>專業法拍 · 誠信服務 · 成功為您　林小姐 Anna {PHONE_A}　黃先生 Pitt {PHONE_P}</small></header>
-<main>{body}</main>
-<footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer></body></html>'''
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0986678928">電話諮詢</a></div></header>
+{pre}<main>{body}</main>
+<footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}</body></html>'''
 
 def card(x):
     ph = photos(x)
     inf = x.get("資訊", {})
     r = round_of(x)
-    badge = f'<span class="rd{"" if r else " n"}">{"第%d拍" % r if r else "拍次洽詢"}</span>'
-    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
-    pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     dv = deliver_of(x)
-    sub = " ".join(filter(None, [f'開標 {inf["開標日期"]}' if inf.get("開標日期") else "", dv]))
+    badge = f'<span class="rd2">{e("｜".join(filter(None, [("第%d拍" % r) if r else "拍次洽詢", dv])))}</span>'
+    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
+    price = re.sub(r"^售", "", x["價格"])
+    old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
+    top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"]]))
     text = f'{x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
     return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}">'
-            f'<div class="cv">{img}{badge}</div>'
-            f'<div class="b"><h3>{e(x["地址"])}</h3><div class="m"><span class="tag">{e(x["狀態"])}</span>{e(area_of(x))}</div>'
-            f'<div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><div class="m">{e(sub)}</div><div class="p">{pr}</div></div></a>')
+            f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
+            f'<div class="b"><div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><h3>{e(x["地址"])}</h3>'
+            f'<div class="pr"><span>底價</span><b>{old}{e(price)}</b></div></div></a>')
 
 def kv(rows):
     rows = [(k, v) for k, v in rows if v]
@@ -185,7 +206,7 @@ def detail_page(x):
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0986678928">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
-    return page(full_title, desc, f'/h/{x["編號"]}', body + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>")
+    return page(full_title, desc, f'/h/{x["編號"]}', body + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
@@ -195,49 +216,72 @@ FAQ = [
     ("本站資料多久更新一次？", "每天早上自動更新一次物件價格、拍次與開標日期，實際內容請以法院公告為準。"),
 ]
 
+def hero_banner():
+    import random
+    rnd = random.Random(7)
+    rects, x = [], -10
+    while x < 1200:
+        w = rnd.randint(28, 52); h = rnd.randint(70, 230)
+        rects.append(f'<rect x="{x}" y="{300 - h}" width="{w}" height="{h}" fill="#fff" opacity="{rnd.choice([0.04, 0.06, 0.08, 0.1])}"/>')
+        x += w + rnd.randint(3, 10)
+    roof = '<path d="M880 250 L960 180 L1040 250 M900 250 V300 M1020 250 V300" fill="none" stroke="#d9b97a" stroke-width="3" opacity=".55"/>'
+    svg = f'<svg class="sky" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">{"".join(rects)}{roof}</svg>'
+    return (f'<section class="hero2">{svg}<div class="hin"><p class="eyebrow">TOMIN REALTY · 1986 年成立</p><h1>透明房訊｜法拍屋查詢與代標</h1>'
+            f'<p class="sub">讓法拍更透明，讓您安心買到好房</p>'
+            f'<div class="cta2"><a class="b1" href="#list">瀏覽全部物件</a><a class="b2" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></div>'
+            f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span><span><b>代標</b>・產權調查・貸款諮詢</span></div>'
+            f'<div class="qk"><button type="button" data-c="台北">台北</button><button type="button" data-c="新北">新北</button><button type="button" data-c="桃園">桃園</button><button type="button" data-r="3+">第3拍以上</button></div></div></section>')
+
 def hero_html():
     h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
          f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
          f'<a href="tel:0986678928">電話諮詢 林小姐 Anna</a></div>')
-    wk = upcoming(7)[:6]
-    if wk: h += '<section class="box"><h2>本週開標（7 天內）</h2><div class="grid">' + "".join(card(x) for x in wk) + "</div></section>"
+    wk = upcoming(30)[:8]
+    if wk:
+        rows = "".join(f'<tr><td>{e("%d拍" % round_of(x) if round_of(x) else "—")}</td><td>{e(x["資訊"].get("開標日期", ""))}</td><td><a href="/h/{e(x["編號"])}">{e(x["地址"])}</a></td><td class="rt">{e(x["價格"])}</td></tr>' for x in wk)
+        h += f'<h2 class="sec">近期開標（30 天內）</h2><table class="tbl"><tr><th>拍次</th><th>開標日期</th><th>地址</th><th class="rt">底價</th></tr>{rows}</table>'
     top = sorted([x for x in ITEMS if round_of(x) >= 3], key=lambda x: (price_num(x["價格"]), date_key(x)))[:6]
-    if top: h += '<section class="box"><h2>第 3 拍以上精選（價格低到高）</h2><div class="grid">' + "".join(card(x) for x in top) + "</div></section>"
+    if top: h += '<h2 class="sec">第 3 拍以上精選</h2><div class="grid">' + "".join(card(x) for x in top) + "</div>"
     return h
 
 def index_page():
-    cities = sorted({area_of(x)[:2] for x in ITEMS})
+    cities = sorted({area_of(x)[:2] for x in ITEMS}, key=lambda c: ({"台北": 0, "新北": 1, "桃園": 2}.get(c, 3), c))
     types = sorted({x["類型"] for x in ITEMS})
     areas = {}
     for x in ITEMS: areas.setdefault(area_of(x), []).append(x)
     opts = lambda a: "".join(f"<option>{e(i)}</option>" for i in a)
-    al = "".join(f'<a href="/area/{slug(a)}">{e(a)}（{len(v)}）</a>' for a, v in sorted(areas.items()))
+    al = "".join(f'<a href="/area/{slug(a)}">{e(a)}（{len(v)}）</a>' for a, v in sorted(areas.items(), key=lambda t: ({"台北": 0, "新北": 1, "桃園": 2}.get(t[0][:2], 3), t[0])))
     faq = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in FAQ)
     js = """<script>(function(){var $=function(i){return document.getElementById(i)},g=$('g'),n=$('n'),cards=[].slice.call(g.children),orig=cards.slice();
 var F=['q','c','a','y','r','j','pr','s'];
-function areas(){var c=$('c').value,seen={},o='<option value="">地區不拘</option>';cards.forEach(function(d){if((!c||d.dataset.c===c)&&!seen[d.dataset.a]){seen[d.dataset.a]=1}});Object.keys(seen).sort().forEach(function(k){o+='<option>'+k+'</option>'});var cur=$('a').value;$('a').innerHTML=o;if(seen[cur])$('a').value=cur}
+function rk(k){return k.indexOf('台北')==0?0:k.indexOf('新北')==0?1:k.indexOf('桃園')==0?2:3}
+function areas(){var c=$('c').value,seen={},o='<option value="">地區不拘</option>';cards.forEach(function(d){if((!c||d.dataset.c===c)&&!seen[d.dataset.a]){seen[d.dataset.a]=1}});Object.keys(seen).sort(function(a,b){return rk(a)-rk(b)||(a<b?-1:1)}).forEach(function(k){o+='<option>'+k+'</option>'});var cur=$('a').value;$('a').innerHTML=o;if(seen[cur])$('a').value=cur}
 function f(){var k=$('q').value.trim(),c=$('c').value,a=$('a').value,y=$('y').value,r=$('r').value,j=$('j').value,pr=$('pr').value,s=$('s').value,cnt=0,lo=0,hi=1e9;if(pr){var p=pr.split('-');lo=+p[0]*10000;hi=+p[1]*10000}
-cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:rr===+r))&&(!j||D.j===j)&&(!pr||(p>=lo&&p<hi));d.style.display=ok?'':'none';if(ok)cnt++});
+cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:r==='3+'?rr>=3:rr===+r))&&(!j||D.j===j)&&(!pr||(p>=lo&&p<hi));d.style.display=ok?'':'none';if(ok)cnt++});
 var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'}
+[].forEach.call(document.querySelectorAll('.qk button'),function(b){b.addEventListener('click',function(){if(b.dataset.c){$('c').value=b.dataset.c;areas()}if(b.dataset.r){$('r').value=b.dataset.r;chipsOn()}f();$('list').scrollIntoView({behavior:'smooth'})})});
+var rc=$('rc');function chipsOn(){[].forEach.call(rc.querySelectorAll('button'),function(b){b.className=b.dataset.v===$('r').value?'on':''})}rc.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('r').value=b.dataset.v;chipsOn();f()});
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();f()})});
-$('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();f()});areas();f()})();</script>"""
-    body = (f'<h1>法拍屋查詢｜法拍屋代標｜透明房訊 104法拍網</h1>'
-            f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
-            + hero_html() +
+$('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});areas();chipsOn();f()})();</script>"""
+    body = (f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
+            + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>' +
+            f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
+            f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
+            f'<button type="button" data-v="3">第3拍（{sum(1 for x in ITEMS if round_of(x)==3)}）</button><button type="button" data-v="4">第4拍以上（{sum(1 for x in ITEMS if round_of(x)>=4)}）</button></div>'
             f'<div class="bar"><input id="q" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
             f'<select id="y" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select>'
-            f'<select id="r" aria-label="拍次"><option value="">拍次不拘</option><option value="1">第1拍</option><option value="2">第2拍</option><option value="3">第3拍</option><option value="4">第4拍以上</option></select>'
+            f'<input type="hidden" id="r">'
             f'<select id="j" aria-label="點交情形"><option value="">點交不拘</option><option>點交</option><option>不點交</option><option>其他</option></select>'
             f'<select id="pr" aria-label="價格"><option value="">價格不拘</option><option value="0-500">500萬以下</option><option value="500-1000">500～1000萬</option><option value="1000-2000">1000～2000萬</option><option value="2000-3000">2000～3000萬</option><option value="3000-1000000">3000萬以上</option></select>'
-            f'<select id="s" aria-label="排序"><option value="">預設排序</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
+            f'<select id="s" aria-label="排序"><option value="">預設（雙北優先）</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
             f'<div id="n" class="m"></div><div class="grid" id="g">{"".join(card(x) for x in ITEMS)}</div>'
-            f'<section class="box areas"><h2>依地區找法拍屋</h2>{al}</section>'
-            f'<section class="box"><h2>法拍屋常見問題</h2>{faq}</section>' + contact_box() + js)
+            f'<section class="box areas" id="areas"><h2>依地區找法拍屋</h2>{al}</section>'
+            f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + contact_box() + js)
     ld = [ORG, {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": SITE + "/", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]},
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
     first = next((photos(x)[0] for x in ITEMS if photos(x)), None)
-    return page(f"法拍屋查詢｜法拍屋代標｜{NAME}", f"全台法拍屋、金拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, first)
+    return page(f"法拍屋查詢｜法拍屋代標｜{NAME}", f"全台法拍屋、金拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, first, "", hero_banner())
 
 def area_page(a, xs):
     title = f"{a}法拍屋｜{len(xs)}筆物件｜{NAME}"
