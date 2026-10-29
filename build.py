@@ -50,6 +50,10 @@ def deliver_of(x):
     v = m.group(1).strip() if m else ""
     return "不點交" if v.startswith("不點交") else "點交" if v.startswith("點交") else ("其他" if v else "")
 
+def first_price(x):
+    m = re.search(r"底標價[：:]\s*([\d.,]+)\s*(億|萬)?", x.get("資訊", {}).get("拍賣紀錄", "").split("\n")[0])
+    return price_num(m.group(1) + (m.group(2) or "")) if m else 0
+
 def upcoming(days=7):
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).date()
     out = []
@@ -140,7 +144,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <style>{CSS}</style>{ld}</head><body>
 <header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0986678928">電話諮詢</a></div></header>
 {pre}<main>{body}</main>
-<footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}</body></html>'''
+<footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 def card(x):
     ph = photos(x)
@@ -153,7 +157,7 @@ def card(x):
     old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
     top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"]]))
     text = f'{x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
-    return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}">'
+    return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}" data-f="{first_price(x)}">'
             f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
             f'<div class="b"><div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><h3>{e(x["地址"])}</h3>'
             f'<div class="pr"><span>底價</span><b>{old}{e(price)}</b></div></div></a>')
@@ -189,6 +193,7 @@ def detail_page(x):
     sim = ('<section class="box"><h2>相似物件</h2><div class="grid">' + "".join(card(y) for y in same) + "</div></section>") if same else ""
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
             f'<section class="box"><h1>{e(x["地址"])}</h1><div>{tags}</div><div class="price">{pr}</div>{gal}</section>'
+            f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
             + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + contact_box() + sim)
