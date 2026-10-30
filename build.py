@@ -148,12 +148,12 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/member">登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/member">登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/#list">物件列表</a><a href="/#n">本週新增・降價</a><a href="/#areas">各區法拍屋</a><a href="/member">會員登入／註冊</a><a href="/member#ask">委託代標留言</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
+          '<a href="/">首頁</a><a href="/#list">物件列表</a><a href="/#n">本週新增・降價</a><a href="/#areas">各區法拍屋</a><a href="/member">會員登入／註冊</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
@@ -240,6 +240,7 @@ FAQ = [
     ("法拍屋的「拍次」是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以各物件「拍賣紀錄」及法院公告為準。"),
     ("可以委託代標嗎？需要準備什麼？", "可以。透明房訊104法拍網提供法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢，請透過電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
+    ("代標服務費怎麼算？", "全程代標依標價收取 2% 到 5%（600 萬元以下另議）；只需聲請點交為 50,000 元，包辦點交為 120,000 元。服務項目與附註請見「服務與收費」頁。"),
     ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
     ("投標保證金不夠或忘記附本票會怎樣？", "保證金未繳足、未附本票，或本票、印章有瑕疵，投標會被判為無效。投標前請逐項核對拍賣公告。"),
     ("得標後要在多久內繳尾款？可以貸款嗎？", "得標後通常需在 7 天內繳清價金。需要貸款或代墊尾款，請在投標前先告知，讓我們協助準備銀行徵信資料。"),
@@ -445,6 +446,30 @@ def type_page(c, t):
               {"@type": "ListItem", "position": 3, "name": kw, "item": f"{SITE}/{slug_}"}]}]
     return page(title, desc, f"/{slug_}", body, ld, SITE + "/og.jpg")
 
+FEE_ITEMS = [
+ ("追蹤法院核發權利移轉證書", "", 1), ("協助產權過戶", "相關代書費、稅費另計，詳見附註一", 1), ("撰擬點交聲請狀", "", 1), ("向法院遞交點交書狀", "", 1), ("持續追蹤點交進度", "", 1),
+ ("保證代墊尾款", "", 2), ("協調轄區警員到場", "", 2), ("安排鎖匠與搬家公司待命", "", 2), ("協同法院協調現住人交屋時間", "", 2), ("處理原債務人戶籍及營業登記遷移", "包含原債務人戶籍中的幽靈人口遷移", 2), ("協助恢復水、電與瓦斯", "", 2),
+ ("投標前案件調查", "現場訪查、法院筆錄核對、債權與水電調查；確認附屬增建是否在拍賣範圍、車位是否遭占用；查核第三人租約陳報與拍定後點交條件", 3),
+ ("標價評估與投標準備", "投標現場陪同及最終標價建議、投標文件準備；核對投標書、委任狀及保證金票據；了解周邊競標情形，比對市價及法拍成交紀錄", 3),
+ ("協調原屋主搬遷條件", "協商搬遷，配合法院點交程序進行", 3), ("全程承辦點交程序", "", 3), ("提供點交保固書", "限服務費 5% 的案件適用，詳見附註二", 3), ("保證於約定期限內和諧交屋", "", 3),
+ ("處理遺留神明、神主牌及祖先牌位", "協助寄託廟宇管理", 3), ("有價遺留物清點與保管", "以貨櫃屋或倉庫存放，通知權利人領取；未領取時，依法聲請拍賣", 3)]
+
+def fees_page():
+    cols = [("聲請點交", "50,000", "元", "服務項目 01–05", 1), ("包辦點交", "120,000", "元", "服務項目 01–11", 2), ("全程代標", "2–5%", "依標價計算", "服務項目 01–19；600 萬元以下另議，依案件難易評估", 3)]
+    th = "".join(f'<th style="text-align:center;color:#123;font-weight:700"><div>{e(n)}</div><div style="font-size:22px">{p}</div><div style="font-weight:400;color:#666;font-size:13px">{e(u)}<br>{e(s)}</div></th>' for n, p, u, s, _ in cols)
+    rows = ""
+    for i, (t, sub, lv) in enumerate(FEE_ITEMS, 1):
+        cells = "".join(f'<td style="text-align:center">{"●" if lv <= c[4] else "—"}</td>' for c in cols)
+        rows += f'<tr><td style="width:auto;color:#123"><b>{i:02d}　{e(t)}</b>' + (f'<div style="color:#666;font-size:13px;font-weight:400">{e(sub)}</div>' if sub else "") + f'</td>{cells}</tr>'
+    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契約、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議。"]
+    nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
+    body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
+            f'<section class="box"><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></section>'
+            f'<section class="box"><h2>費用附註</h2>{nh}</section>' + contact_box())
+    desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標依標價 2% 到 5%，並列出各方案服務項目與費用附註。"
+    ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
+    return page(f"服務與收費｜法拍屋代標費用｜{NAME}", desc, "/fees", body, ld, SITE + "/og.jpg")
+
 def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
@@ -467,6 +492,7 @@ if __name__ == "__main__":
             for t in TYPES:
                 if len(type_items(c, t[2])) >= 3:
                     write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
+    write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
