@@ -399,6 +399,8 @@ def city_page(slug_, short, prefixes, kw, scope):
              f'每筆物件都列出拍次、開標日期、底標價與法院筆錄，並由黃先生 Pitt、林小姐 Anna 提供代標與產權調查。</p>')
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(kw)}</nav><h1>{e(kw)}｜{e(scope)}最新法拍物件（{len(xs)}筆）</h1>{intro}'
             f'<section class="box areas"><h2>{e(short)}各區法拍屋</h2>{al}</section>'
+            + (lambda cc: f'<section class="box areas"><h2>依類型找{e(short)}法拍屋</h2>' + "".join(f'<a href="/{cc[0]}-{t[0]}">{e(short + t[1])}法拍屋（{len(type_items(cc, t[2]))}）</a>' for t in TYPES if len(type_items(cc, t[2])) >= 3) + '</section>')(next(c for c in CITIES if c[0] == slug_))
+            +
             f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
             f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
             f'<section class="box areas"><h2>其他地區</h2>{others}</section>' + contact_box())
@@ -409,6 +411,38 @@ def city_page(slug_, short, prefixes, kw, scope):
           {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
               {"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"},
               {"@type": "ListItem", "position": 2, "name": kw, "item": f"{SITE}/{slug_}"}]}]
+    return page(title, desc, f"/{slug_}", body, ld, SITE + "/og.jpg")
+
+TYPES = [("townhouse", "透天", "透天"), ("shop", "店面", "店面"), ("apartment", "公寓", "公寓"), ("building", "大樓", "大樓"), ("mansion", "華廈", "華廈"), ("studio", "套房", "套房")]
+
+def type_items(c, tk):
+    return [x for x in ITEMS if area_of(x)[:2] in c[2] and tk in (x.get("類型") or "")]
+
+def type_page(c, t):
+    ts, tn, tk = t
+    xs = type_items(c, tk)
+    xs.sort(key=lambda x: (-min(round_of(x), 4), date_key(x)))
+    kw = f"{c[1]}{tn}法拍屋"
+    slug_ = f"{c[0]}-{ts}"
+    n3 = sum(1 for x in xs if round_of(x) >= 3)
+    title = f"{kw}｜{c[4]}{tn}最新法拍物件{len(xs)}筆｜{NAME}"
+    desc = f"{kw}最新物件{len(xs)}筆，含拍次、開標日期、底標價與法院筆錄；提供{c[1]}{tn}法拍屋代標、產權調查與貸款諮詢，每日更新。"
+    others = "".join(f'<a href="/{c[0]}-{o[0]}">{e(c[1] + o[1])}法拍屋</a>' for o in TYPES if o[0] != ts and len(type_items(c, o[2])) >= 3)
+    faq = city_faq(kw, f"{c[4]}{tn}")[:3]
+    fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in faq)
+    intro = f'<p>{e(kw)}專區：目前共 {len(xs)} 筆，其中第三拍以上 {n3} 筆，資料{e(UPDATED[:10])}更新。每筆列出拍次、開標日期、底標價與法院筆錄。</p>'
+    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/{c[0]}">{e(c[3])}</a> › {e(kw)}</nav><h1>{e(kw)}（{len(xs)}筆）</h1>{intro}'
+            f'<div class="grid">{"".join(card(x) for x in xs)}</div>'
+            f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
+            f'<section class="box areas"><h2>其他類型與地區</h2><a href="/{c[0]}">{e(c[3])}</a>{others}</section>' + contact_box())
+    ld = [ORG,
+          {"@context": "https://schema.org", "@type": "CollectionPage", "name": kw, "url": f"{SITE}/{slug_}", "description": desc, "inLanguage": "zh-TW"},
+          {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
+          {"@context": "https://schema.org", "@type": "ItemList", "name": kw, "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs[:50])]},
+          {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+              {"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"},
+              {"@type": "ListItem", "position": 2, "name": c[3], "item": f"{SITE}/{c[0]}"},
+              {"@type": "ListItem", "position": 3, "name": kw, "item": f"{SITE}/{slug_}"}]}]
     return page(title, desc, f"/{slug_}", body, ld, SITE + "/og.jpg")
 
 def write(path, s):
@@ -429,6 +463,10 @@ if __name__ == "__main__":
         write(f"site/area/{a}.html", area_page(a, xs)[1]); urls.append((f"/area/{slug(a)}", 0.7))
     for c in CITIES:
         write(f"site/{c[0]}.html", city_page(*c)); urls.append((f"/{c[0]}", 0.9))
+        if c[0] != "greater-taipei":
+            for t in TYPES:
+                if len(type_items(c, t[2])) >= 3:
+                    write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
