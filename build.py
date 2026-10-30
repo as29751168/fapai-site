@@ -7,7 +7,7 @@ SITE = "https://tomin104.com"          # 網站正式網址
 NAME = "透明房訊｜104法拍網"
 PHONE_A, PHONE_P = "0986-678-928", "0918-313-888"
 LINKS = {
-    "LINE": "https://line.me/ti/p/MJcPvp3nG8",
+    "LINE": "https://lin.ee/TpELEaz",
     "粉絲專頁": "https://www.facebook.com/share/1CnLq9vuJd/?mibextid=wwXIfr",
     "YouTube": "https://youtube.com/@anna-n9999?si=laOYfE2Bm2VMPYDa",
     "LINE 社群": "https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default",
