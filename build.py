@@ -233,7 +233,7 @@ def detail_page(x):
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
-    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, SITE + "/og/" + x["編號"] + ".jpg", "<style>footer{padding-bottom:90px}</style>", "", False)
+    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
