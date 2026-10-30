@@ -159,7 +159,7 @@ DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" 
 
 def member_page():
     body = ('<h1>會員專區・委託代標留言</h1>'
-            '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。Google／LINE 請用 LINE 加入官方好友，我們為您建立會員資料，並用 LINE 推送新案與降價提醒。</p>'
+            '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。請用 LINE 加入官方好友，我們為您建立會員資料，並用 LINE 推送新案與降價提醒。</p>'
             f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">用 LINE 登入／加入會員</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
             '<section class="box" id="ask"><h2>委託代標・物件諮詢留言</h2><p>留下需求，我們會盡快與您聯絡。</p><form class="mf" id="mf">'
             '<label>姓名</label><input id="mn" required autocomplete="name"><label>聯絡電話</label><input id="mp" type="tel" required autocomplete="tel">'
