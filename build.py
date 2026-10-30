@@ -159,8 +159,8 @@ DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" 
 
 def member_page():
     body = ('<h1>會員專區・委託代標留言</h1>'
-            '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。Google／LINE 一鍵登入即將開放，目前請先加入 LINE 社群或直接聯絡我們，專人協助建立會員資料。</p>'
-            f'<p><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
+            '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。Google／LINE 請用 LINE 加入官方好友，我們為您建立會員資料，並用 LINE 推送新案與降價提醒。</p>'
+            f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">用 LINE 登入／加入會員</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
             '<section class="box" id="ask"><h2>委託代標・物件諮詢留言</h2><p>留下需求，我們會盡快與您聯絡。</p><form class="mf" id="mf">'
             '<label>姓名</label><input id="mn" required autocomplete="name"><label>聯絡電話</label><input id="mp" type="tel" required autocomplete="tel">'
             '<label>想了解的物件（案號／地址，可留空）</label><input id="mo"><label>需求</label><select id="mt"><option>委託代標</option><option>產權調查／不點交處理</option><option>貸款諮詢</option><option>其他</option></select>'
@@ -233,7 +233,7 @@ def detail_page(x):
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
-    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
+    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, SITE + "/og/" + x["編號"] + ".jpg", "<style>footer{padding-bottom:90px}</style>", "", False)
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
