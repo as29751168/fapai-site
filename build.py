@@ -153,7 +153,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/#list">物件列表</a><a href="/#n">本週新增・降價</a><a href="/#areas">各區法拍屋</a><a href="/member">會員登入／註冊</a><a href="/member#ask">委託代標留言</a><a href="/#faq">常見問題</a>'
+          '<a href="/">首頁</a><a href="/#list">物件列表</a><a href="/#n">本週新增・降價</a><a href="/#areas">各區法拍屋</a><a href="/member">會員登入／註冊</a><a href="/member#ask">委託代標留言</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
@@ -233,7 +233,7 @@ def detail_page(x):
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
-    return page(full_title, desc, f'/h/{x["編號"]}', body + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
+    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
@@ -350,7 +350,7 @@ $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''}
             f'<select id="s" aria-label="排序"><option value="">預設（雙北優先）</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
             f'<div id="n" class="m"></div><div class="grid" id="g">{"".join(card(x) for x in ITEMS)}</div>'
             f'<section class="box areas" id="areas"><h2>依地區找法拍屋</h2>{al}</section>'
-            f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + contact_box() + js)
+            f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + extras_index() + contact_box() + js)
     ld = [ORG, {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": SITE + "/", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]},
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
@@ -368,6 +368,8 @@ def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
 
+exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
+
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/index.html", index_page())
@@ -378,6 +380,7 @@ if __name__ == "__main__":
     for x in ITEMS: areas.setdefault(area_of(x), []).append(x)
     for a, xs in areas.items():
         write(f"site/area/{a}.html", area_page(a, xs)[1]); urls.append((f"/area/{slug(a)}", 0.7))
+    write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
           "".join(f"<url><loc>{e(SITE + p)}</loc><lastmod>{day}</lastmod><priority>{pr}</priority></url>\n" for p, pr in urls) + "</urlset>\n")
