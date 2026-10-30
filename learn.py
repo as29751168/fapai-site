@@ -34,8 +34,6 @@ LEARN = [
    ("欠繳費用", "管理費、水電瓦斯可能有欠款，需向社區與公司確認。"),
    ("屋況", "法拍通常無法進屋勘查，漏水、壁癌、結構問題要用外觀與周邊資訊推估。"),
    ("租賃關係", "現場有承租人時，需看公告是否載明租約情形。"),
-exec(compile(open("services.py", encoding="utf-8").read(), "services.py", "exec"))
-
    ("貸款成數", "法拍屋貸款成數與一般交易不同，先與銀行確認再投標。")]),
  ("how-long-to-move-in", "法拍屋得標後多久能交屋？",
   "點交物件走司法程序，從拍定到交屋通常要幾個月；不點交則取決於與占用人協商，時間難以預估。",
@@ -113,3 +111,6 @@ def team3_box():
     return ('<section class="box team"><img src="/brand/team3.jpg" alt="黃先生 Pitt 與林小姐 Anna 拿著鑰匙" width="585" height="800" loading="lazy" onerror="this.parentNode.remove()">'
             '<div><h2>想標這間？我們陪你</h2><p>產權調查、現場勘查、出價策略，由兩位顧問一起把關。</p>'
             f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 詢問</a> <a class="btn" href="tel:0918313888">電話洽詢</a></p></div></section>')
+
+# 購屋流程頁（services.py 會包裝 extras_index / write_learn，需放在最後載入）
+exec(compile(open("services.py", encoding="utf-8").read(), "services.py", "exec"))

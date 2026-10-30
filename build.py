@@ -123,7 +123,9 @@ ORG = {
     "telephone": ["+886-918-313-888", "+886-986-678-928", "+886-2-2270-0888", "+886-3-338-8220"],
     "address": [{"@type": "PostalAddress", "streetAddress": "金城路二段396號11樓", "addressLocality": "土城區", "addressRegion": "新北市", "addressCountry": "TW"},
                 {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
-    "areaServed": "TW", "sameAs": list(LINKS.values())[1:3],
+    "areaServed": "TW", "sameAs": list(LINKS.values())[1:],
+    "employee": [{"@type": "Person", "name": "黃先生 Pitt", "jobTitle": "法拍代標顧問", "telephone": "+886-918-313-888"}, {"@type": "Person", "name": "林小姐 Anna", "jobTitle": "法拍代標顧問", "telephone": "+886-986-678-928"}],
+    "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "依標價 2% 到 5%，600 萬元以下最低 12 萬元"}],
     "knowsAbout": ["法拍屋", "法拍屋代標", "不點交物件處理", "撤封代償", "產權調查", "法拍屋貸款"],
 }
 
@@ -404,7 +406,7 @@ def city_page(slug_, short, prefixes, kw, scope):
             +
             f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
             f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
-            f'<section class="box areas"><h2>其他地區</h2>{others}</section>' + contact_box())
+            f'<section class="box areas"><h2>其他地區</h2>{others}</section>' + know_box() + contact_box())
     ld = [ORG,
           {"@context": "https://schema.org", "@type": "CollectionPage", "name": kw, "url": f"{SITE}/{slug_}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
@@ -435,7 +437,7 @@ def type_page(c, t):
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/{c[0]}">{e(c[3])}</a> › {e(kw)}</nav><h1>{e(kw)}（{len(xs)}筆）</h1>{intro}'
             f'<div class="grid">{"".join(card(x) for x in xs)}</div>'
             f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
-            f'<section class="box areas"><h2>其他類型與地區</h2><a href="/{c[0]}">{e(c[3])}</a>{others}</section>' + contact_box())
+            f'<section class="box areas"><h2>其他類型與地區</h2><a href="/{c[0]}">{e(c[3])}</a>{others}</section>' + know_box() + contact_box())
     ld = [ORG,
           {"@context": "https://schema.org", "@type": "CollectionPage", "name": kw, "url": f"{SITE}/{slug_}", "description": desc, "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
@@ -465,10 +467,32 @@ def fees_page():
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
     body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
             f'<section class="box"><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></section>'
-            f'<section class="box"><h2>費用附註</h2>{nh}</section>' + contact_box())
+            f'<section class="box"><h2>費用附註</h2>{nh}</section>' + know_box() + contact_box())
     desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標依標價 2% 到 5%（600 萬元以下最低 12 萬元），並列出各方案服務項目與費用附註。"
     ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
     return page(f"服務與收費｜法拍屋代標費用｜{NAME}", desc, "/fees", body, ld, SITE + "/og.jpg")
+
+def know_box():
+    items = [("what-is-foreclosure-auction", "法拍屋是什麼？流程"), ("delivery-or-not", "點交與不點交"), ("how-long-to-move-in", "得標後多久交屋"), ("deposit-invalid", "投標保證金"), ("proxy-bid-process", "委託代標怎麼進行")]
+    return '<section class="box areas"><h2>法拍知識與服務</h2>' + "".join(f'<a href="/learn/{s}">{e(t)}</a>' for s, t in items) + '<a href="/process">購屋流程</a><a href="/fees">服務與收費</a><a href="/about">關於我們</a></section>'
+
+ABOUT_FAQ = [
+    ("透明房訊／104法拍網是什麼？", "透明房訊／104法拍網（一零四法拍網股份有限公司）是提供法拍屋查詢與代標服務的公司，網站每日更新物件的拍次、開標日期、底標價與法院筆錄。"),
+    ("誰負責代標服務？", "由黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問負責，提供產權調查、現場勘查、標價評估、點交與交屋協助。"),
+    ("怎麼聯絡？", f"黃先生 Pitt {PHONE_P}、林小姐 Anna {PHONE_A}，或透過 LINE 聯絡。據點在新北市土城區與桃園市桃園區。"),
+]
+
+def about_page():
+    fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in ABOUT_FAQ)
+    body = ('<nav class="bc"><a href="/">首頁</a> › 關於我們</nav><h1>關於透明房訊／104法拍網</h1>'
+            '<p>透明房訊／104法拍網（一零四法拍網股份有限公司）提供法拍屋物件查詢與代標服務。物件資料每日更新，實際內容以法院拍賣公告為準。</p>'
+            '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p></section>'
+            '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：標價 2% 到 5%（600 萬元以下最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
+            f'<section class="box"><h2>據點與聯絡</h2><ul><li>{e(ADDR[0])}</li><li>{e(ADDR[1])}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>林小姐 Anna：{e(PHONE_A)}</li></ul></section>'
+            f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
+    ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於透明房訊／104法拍網", "url": SITE + "/about", "inLanguage": "zh-TW"},
+          {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]
+    return page(f"關於我們｜透明房訊／104法拍網法拍代標團隊｜{NAME}", "透明房訊／104法拍網：黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問，提供法拍屋查詢、產權調查、點交與代標服務。", "/about", body, ld, SITE + "/og.jpg")
 
 def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
@@ -493,6 +517,7 @@ if __name__ == "__main__":
                 if len(type_items(c, t[2])) >= 3:
                     write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
+    write("site/about.html", about_page()); urls.append(("/about", 0.7))
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -500,7 +525,10 @@ if __name__ == "__main__":
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
+          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標依標價 2% 到 5%（600 萬元以下最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
+          + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
+          + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
+          + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
     write("site/post.html", post_page())
     write("site/member.html", member_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/">回到法拍屋物件列表</a></p>'))

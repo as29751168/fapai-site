@@ -15,7 +15,7 @@ STAGES = [
 ]
 PROCESS_NOTE = "未得標：依程序領回保證金，可再評估其他物件。交屋時程：依占用現況及法院程序評估。拍賣、繳款與點交依法院公告及相關規定辦理；融資與代墊須依個案條件評估。"
 
-FEE_COLS = [("聲請點交", "50,000 元", "服務項目 01–05"), ("包辦點交", "120,000 元", "服務項目 01–11"), ("全程代標", "標價的 2–5%", "服務項目 01–19，600 萬元以下另議，依案件難易評估")]
+FEE_COLS = [("聲請點交", "50,000 元", "服務項目 01–05"), ("包辦點交", "120,000 元", "服務項目 01–11"), ("全程代標", "標價的 2–5%", "服務項目 01–19，600 萬元以下最低 12 萬元，依案件難易評估")]
 FEE_ROWS = [
  ("追蹤法院核發權利移轉證書", "", 1), ("協助產權過戶", "相關代書費、稅費另計，詳見附註一", 1), ("撰擬點交聲請狀", "", 1),
  ("向法院遞交點交書狀", "", 1), ("持續追蹤點交進度", "", 1),
@@ -40,25 +40,11 @@ def process_page():
     h += (f'<section class="box"><h2>想了解費用？</h2><p><a class="btn" href="/fees">服務費用與收費標準</a><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></p></section>')
     return page(f"法拍屋購屋流程 9 步驟｜{NAME}", "法拍屋從確認案件、投標、繳款到點交交屋，9 個步驟說明。黃先生 Pitt、林小姐 Anna 全程協助。", "/process", h, _article_ld("法拍屋購屋流程 9 步驟", "法拍屋購屋流程說明", "/process"))
 
-def fees_page():
-    mark = lambda lvl, col: "✓" if lvl <= col + 1 and ((col == 0 and lvl == 1) or (col == 1 and lvl <= 2) or col == 2) else "—"
-    th = "".join(f'<th style="text-align:center">{e(n)}<br><span style="font-size:20px;color:#d62828">{e(p)}</span><br><span style="font-size:12px;font-weight:400;color:#666">{e(s)}</span></th>' for n, p, s in FEE_COLS)
-    rows = ""
-    for i, (t, d, lvl) in enumerate(FEE_ROWS, 1):
-        sub = f'<br><span style="font-size:13px;color:#666">{e(d)}</span>' if d else ""
-        rows += f'<tr><td><b>{i:02d}</b>　{e(t)}{sub}</td>' + "".join(f'<td style="text-align:center">{mark(lvl, c)}</td>' for c in range(3)) + '</tr>'
-    h = ('<nav class="bc"><a href="/">首頁</a> › 服務費用</nav><h1>法拍代標服務費用與收費標準</h1><p>三種方案，清楚列出每一項服務內容。實際費用依案件條件確認，歡迎先諮詢。</p>'
-         f'<section class="box" style="overflow-x:auto"><table style="min-width:560px"><tr><th>服務項目</th>{th}</tr>{rows}</table></section>'
-         '<section class="box"><h2>費用附註</h2><ol>' + "".join(f"<li>{e(n)}</li>" for n in FEE_NOTES) + '</ol></section>'
-         f'<section class="box"><h2>聯絡我們</h2><p><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a><br><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a></p>'
-         f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a><a class="btn" href="/process">購屋流程</a></p></section>')
-    return page(f"法拍代標服務費用與收費標準｜{NAME}", "聲請點交 50,000 元、包辦點交 120,000 元、全程代標為標價 2–5%，列出 19 項服務內容與附註。", "/fees", h)
-
 def svc_teaser():
     return ('<section class="box" id="svc"><h2>代標流程與服務費用</h2><p>9 個步驟看懂法拍，三種服務方案清楚標價。</p>'
-            '<p><a class="btn" href="/process">購屋流程</a><a class="btn" href="/fees">服務費用</a></p></section>')
+            '<p><a class="btn" href="/process">購屋流程</a><a class="btn" href="/fees">服務與收費</a></p></section>')
 
-DRAWER = DRAWER.replace('<a href="/learn">法拍小教室</a>', '<a href="/process">購屋流程</a><a href="/fees">服務費用</a><a href="/learn">法拍小教室</a>')
+DRAWER = DRAWER.replace('<a href="/learn">法拍小教室</a>', '<a href="/process">購屋流程</a><a href="/learn">法拍小教室</a>')
 _extras_base = extras_index
 def extras_index():
     return svc_teaser() + _extras_base()
@@ -66,4 +52,3 @@ _write_learn_base = write_learn
 def write_learn(urls):
     _write_learn_base(urls)
     write("site/process.html", process_page()); urls.append(("/process", 0.8))
-    write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
