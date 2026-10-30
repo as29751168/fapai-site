@@ -4,6 +4,10 @@
 
 ## 主要頁面
 - [物件列表](https://tomin104.com/): 全部法拍屋物件與搜尋
+- [台北法拍屋](https://tomin104.com/taipei): 台北市法拍屋最新物件
+- [新北法拍屋](https://tomin104.com/new-taipei): 新北市法拍屋最新物件
+- [桃園法拍屋](https://tomin104.com/taoyuan): 桃園市法拍屋最新物件
+- [大台北法拍屋](https://tomin104.com/greater-taipei): 台北、新北、基隆法拍屋最新物件
 - [台中大甲區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%A4%A7%E7%94%B2%E5%8D%80): 1筆
 - [台中太平區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%A4%AA%E5%B9%B3%E5%8D%80): 1筆
 - [台中梧棲區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E6%A2%A7%E6%A3%B2%E5%8D%80): 1筆
