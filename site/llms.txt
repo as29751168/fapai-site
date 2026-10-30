@@ -1,6 +1,6 @@
 # 透明房訊｜104法拍網
 
-> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（2026-10-30 15:06）。
+> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（2026-10-31 06:30）。
 
 ## 主要頁面
 - [物件列表](https://tomin104.com/): 全部法拍屋物件與搜尋
@@ -19,7 +19,7 @@
 - [台北內湖區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%85%A7%E6%B9%96%E5%8D%80): 12筆
 - [台北北投區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%8C%97%E6%8A%95%E5%8D%80): 7筆
 - [台北南港區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%8D%97%E6%B8%AF%E5%8D%80): 3筆
-- [台北士林區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E5%8D%80): 14筆
+- [台北士林區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E5%8D%80): 13筆
 - [台北大同區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A4%A7%E5%90%8C%E5%8D%80): 6筆
 - [台北大安區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A4%A7%E5%AE%89%E5%8D%80): 17筆
 - [台北文山區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E6%96%87%E5%B1%B1%E5%8D%80): 7筆
@@ -35,15 +35,15 @@
 - [宜蘭礁溪鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E7%A4%81%E6%BA%AA%E9%84%89): 1筆
 - [屏東萬巒鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E8%90%AC%E5%B7%92%E9%84%89): 1筆
 - [新北三峽區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%89%E5%B3%BD%E5%8D%80): 3筆
-- [新北三芝區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%89%E8%8A%9D%E5%8D%80): 1筆
+- [新北三芝區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%89%E8%8A%9D%E5%8D%80): 2筆
 - [新北三重區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%89%E9%87%8D%E5%8D%80): 20筆
-- [新北中和區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%AD%E5%92%8C%E5%8D%80): 11筆
+- [新北中和區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%B8%AD%E5%92%8C%E5%8D%80): 13筆
 - [新北五股區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E4%BA%94%E8%82%A1%E5%8D%80): 1筆
 - [新北八里區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E5%85%AB%E9%87%8C%E5%8D%80): 4筆
 - [新北土城區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E5%9C%9F%E5%9F%8E%E5%8D%80): 11筆
 - [新北新店區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%96%B0%E5%BA%97%E5%8D%80): 24筆
 - [新北新莊區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%96%B0%E8%8E%8A%E5%8D%80): 12筆
-- [新北板橋區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%9D%BF%E6%A9%8B%E5%8D%80): 6筆
+- [新北板橋區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%9D%BF%E6%A9%8B%E5%8D%80): 7筆
 - [新北林口區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%9E%97%E5%8F%A3%E5%8D%80): 8筆
 - [新北樹林區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%A8%B9%E6%9E%97%E5%8D%80): 11筆
 - [新北永和區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B0%B8%E5%92%8C%E5%8D%80): 7筆
@@ -62,13 +62,13 @@
 - [新竹芎林鄉法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E8%8A%8E%E6%9E%97%E9%84%89): 1筆
 - [新竹香山區法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E9%A6%99%E5%B1%B1%E5%8D%80): 3筆
 - [桃園中壢區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E4%B8%AD%E5%A3%A2%E5%8D%80): 9筆
-- [桃園八德區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%85%AB%E5%BE%B7%E5%8D%80): 11筆
+- [桃園八德區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%85%AB%E5%BE%B7%E5%8D%80): 10筆
 - [桃園大園區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%A4%A7%E5%9C%92%E5%8D%80): 1筆
 - [桃園大溪區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%A4%A7%E6%BA%AA%E5%8D%80): 8筆
 - [桃園平鎮區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%B9%B3%E9%8E%AE%E5%8D%80): 13筆
 - [桃園新屋區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%96%B0%E5%B1%8B%E5%8D%80): 2筆
 - [桃園桃園區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A1%83%E5%9C%92%E5%8D%80): 33筆
-- [桃園楊梅區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A5%8A%E6%A2%85%E5%8D%80): 13筆
+- [桃園楊梅區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A5%8A%E6%A2%85%E5%8D%80): 14筆
 - [桃園蘆竹區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E8%98%86%E7%AB%B9%E5%8D%80): 7筆
 - [桃園觀音區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E8%A7%80%E9%9F%B3%E5%8D%80): 13筆
 - [桃園龍潭區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E9%BE%8D%E6%BD%AD%E5%8D%80): 8筆
