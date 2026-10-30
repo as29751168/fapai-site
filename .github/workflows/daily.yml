@@ -20,7 +20,7 @@ jobs:
           pip install playwright >/dev/null
           playwright install --with-deps chromium >/dev/null
           python og.py
-          python og_items.py
+
       - run: python build.py
       - name: 有變動才提交
         run: |
