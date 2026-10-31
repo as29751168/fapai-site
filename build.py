@@ -28,7 +28,7 @@ def jd(o): return json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
 def photos(x):
     v = P.get(x["編號"][2:], [])
     if isinstance(v, str): v = [v]
-    return [PHOTO_BASE + urllib.parse.quote(p, safe="/") for p in v]
+    return [(SITE + p if p.startswith("/") else PHOTO_BASE + urllib.parse.quote(p, safe="/")) for p in v]
 def price_num(s):
     m = re.search(r"([\d.,]+)\s*(億|萬)?", str(s or ""))
     if not m: return 0
