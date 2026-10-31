@@ -36,6 +36,36 @@ def photo_list(c):
         out.append(p if re.match(r"(wwwphoto|street|Media)/", p) else f"Media/{MOBILE}/{c['CITY']}/{c['FP_ID']}/{p}")
     return out
 
+def query(city, lo, hi, mobile=""):
+    p = {"isJson": "Y", "type": "SEARCH", "cityCourt": "", "city": city, "pageIndex": 1, "pageSize": 100, "price-min": lo, "price-max": hi}
+    if mobile: p["mobile"] = mobile
+    for i in range(3):
+        try:
+            req = urllib.request.Request(f"{BASE}/MW/SearchItems?{urllib.parse.urlencode(p)}", data=b"", headers=UA, method="POST")
+            return json.loads(urllib.request.urlopen(req, timeout=40).read().decode("utf-8"))["items"]
+        except Exception:
+            time.sleep(2)
+    return []
+
+def market(city, lo=0, hi=200000, out=None):
+    """列出透明房訊某縣市全部物件：單次最多回 30 筆，滿了就把價格區間對半切"""
+    out = {} if out is None else out
+    items = query(city, lo, hi)
+    for it in items: out[it["NO"]] = it
+    if len(items) >= 30 and hi - lo > 1:
+        mid = (lo + hi) // 2
+        market(city, lo, mid, out); market(city, mid, hi, out)
+    return out
+
+COURT = re.compile(r"(wwwphoto|street)/")
+def court_photos(c):
+    """他人物件只用法院現場照（不用其他經紀人自己上傳的照片）"""
+    return [p for p in photo_list(c) if COURT.match(p)]
+
+def district(s):
+    m = re.search(r"[市縣](.{1,3}?[區鄉鎮市])", s or "")
+    return m.group(1) if m else ""
+
 def fetch_all():
     allc = {}
     for c in CITIES:
@@ -92,5 +122,23 @@ def sync(items):
             x = to_item(c); items.append(x); key = x["編號"][2:]; extra += 1; time.sleep(0.3)
         pl = photo_list(c)
         if pl and P.get(key) != pl: P[key] = pl; pics += 1
+    # 其他尚無照片的物件：到透明房訊用地址對應，只取法院現場照
+    try:
+        mk = {}
+        for city in CITIES: market(city, out=mk)
+        mk = [c for c in mk.values() if c.get("MOBILE") != MOBILE and not re.search(r"撤", c.get("NOW_STATUS") or "")]
+        for x in items:
+            key = x["編號"][2:]
+            if P.get(key): continue
+            a = norm(x["地址"]); d = x["區域"][2:5]
+            for c in mk:
+                s = norm(c.get("ADDRESS"))
+                if len(s) >= 5 and s in a and district(c.get("FULL_ADDRESS")) in d + "區":
+                    pl = court_photos(c)
+                    if pl: P[key] = pl; pics += 1
+                    break
+        print("透明房訊全部物件", len(mk), "筆")
+    except Exception as e:
+        print("他人物件照片同步失敗（略過）：", e)
     json.dump(P, open("site/photos.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     return items, pics, extra
