@@ -79,7 +79,8 @@ SPEC_ORDER = ["案號", "總登記坪數", "每坪單價"]
 DETAIL_KEYS = ["銷售狀態", "格局", "社區/大樓", "屋齡", "車位", "座向", "所在樓層", "管理費", "管委會", "中庭", "電梯", "邊間", "增建", "是否凶宅", "無障礙環境", "法拍件", "拍次", "開標日期"]
 SIZE_KEYS = ["主建物", "附屬建物", "公共設施", "停車位", "土地登記總坪數", "總坪數"]
 
-CSS = """body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}img{-webkit-user-drag:none;user-drag:none}
+CSS = """.cr{position:relative;margin:6px 0 4px}.crt{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px}.crt::-webkit-scrollbar{display:none}.crs{flex:0 0 88%;max-width:420px;scroll-snap-align:center;border:1px solid #d9b8a8;border-radius:14px;overflow:hidden;background:#fff;color:#222;text-decoration:none;display:block}.crh{background:#cf8570;color:#fff;text-align:center;padding:8px;font-size:1rem;letter-spacing:.03em}.cri{position:relative;aspect-ratio:4/3;background:#eee}.cri img{width:100%;height:100%;object-fit:cover;display:block}.cri .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#999}.crtg{position:absolute;right:10px;bottom:10px;background:#fff;color:#b5502f;font-weight:700;border-radius:8px;padding:5px 12px;font-size:.95rem}.crb{padding:12px 16px 14px}.crct{color:#b5654a;font-size:.92rem}.crn{font-weight:700;font-size:1.05rem;margin:6px 0 10px;min-height:2.9em;line-height:1.45}.crp{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e3cfc4;padding-top:10px}.crp span{color:#b5654a;font-weight:700}.crp b{font-size:1.4rem}.crdots{display:flex;justify-content:center;gap:9px;margin:12px 0 4px}.crdots i{width:11px;height:11px;border-radius:50%;background:#efd8cf;display:block}.crdots i.on{background:#a4442d}.crmw{text-align:center;margin:10px 0 18px}.crmore{display:inline-flex;align-items:center;justify-content:center;width:104px;height:104px;border:1px solid #cf8570;border-radius:50%;color:#cf8570;text-decoration:none;font-family:Georgia,serif;font-size:1.3rem}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}img{-webkit-user-drag:none;user-drag:none}
 *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#222;background:#f6f6f4;line-height:1.6}
 a{color:#1f3a4d}header.top{background:#1f3a4d;color:#fff;padding:14px 16px}header.top a{color:#fff;text-decoration:none;font-weight:700;font-size:18px}
 header.top small{display:block;opacity:.8;font-weight:400;font-size:13px}
@@ -317,6 +318,26 @@ def hero_banner():
             f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span><span><b>代標</b>・產權調查・貸款諮詢</span></div>'
             f'<div class="qk"><button type="button" data-c="台北">台北</button><button type="button" data-c="新北">新北</button><button type="button" data-c="桃園">桃園</button><button type="button" data-r="3+">第3拍以上</button></div></div></section>')
 
+def carousel(title, xs, href, cap=12, auto=False):
+    """橫向滑動卡片（一次一張，底下圓點，最後 more 按鈕）"""
+    if not xs: return ""
+    slides = ""
+    for x in xs[:cap]:
+        ph = photos(x); inf = x.get("資訊", {}); r = round_of(x); dv = deliver_of(x)
+        img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
+        tag = "｜".join(filter(None, [("%d拍" % r) if r else "", dv]))
+        top = "｜".join(filter(None, [inf.get("開標日期", ""), x.get("狀態", "")]))
+        sub = "｜".join(filter(None, [x.get("類型", ""), inf.get("總登記坪數", "") or x.get("格局坪數", "")]))
+        slides += (f'<a class="crs" href="/h/{e(x["編號"])}"><div class="crh">{e(top)}</div><div class="cri">{img}<span class="crtg">{e(tag)}</span></div>'
+                   f'<div class="crb"><div class="crct">{e(sub)}</div><div class="crn">{e(x["地址"])}</div><div class="crp"><span>底價</span><b>{e(re.sub("^售", "", x["價格"]))}</b></div></div></a>')
+    return (f'<h2 class="sec">{e(title)}（{len(xs)}筆）</h2><div class="cr" data-cr{" data-auto" if auto else ""}><div class="crt">{slides}</div><div class="crdots"></div></div>'
+            f'<p class="crmw"><a class="crmore" href="{href}">more</a></p>')
+
+def featured_items():
+    t = _today(); tk = (t.year - 1911) * 10000 + t.month * 100 + t.day
+    xs = [x for x in ITEMS if (_age(x) is not None and _age(x) <= 10) and date_key(x) >= tk and "撤" not in x.get("狀態", "")]
+    return sorted(xs, key=lambda x: (date_key(x), _age(x)))
+
 def hero_html():
     h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
          f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
@@ -324,11 +345,9 @@ def hero_html():
     h += ('<section class="box team"><img src="/img/team2.jpg" alt="黃先生 Pitt 與林小姐 Anna 研究格局圖" width="583" height="800" loading="lazy" onerror="this.remove()">'
           '<div><h2>同樣價格，兩個人幫你把關</h2><ol><li><b>產權調查</b>：查清楚有沒有占用、抵押、不點交風險</li><li><b>現場勘查</b>：兩人分工看屋況與周邊</li><li><b>出價精準評估</b>：比對行情與後續成本，算出合理出價</li><li><b>一條龍服務</b>：代標、貸款、點交到交屋，一次處理</li></ol>'
           '<p><a class="btn line" href="/member#ask">委託代標留言</a> <a class="btn" href="tel:0918313888">電話洽詢</a></p></div></section>')
-    allnw, alldr = new_items(), changed_items()
-    nw, dr = allnw[:12], alldr[:12]
-    more = lambda n, href: f'<p class="more"><a class="btn" href="{href}">看全部 {n} 筆 →</a></p>' if n > 12 else ""
-    if nw: h += '<h2 class="sec">本週新增</h2><div class="grid">' + "".join(card(x) for x in nw) + "</div>" + more(len(allnw), "/new")
-    if dr: h += '<h2 class="sec">降價・降拍更新</h2><div class="grid">' + "".join(card(x) for x in dr) + "</div>" + more(len(alldr), "/changes")
+    h += carousel("每週精選・10年內新屋", featured_items(), "/new-house", auto=True)
+    h += carousel("本週新增", sorted(new_items(), key=date_key), "/new")
+    h += carousel("降價・復拍更新", sorted(changed_items(), key=date_key), "/changes")
     wk = upcoming(30)[:8]
     if wk:
         rows = "".join(f'<tr><td>{e("%d拍" % round_of(x) if round_of(x) else "—")}</td><td>{e(x["資訊"].get("開標日期", ""))}</td><td><a href="/h/{e(x["編號"])}">{e(x["地址"])}</a></td><td class="rt">{e(x["價格"])}</td></tr>' for x in wk)
@@ -538,6 +557,7 @@ if __name__ == "__main__":
                     write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
     write("site/new.html", list_page("/new", "本週新增法拍屋", "最近 7 天新上架的法拍屋，含拍次、開標日期與底標價。", new_items())); urls.append(("/new", 0.8))
     write("site/changes.html", list_page("/changes", "降價・降拍更新法拍屋", "最近 7 天價格下降或拍次往後的法拍屋。", changed_items())); urls.append(("/changes", 0.8))
+    write("site/new-house.html", list_page("/new-house", "10年內新屋法拍屋", "屋齡 10 年以內的法拍屋，由新到舊排列，含拍次、開標日期與底標價。", sorted([x for x in ITEMS if _age(x) is not None and _age(x) <= 10], key=lambda x: (_age(x), date_key(x))))); urls.append(("/new-house", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write("site/about.html", about_page()); urls.append(("/about", 0.7))
     write_learn(urls)

@@ -91,3 +91,31 @@
     if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].indexOf(k) > -1)) e.preventDefault();
   });
 })();
+
+/* 橫向滑動卡片：圓點隨滑動更新，點圓點跳到該張 */
+(function () {
+  document.querySelectorAll('[data-cr]').forEach(function (box) {
+    var track = box.querySelector('.crt'), slides = track.children, dots = box.querySelector('.crdots');
+    if (!slides.length) return;
+    for (var i = 0; i < slides.length; i++) { var d = document.createElement('i'); d.dataset.i = i; dots.appendChild(d); }
+    function mark() {
+      var mid = track.scrollLeft + track.clientWidth / 2, best = 0, bd = 1e9;
+      for (var i = 0; i < slides.length; i++) { var c = slides[i].offsetLeft + slides[i].offsetWidth / 2, dd = Math.abs(c - mid); if (dd < bd) { bd = dd; best = i; } }
+      for (var k = 0; k < dots.children.length; k++) dots.children[k].className = k === best ? 'on' : '';
+    }
+    track.addEventListener('scroll', function () { window.requestAnimationFrame(mark); }, { passive: true });
+    function go(i) { var s = slides[i]; track.scrollTo({ left: s.offsetLeft - (track.clientWidth - s.offsetWidth) / 2, behavior: 'smooth' }); }
+    dots.addEventListener('click', function (e) { var i = e.target.dataset && e.target.dataset.i; if (i != null) go(+i); });
+    mark();
+    if (box.hasAttribute('data-auto')) {   /* 幻燈：每 4 秒自動換下一張；手指或滑鼠停留時暫停 */
+      var cur = 0, paused = false, timer = setInterval(function () {
+        if (paused || document.hidden) return;
+        cur = (cur + 1) % slides.length; go(cur);
+      }, 4000);
+      ['touchstart', 'mouseenter', 'pointerdown'].forEach(function (ev) { box.addEventListener(ev, function () { paused = true; }, { passive: true }); });
+      ['mouseleave'].forEach(function (ev) { box.addEventListener(ev, function () { paused = false; }); });
+      track.addEventListener('scroll', function () { var m = track.scrollLeft + track.clientWidth / 2; for (var i = 0; i < slides.length; i++) { var c = slides[i].offsetLeft + slides[i].offsetWidth / 2; if (Math.abs(c - m) < slides[i].offsetWidth / 2) { cur = i; break; } } }, { passive: true });
+      box.addEventListener('touchend', function () { setTimeout(function () { paused = false; }, 6000); }, { passive: true });
+    }
+  });
+})();
