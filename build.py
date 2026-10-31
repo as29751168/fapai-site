@@ -16,11 +16,17 @@ ADDR = ["新北市土城區金城路二段396號11樓", "桃園市桃園區莊�
 PHOTO_BASE = "https://www.104woo.com.tw/"
 
 D = json.load(open("site/data.json", encoding="utf-8"))
-def _is_new(x):
-    try: return 0 <= (datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).date() - datetime.date.fromisoformat(x.get("新增日", ""))).days <= 7
-    except Exception: return False
-# 新上架（7 天內）排最前面；其餘維持台北、新北、桃園的順序
-ITEMS = sorted(D["104"], key=lambda x: (0 if _is_new(x) else 1, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3)))
+def _age(x):
+    """屋齡（年）；預售屋視為 0；查無則回傳 None"""
+    v = (x.get("資訊") or {}).get("屋齡", "")
+    if "預售" in v: return 0.0
+    m = re.match(r"[\d.]+", v)
+    return float(m[0]) if m else None
+# 屋齡 10 年內的新房子排最前面（由新到舊）；其餘維持台北、新北、桃園的順序
+def _order(x):
+    a = _age(x)
+    return (0, a, 0) if a is not None and a <= 10 else (1, 0, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
+ITEMS = sorted(D["104"], key=_order)
 UPDATED = D["更新時間"]
 try:
     P = json.load(open("site/photos.json", encoding="utf-8"))
