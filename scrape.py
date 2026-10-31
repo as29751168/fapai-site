@@ -90,6 +90,16 @@ def track(items):
                 s0["round"], ch = rd, True
             if ch: s0["changed"] = today
         x["新增日"], x["異動日"], x["降價前"] = s0["first"], s0.get("changed", ""), s0.get("old", 0)
+    # 下架偵測：今天沒出現的物件記下 gone 日期（拍定／停拍／撤回都會從列表消失）；抓取量異常偏少時不判定，避免誤判
+    cur = {x["編號"] for x in items}
+    active = [k for k, v in seen.items() if "gone" not in v]
+    if not first_run and active and len(cur) >= 0.8 * len(active):
+        for k, v in seen.items():
+            if k not in cur and "gone" not in v: v["gone"] = today
+    for x in items:
+        v = seen[x["編號"]]; v.pop("gone", None)
+        inf = x.get("資訊") or {}
+        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", "")})
     os.makedirs("data", exist_ok=True)
     json.dump(seen, open(p, "w", encoding="utf-8"), ensure_ascii=False)
 
