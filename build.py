@@ -314,10 +314,11 @@ def hero_html():
     h += ('<section class="box team"><img src="/img/team2.jpg" alt="黃先生 Pitt 與林小姐 Anna 研究格局圖" width="583" height="800" loading="lazy" onerror="this.remove()">'
           '<div><h2>同樣價格，兩個人幫你把關</h2><ol><li><b>產權調查</b>：查清楚有沒有占用、抵押、不點交風險</li><li><b>現場勘查</b>：兩人分工看屋況與周邊</li><li><b>出價精準評估</b>：比對行情與後續成本，算出合理出價</li><li><b>一條龍服務</b>：代標、貸款、點交到交屋，一次處理</li></ol>'
           '<p><a class="btn line" href="/member#ask">委託代標留言</a> <a class="btn" href="tel:0918313888">電話洽詢</a></p></div></section>')
-    nw = new_items()[:6]
-    if nw: h += '<h2 class="sec">本週新增</h2><div class="grid">' + "".join(card(x) for x in nw) + "</div>"
-    dr = changed_items()[:6]
-    if dr: h += '<h2 class="sec">降價・降拍更新</h2><div class="grid">' + "".join(card(x) for x in dr) + "</div>"
+    allnw, alldr = new_items(), changed_items()
+    nw, dr = allnw[:12], alldr[:12]
+    more = lambda n, href: f'<p class="more"><a class="btn" href="{href}">看全部 {n} 筆 →</a></p>' if n > 12 else ""
+    if nw: h += '<h2 class="sec">本週新增</h2><div class="grid">' + "".join(card(x) for x in nw) + "</div>" + more(len(allnw), "/new")
+    if dr: h += '<h2 class="sec">降價・降拍更新</h2><div class="grid">' + "".join(card(x) for x in dr) + "</div>" + more(len(alldr), "/changes")
     wk = upcoming(30)[:8]
     if wk:
         rows = "".join(f'<tr><td>{e("%d拍" % round_of(x) if round_of(x) else "—")}</td><td>{e(x["資訊"].get("開標日期", ""))}</td><td><a href="/h/{e(x["編號"])}">{e(x["地址"])}</a></td><td class="rt">{e(x["價格"])}</td></tr>' for x in wk)
@@ -365,6 +366,12 @@ $('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''}
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
     first = next((photos(x)[0] for x in ITEMS if photos(x)), None)
     return page(f"大台北法拍屋｜台北法拍屋・新北法拍屋・桃園法拍屋｜{NAME}", f"大台北法拍屋、台北法拍屋、新北法拍屋、桃園法拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, SITE + "/og.jpg", "", hero_banner())
+
+def list_page(path, h1, desc, xs):
+    title = f"{h1}｜{len(xs)}筆｜{NAME}"
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(h1)}</nav><h1>{e(h1)}（{len(xs)}筆）</h1><p>{e(desc)}</p><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
+    ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": h1, "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
+    return page(title, desc, path, body, ld, SITE + "/og.jpg")
 
 def area_page(a, xs):
     title = f"{a}法拍屋｜{len(xs)}筆物件｜{NAME}"
@@ -519,6 +526,8 @@ if __name__ == "__main__":
             for t in TYPES:
                 if len(type_items(c, t[2])) >= 3:
                     write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
+    write("site/new.html", list_page("/new", "本週新增法拍屋", "最近 7 天新上架的法拍屋，含拍次、開標日期與底標價。", new_items())); urls.append(("/new", 0.8))
+    write("site/changes.html", list_page("/changes", "降價・降拍更新法拍屋", "最近 7 天價格下降或拍次往後的法拍屋。", changed_items())); urls.append(("/changes", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write("site/about.html", about_page()); urls.append(("/about", 0.7))
     write_learn(urls)
