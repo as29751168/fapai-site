@@ -357,8 +357,11 @@ def gone_carousel(title, es, cap=12):
 
 def results_items():
     """近 7 天（含之後日期）的拍定／停拍／撤回等開標結果；資料來自法院公告彙整"""
-    try: xs = json.load(open("data/results.json", encoding="utf-8"))["items"]
-    except Exception: return []
+    xs = []
+    for f in ("data/results.json", "data/results_manual.json"):   # 雙北：每日自動；桃園：人工更新（透明房訊需登入）
+        try: xs += json.load(open(f, encoding="utf-8"))["items"]
+        except Exception: pass
+    if not xs: return []
     t = _today(); keep = []
     for x in xs:
         m = re.match(r"(\d+)/(\d+)/(\d+)", x.get("date", ""))
