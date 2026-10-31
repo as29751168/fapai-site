@@ -146,7 +146,7 @@ def sync(items):
 
 # ---- 法院現場照（依案號直接找檔案；不需登入）----
 import os, concurrent.futures as cf
-_MONTHS = [f"{y}{m:02d}" for y in (112, 113, 114, 115) for m in range(1, 13)]
+_MONTHS = [f"{y}{m:02d}" for y in (113, 114, 115) for m in range(1, 13)]
 
 def _ok(path):
     u = BASE + "/" + urllib.parse.quote(path, safe="/")
@@ -169,15 +169,23 @@ def _all(prefix, c):
         elif n > 2 and not out: break
     return out
 
+_ALL_COURTS = ["tpd", "sld", "pcd", "tyd", "kld", "scd", "tcd", "tnd", "ksd"]
+_PLAN_CODES = ["PCD", "TPD", "SLD", "TYD", "KLD", "SCD", "TCD", "TND", "KSD"]
+
 def _probe(x):
     c = x["資訊"]["案號"]
     o = _all("wwwphoto/street/judbp/wkw", c)
     if o: return x["編號"], o
     a = x["區域"][:2]
-    for ct in (["tyd"] if a == "桃園" else ["tpd", "sld"] if a == "台北" else ["pcd", "sld", "tpd"]):
+    first = (["kld"] if c.endswith("金") else []) + (["tyd"] if a == "桃園" else ["tpd", "sld"] if a == "台北" else ["pcd", "sld", "tpd"])
+    for ct in first:
         for m in _MONTHS:
             if _ok(f"wwwphoto/street/{ct}/{m}/{c}-1.jpg"):
                 return x["編號"], _all(f"wwwphoto/street/{ct}/{m}", c)
+    # 沒有現場照時，改用透明房訊製作的平面圖（固定路徑）
+    for pc in _PLAN_CODES:
+        p = f"wwwphoto/sc4/0/{pc}/{c}_s.gif"
+        if _ok(p): return x["編號"], [p]
     return x["編號"], []
 
 def court_sync(items):
@@ -193,7 +201,7 @@ def court_sync(items):
         if t and (today - datetime.date.fromisoformat(t)).days < 7: continue
         todo.append(x)
     n = 0
-    with cf.ThreadPoolExecutor(32) as ex:
+    with cf.ThreadPoolExecutor(48) as ex:
         for k, o in ex.map(_probe, todo):
             if o: P[k[2:]] = o; miss.pop(k, None); n += 1
             else: miss[k] = today.isoformat()
