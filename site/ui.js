@@ -77,3 +77,17 @@
     ['c1', 'c2', 'c3'].forEach(function (i) { document.getElementById(i).addEventListener('input', calc); }); calc();
   }
 })();
+
+/* 防複製：禁用右鍵、選取、拖曳圖片、複製與常見儲存快捷鍵（輸入框除外）。僅能提高門檻，無法完全防止截圖或原始碼檢視。 */
+(function () {
+  function inField(t) { return t && t.closest && t.closest('input,textarea,select,[contenteditable]'); }
+  ['contextmenu', 'copy', 'cut', 'dragstart', 'selectstart'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (!inField(e.target)) e.preventDefault(); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (inField(e.target)) return;
+    var k = (e.key || '').toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && ['c', 'x', 's', 'u', 'p', 'a'].indexOf(k) > -1) e.preventDefault();
+    if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].indexOf(k) > -1)) e.preventDefault();
+  });
+})();
