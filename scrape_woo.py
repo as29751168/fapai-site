@@ -146,15 +146,20 @@ def sync(items):
 
 # ---- 法院現場照（依案號直接找檔案；不需登入）----
 import os, concurrent.futures as cf
-_MONTHS = [f"{y}{m:02d}" for y in (114, 115) for m in range(1, 13)]
+_MONTHS = [f"{y}{m:02d}" for y in (112, 113, 114, 115) for m in range(1, 13)]
 
 def _ok(path):
     u = BASE + "/" + urllib.parse.quote(path, safe="/")
-    try:
-        r = urllib.request.urlopen(urllib.request.Request(u, method="HEAD", headers={"User-Agent": "Mozilla/5.0"}), timeout=15)
-        return r.status == 200 and r.headers.get("content-type", "").startswith("image")
-    except Exception:
-        return False
+    for i in range(3):   # 連線錯誤重試；404 代表真的沒有
+        try:
+            r = urllib.request.urlopen(urllib.request.Request(u, method="HEAD", headers={"User-Agent": "Mozilla/5.0"}), timeout=20)
+            return r.status == 200 and r.headers.get("content-type", "").startswith("image")
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 403): return False
+            time.sleep(1 + i)
+        except Exception:
+            time.sleep(1 + i)
+    return False
 
 def _all(prefix, c):
     out = []
@@ -188,7 +193,7 @@ def court_sync(items):
         if t and (today - datetime.date.fromisoformat(t)).days < 7: continue
         todo.append(x)
     n = 0
-    with cf.ThreadPoolExecutor(48) as ex:
+    with cf.ThreadPoolExecutor(32) as ex:
         for k, o in ex.map(_probe, todo):
             if o: P[k[2:]] = o; miss.pop(k, None); n += 1
             else: miss[k] = today.isoformat()
