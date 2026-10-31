@@ -97,6 +97,12 @@ if __name__ == "__main__":
     data = {"更新時間": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
             "104": s104()}
     clear_images()
+    try:
+        import scrape_woo
+        data["104"], np, ne = scrape_woo.sync(data["104"])
+        print("透明房訊：照片更新", np, "件；新增物件", ne, "件")
+    except Exception as e:
+        print("透明房訊同步失敗（略過）：", e)
     track(data["104"])
     json.dump(data, open("site/data.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(len(data["104"]), "筆 104")
