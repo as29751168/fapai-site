@@ -79,7 +79,7 @@ SPEC_ORDER = ["案號", "總登記坪數", "每坪單價"]
 DETAIL_KEYS = ["銷售狀態", "格局", "社區/大樓", "屋齡", "車位", "座向", "所在樓層", "管理費", "管委會", "中庭", "電梯", "邊間", "增建", "是否凶宅", "無障礙環境", "法拍件", "拍次", "開標日期"]
 SIZE_KEYS = ["主建物", "附屬建物", "公共設施", "停車位", "土地登記總坪數", "總坪數"]
 
-CSS = """.note{color:#777;font-size:.85rem;text-align:center;margin:4px 0 14px}.cr{position:relative;margin:6px 0 4px}.crt{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px}.crt::-webkit-scrollbar{display:none}.crs{flex:0 0 88%;max-width:420px;scroll-snap-align:center;border:1px solid #d9b8a8;border-radius:14px;overflow:hidden;background:#fff;color:#222;text-decoration:none;display:block}.crh{background:#cf8570;color:#fff;text-align:center;padding:8px;font-size:1rem;letter-spacing:.03em}.cri{position:relative;aspect-ratio:4/3;background:#eee}.cri img{width:100%;height:100%;object-fit:cover;display:block}.cri .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#999}.crtg{position:absolute;right:10px;bottom:10px;background:#fff;color:#b5502f;font-weight:700;border-radius:8px;padding:5px 12px;font-size:.95rem}.crb{padding:12px 16px 14px}.crct{color:#b5654a;font-size:.92rem}.crn{font-weight:700;font-size:1.05rem;margin:6px 0 10px;min-height:2.9em;line-height:1.45}.crp{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e3cfc4;padding-top:10px}.crp span{color:#b5654a;font-weight:700}.crp b{font-size:1.4rem}.crdots{display:flex;justify-content:center;gap:9px;margin:12px 0 4px}.crdots i{width:11px;height:11px;border-radius:50%;background:#efd8cf;display:block}.crdots i.on{background:#a4442d}.crmw{text-align:center;margin:10px 0 18px}.crmore{display:inline-flex;align-items:center;justify-content:center;width:104px;height:104px;border:1px solid #cf8570;border-radius:50%;color:#cf8570;text-decoration:none;font-family:Georgia,serif;font-size:1.3rem}
+CSS = """.crx{background:#8a8f94}.crs>.crb .crp+.crp{margin-top:6px;border-top:0;padding-top:0}.note{color:#777;font-size:.85rem;text-align:center;margin:4px 0 14px}.cr{position:relative;margin:6px 0 4px}.crt{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px}.crt::-webkit-scrollbar{display:none}.crs{flex:0 0 88%;max-width:420px;scroll-snap-align:center;border:1px solid #d9b8a8;border-radius:14px;overflow:hidden;background:#fff;color:#222;text-decoration:none;display:block}.crh{background:#cf8570;color:#fff;text-align:center;padding:8px;font-size:1rem;letter-spacing:.03em}.cri{position:relative;aspect-ratio:4/3;background:#eee}.cri img{width:100%;height:100%;object-fit:cover;display:block}.cri .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#999}.crtg{position:absolute;right:10px;bottom:10px;background:#fff;color:#b5502f;font-weight:700;border-radius:8px;padding:5px 12px;font-size:.95rem}.crb{padding:12px 16px 14px}.crct{color:#b5654a;font-size:.92rem}.crn{font-weight:700;font-size:1.05rem;margin:6px 0 10px;min-height:2.9em;line-height:1.45}.crp{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e3cfc4;padding-top:10px}.crp span{color:#b5654a;font-weight:700}.crp b{font-size:1.4rem}.crdots{display:flex;justify-content:center;gap:9px;margin:12px 0 4px}.crdots i{width:11px;height:11px;border-radius:50%;background:#efd8cf;display:block}.crdots i.on{background:#a4442d}.crmw{text-align:center;margin:10px 0 18px}.crmore{display:inline-flex;align-items:center;justify-content:center;width:104px;height:104px;border:1px solid #cf8570;border-radius:50%;color:#cf8570;text-decoration:none;font-family:Georgia,serif;font-size:1.3rem}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea,select{-webkit-user-select:text;user-select:text}img{-webkit-user-drag:none;user-drag:none}
 *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#222;background:#f6f6f4;line-height:1.6}
 a{color:#1f3a4d}header.top{background:#1f3a4d;color:#fff;padding:14px 16px}header.top a{color:#fff;text-decoration:none;font-weight:700;font-size:18px}
@@ -355,6 +355,31 @@ def gone_carousel(title, es, cap=12):
     return (f'<h2 class="sec">{e(title)}（{len(es)}筆）</h2><div class="cr" data-cr><div class="crt">{slides}</div><div class="crdots"></div></div>'
             '<p class="note">物件從列表下架，可能是拍定、停拍或撤回，實際結果請以法院公告為準，歡迎來電詢問。</p>')
 
+def results_items():
+    """近 7 天（含之後日期）的拍定／停拍／撤回等開標結果；資料來自法院公告彙整"""
+    try: xs = json.load(open("data/results.json", encoding="utf-8"))["items"]
+    except Exception: return []
+    t = _today(); keep = []
+    for x in xs:
+        m = re.match(r"(\d+)/(\d+)/(\d+)", x.get("date", ""))
+        if not m: continue
+        try: d = datetime.date(int(m[1]) + 1911, int(m[2]), int(m[3]))
+        except ValueError: continue
+        if (t - d).days <= 7: keep.append((d, x))
+    return [x for d, x in sorted(keep, key=lambda z: z[0], reverse=True)]
+
+def results_carousel(title, xs, cap=12):
+    if not xs: return ""
+    slides = ""
+    for x in xs[:cap]:
+        win = f'<div class="crp"><span>拍定價</span><b>{e(x["win"])}</b></div>' if x.get("win") else ""
+        tag = "｜".join(filter(None, [x.get("round", ""), x.get("deliver", "")]))
+        cls = "crh" if x["status"] == "拍定" else "crh crx"
+        slides += (f'<div class="crs"><div class="{cls}">{e(x["date"])}｜{e(x["status"])}</div><div class="crb"><div class="crct">{e("｜".join(filter(None, [x.get("type", ""), tag])))}</div>'
+                   f'<div class="crn">{e(x["addr"])}</div><div class="crp"><span>底價</span><b>{e(x.get("base", ""))}</b></div>{win}</div></div>')
+    return (f'<h2 class="sec">{e(title)}（{len(xs)}筆）</h2><div class="cr" data-cr><div class="crt">{slides}</div><div class="crdots"></div></div>'
+            '<p class="note">開標結果依法院公告彙整，實際內容以法院公告為準。</p>')
+
 def hero_html():
     h = (f'<div class="hero"><a class="l" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群，搶先看新物件</a>'
          f'<a class="f" href="{e(LINKS["粉絲專頁"])}" target="_blank" rel="noopener">追蹤粉絲專頁</a>'
@@ -365,7 +390,7 @@ def hero_html():
     h += carousel("每週精選・10年內新屋", featured_items(), "/new-house", auto=True)
     h += carousel("本週新增", sorted(new_items(), key=date_key), "/new")
     h += carousel("降價・復拍更新", sorted(changed_items(), key=date_key), "/changes")
-    h += gone_carousel("每週拍定・停拍・撤回", gone_entries())
+    h += results_carousel("每週拍定・停拍・撤回・流標", results_items())
     wk = upcoming(30)[:8]
     if wk:
         rows = "".join(f'<tr><td>{e("%d拍" % round_of(x) if round_of(x) else "—")}</td><td>{e(x["資訊"].get("開標日期", ""))}</td><td><a href="/h/{e(x["編號"])}">{e(x["地址"])}</a></td><td class="rt">{e(x["價格"])}</td></tr>' for x in wk)

@@ -114,6 +114,14 @@ if __name__ == "__main__":
         print("法院現場照新增", scrape_woo.court_sync(data["104"]), "件")
     except Exception as e:
         print("透明房訊同步失敗（略過）：", e)
+    try:  # 每週拍定・停拍・撤回：法院開標結果文字資料（toro591，不取照片與連結）
+        import scrape_results
+        rs = scrape_results.fetch()
+        if rs:
+            json.dump({"更新時間": data["更新時間"], "items": rs}, open("data/results.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            print("開標結果", len(rs), "筆")
+    except Exception as e:
+        print("開標結果同步失敗（略過）：", e)
     try:  # 人工更正（data/overrides.json）：{編號: {欄位: 值}}，避免每日抓取又被蓋回
         ov = json.load(open("data/overrides.json", encoding="utf-8"))
         for x in data["104"]:
