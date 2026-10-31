@@ -142,3 +142,58 @@ def sync(items):
         print("他人物件照片同步失敗（略過）：", e)
     json.dump(P, open("site/photos.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     return items, pics, extra
+
+
+# ---- 法院現場照（依案號直接找檔案；不需登入）----
+import os, concurrent.futures as cf
+_MONTHS = [f"{y}{m:02d}" for y in (114, 115) for m in range(1, 13)]
+
+def _ok(path):
+    u = BASE + "/" + urllib.parse.quote(path, safe="/")
+    try:
+        r = urllib.request.urlopen(urllib.request.Request(u, method="HEAD", headers={"User-Agent": "Mozilla/5.0"}), timeout=15)
+        return r.status == 200 and r.headers.get("content-type", "").startswith("image")
+    except Exception:
+        return False
+
+def _all(prefix, c):
+    out = []
+    for n in range(1, 13):
+        p = f"{prefix}/{c}-{n}.jpg"
+        if _ok(p): out.append(p)
+        elif n > 2 and not out: break
+    return out
+
+def _probe(x):
+    c = x["資訊"]["案號"]
+    o = _all("wwwphoto/street/judbp/wkw", c)
+    if o: return x["編號"], o
+    a = x["區域"][:2]
+    for ct in (["tyd"] if a == "桃園" else ["tpd", "sld"] if a == "台北" else ["pcd", "sld", "tpd"]):
+        for m in _MONTHS:
+            if _ok(f"wwwphoto/street/{ct}/{m}/{c}-1.jpg"):
+                return x["編號"], _all(f"wwwphoto/street/{ct}/{m}", c)
+    return x["編號"], []
+
+def court_sync(items):
+    """沒有照片的物件，用案號到透明房訊找法院現場照；找不到的 7 天後再試"""
+    P = json.load(open("site/photos.json", encoding="utf-8"))
+    mp = "data/photo_miss.json"
+    miss = json.load(open(mp, encoding="utf-8")) if os.path.exists(mp) else {}
+    today = datetime.date.today()
+    todo = []
+    for x in items:
+        if P.get(x["編號"][2:]) or not x["資訊"].get("案號"): continue
+        t = miss.get(x["編號"])
+        if t and (today - datetime.date.fromisoformat(t)).days < 7: continue
+        todo.append(x)
+    n = 0
+    with cf.ThreadPoolExecutor(48) as ex:
+        for k, o in ex.map(_probe, todo):
+            if o: P[k[2:]] = o; miss.pop(k, None); n += 1
+            else: miss[k] = today.isoformat()
+    ids = {x["編號"] for x in items}
+    miss = {k: v for k, v in miss.items() if k in ids}
+    json.dump(P, open("site/photos.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    json.dump(miss, open(mp, "w", encoding="utf-8"), ensure_ascii=False)
+    return n

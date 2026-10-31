@@ -101,6 +101,7 @@ if __name__ == "__main__":
         import scrape_woo
         data["104"], np, ne = scrape_woo.sync(data["104"])
         print("透明房訊：照片更新", np, "件；新增物件", ne, "件")
+        print("法院現場照新增", scrape_woo.court_sync(data["104"]), "件")
     except Exception as e:
         print("透明房訊同步失敗（略過）：", e)
     track(data["104"])
