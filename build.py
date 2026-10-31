@@ -16,7 +16,11 @@ ADDR = ["新北市土城區金城路二段396號11樓", "桃園市桃園區莊�
 PHOTO_BASE = "https://www.104woo.com.tw/"
 
 D = json.load(open("site/data.json", encoding="utf-8"))
-ITEMS = sorted(D["104"], key=lambda x: {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
+def _is_new(x):
+    try: return 0 <= (datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).date() - datetime.date.fromisoformat(x.get("新增日", ""))).days <= 7
+    except Exception: return False
+# 新上架（7 天內）排最前面；其餘維持台北、新北、桃園的順序
+ITEMS = sorted(D["104"], key=lambda x: (0 if _is_new(x) else 1, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3)))
 UPDATED = D["更新時間"]
 try:
     P = json.load(open("site/photos.json", encoding="utf-8"))
