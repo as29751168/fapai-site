@@ -104,6 +104,12 @@ if __name__ == "__main__":
         print("法院現場照新增", scrape_woo.court_sync(data["104"]), "件")
     except Exception as e:
         print("透明房訊同步失敗（略過）：", e)
+    try:  # 人工更正（data/overrides.json）：{編號: {欄位: 值}}，避免每日抓取又被蓋回
+        ov = json.load(open("data/overrides.json", encoding="utf-8"))
+        for x in data["104"]:
+            x.update(ov.get(x["編號"], {}))
+    except Exception as e:
+        print("overrides 略過：", e)
     track(data["104"])
     json.dump(data, open("site/data.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(len(data["104"]), "筆 104")
