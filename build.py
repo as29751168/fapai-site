@@ -127,6 +127,7 @@ details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-w
 .hin .tm{display:block;margin:0 auto 6px;height:230px;width:auto;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 @media(min-width:900px){.hin{text-align:left;padding-right:380px;min-height:420px}.hin .tm{position:absolute;right:24px;top:24px;height:380px;margin:0}.cta2,.stats,.qk{justify-content:flex-start}}
 .team{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.team img{width:230px;max-width:100%;height:auto;border-radius:16px}.team ol{flex:1;min-width:230px;margin:0;padding-left:20px}.team li{margin:6px 0}
+@media(max-width:640px){header.top a.logo{font-size:16px;letter-spacing:0;white-space:nowrap}header.top a.tel{display:none}.hd{gap:10px}.fab{right:10px;bottom:12px;gap:8px}.fab a{width:44px;height:44px;border-radius:12px;font-size:12px}.fab svg{width:22px;height:22px}body{padding-bottom:70px}}
 @media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}"""
 
 ORG = {
@@ -315,7 +316,7 @@ def hero_banner():
     return (f'<section class="hero2">{svg}<div class="hin"><img class="tm" src="/brand/team1.jpg" alt="黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問" width="582" height="800" onerror="this.remove()"><p class="eyebrow">透明房訊｜法拍屋查詢與代標</p><h1>法拍怕踩雷？<br>專業代標，幫你標到對的房子</h1>'
             f'<p class="sub">兩個人把關，查得清、標得穩</p>'
             f'<div class="cta2"><a class="b1" href="#list">瀏覽全部物件</a><a class="b2" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></div>'
-            f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span><span><b>代標</b>・產權調查・貸款諮詢</span></div>'
+            f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span></div>'
             f'<div class="qk"><button type="button" data-c="台北">台北</button><button type="button" data-c="新北">新北</button><button type="button" data-c="桃園">桃園</button><button type="button" data-r="3+">第3拍以上</button></div></div></section>')
 
 def carousel(title, xs, href, cap=12, auto=False):
