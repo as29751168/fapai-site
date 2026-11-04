@@ -123,3 +123,15 @@ def test_real_data_import_idempotent(db):
     r1 = C.import_104(db, items); n = count(db, "cases"); r2 = C.import_104(db, items)
     assert count(db, "cases") == n and r2["new"] == 0
     assert n <= len(items)
+
+def test_address_key_same_across_sources():
+    assert C.norm_addr("濱江市場【榮星花園】龍江路412巷6號2樓") == C.norm_addr("台北市中山區龍江路412巷6號2樓")
+    assert C.norm_addr("八德重劃區【益騏福爾摩沙】廣興三路96號2樓") == C.norm_addr("桃園市八德區廣興三路96號2樓")
+    assert C.norm_addr("桃園市蘆竹區南竹路二段5號8樓") == "南竹路二段5號8樓"
+
+def test_package_merges_with_site_case(db):
+    x = item("HH2505310", case="115職二98金", addr="x"); x["地址"] = "八德重劃區【益騏福爾摩沙】廣興三路96號2樓"
+    C.import_104(db, [x]); n = count(db, "cases")
+    f = C._fields_from_104(x); f["address"] = "桃園市八德區廣興三路96號2樓"; f["object_key"] = C.norm_addr(f["address"])
+    cid, st = C.upsert_case(db, f, "上架包", "115職二98金")
+    assert count(db, "cases") == n and st in ("same", "changed")

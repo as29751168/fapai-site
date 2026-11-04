@@ -45,8 +45,10 @@ def official_price_for_round(record_text, rnd):
 
 
 def norm_addr(a):
+    """物件識別：取「路名最後2字＋路／街／大道＋門牌」之後的部分，去掉縣市區與社區名，讓不同來源的同一地址得到相同鍵"""
     a = re.sub(r"【[^】]*】|\s+", "", a or "")
-    return re.sub(r"^.*?(?=[一-鿿]+(?:路|街|大道))", "", a) or a
+    m = re.search(r"(?:路|街|大道)(?=(?:[一-鿿]段)?\d)", a)
+    return a[max(0, m.start() - 2):] if m else a
 
 
 def ping(v):
