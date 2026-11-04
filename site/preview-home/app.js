@@ -88,6 +88,25 @@
     $('#inquiry-note').focus({preventScroll:true});
   });
 
+  const BROWSE = {
+    cities: { '台北市': '台北', '新北市': '新北', '桃園市': '桃園' },
+    budgets: { '1,000 萬元以下': '0-1000', '1,000–2,000 萬元': '1000-2000', '2,000–3,000 萬元': '2000-3000', '3,000 萬元以上': '3000-1000000' },
+    types: { '電梯大樓': ['大樓,華廈', '電梯大樓'], '透天住宅': ['透天', '透天住宅'], '公寓': ['公寓', '公寓'], '店面／辦公': ['店面,商辦,辦公室', '店面／辦公'] }
+  };
+  function updateBrowse() {
+    const q = new URLSearchParams();
+    q.set('c', BROWSE.cities[selectedRegion] || '');
+    const p = BROWSE.budgets[$('#property-budget').value];
+    if (p) q.set('p', p);
+    const t = BROWSE.types[$('#property-type').value];
+    if (t) { q.set('t', t[0]); q.set('tl', t[1]); }
+    $('#browse-property').href = '/?' + q.toString() + '#list';
+  }
+  $$('[data-region]').forEach((b) => b.addEventListener('click', updateBrowse));
+  $('#property-budget').addEventListener('change', updateBrowse);
+  $('#property-type').addEventListener('change', updateBrowse);
+  updateBrowse();
+
   const promoActive = () => Date.now() < Date.parse('2027-01-01T00:00:00+08:00');
   function updateRates() {
     const offer = promoActive();

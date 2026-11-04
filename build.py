@@ -421,17 +421,17 @@ def index_page():
     al = "".join(f'<a href="/area/{slug(a)}">{e(a)}（{len(v)}）</a>' for a, v in sorted(areas.items(), key=lambda t: ({"台北": 0, "新北": 1, "桃園": 2}.get(t[0][:2], 3), t[0])))
     faq = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in FAQ)
     js = """<script>(function(){var $=function(i){return document.getElementById(i)},g=$('g'),n=$('n'),cards=[].slice.call(g.children),orig=cards.slice();
-var F=['q','c','a','y','r','j','pr','s'];
+var F=['q','c','a','y','r','j','pr','s'],TY=[],TL='',OVR=null;
 function rk(k){return k.indexOf('台北')==0?0:k.indexOf('新北')==0?1:k.indexOf('桃園')==0?2:3}
 function areas(){var c=$('c').value,seen={},o='<option value="">地區不拘</option>';cards.forEach(function(d){if((!c||d.dataset.c===c)&&!seen[d.dataset.a]){seen[d.dataset.a]=1}});Object.keys(seen).sort(function(a,b){return rk(a)-rk(b)||(a<b?-1:1)}).forEach(function(k){o+='<option>'+k+'</option>'});var cur=$('a').value;$('a').innerHTML=o;if(seen[cur])$('a').value=cur}
-function f(){var k=$('q').value.trim(),c=$('c').value,a=$('a').value,y=$('y').value,r=$('r').value,j=$('j').value,pr=$('pr').value,s=$('s').value,cnt=0,lo=0,hi=1e9;if(pr){var p=pr.split('-');lo=+p[0]*10000;hi=+p[1]*10000}
-cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:r==='3+'?rr>=3:rr===+r))&&(!j||D.j===j)&&(!pr||(p>=lo&&p<hi));d.style.display=ok?'':'none';if(ok)cnt++});
-var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'}
+function f(){var k=$('q').value.trim(),c=$('c').value,a=$('a').value,y=$('y').value,r=$('r').value,j=$('j').value,pr=$('pr').value,s=$('s').value,cnt=0,lo=0,hi=1e9;if(pr){var p=pr.split('-');lo=+p[0]*10000;hi=+p[1]*10000}else if(OVR){lo=OVR[0]*10000;hi=OVR[1]*10000}
+cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:r==='3+'?rr>=3:rr===+r))&&(!j||D.j===j)&&((!pr&&!OVR)||(p>=lo&&p<hi))&&(!TY.length||TY.some(function(t){return D.y.indexOf(t)===0}));d.style.display=ok?'':'none';if(ok)cnt++});
+var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'+(TY.length?'（類型：'+TL+'）':'')}
 [].forEach.call(document.querySelectorAll('.qk button'),function(b){b.addEventListener('click',function(){if(b.dataset.c){$('c').value=b.dataset.c;areas()}if(b.dataset.r){$('r').value=b.dataset.r;chipsOn()}f();$('list').scrollIntoView({behavior:'smooth'})})});
 var rc=$('rc');function chipsOn(){[].forEach.call(rc.querySelectorAll('button'),function(b){b.className=b.dataset.v===$('r').value?'on':''})}rc.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('r').value=b.dataset.v;chipsOn();f()});
 var go=$('go');function done(){if(document.activeElement)document.activeElement.blur();f();$('n').scrollIntoView({behavior:'smooth',block:'start'})}go.addEventListener('click',done);$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();done()}});
-F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();f()})});
-$('rs').addEventListener('click',function(){F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});areas();chipsOn();f()})();</script>"""
+F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();if(i==='pr')OVR=null;if(i==='y'){TY=[];TL=''}f()})});
+$('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();f()})();</script>"""
     body = (f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
             + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>' +
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
