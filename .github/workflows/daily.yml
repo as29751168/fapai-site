@@ -1,8 +1,12 @@
 name: 每日更新法拍資料
 on:
   schedule:
-    - cron: "0 22 * * *"
+    - cron: "0 3 * * *"     # 台北時間 11:00
+    - cron: "30 8 * * *"    # 台北時間 16:30（當天開標結果）
   workflow_dispatch:
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
