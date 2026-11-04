@@ -130,6 +130,12 @@ if __name__ == "__main__":
             print("桃園開標結果", len(ty), "筆")
     except Exception as e:
         print("桃園開標結果同步失敗（略過）：", e)
+    try:  # 用透明房訊公開的每日開標清單校正拍次、日期、底價與狀態
+        import scrape_public
+        data["104"], st = scrape_public.apply(data["104"])
+        print("公開資料校正：", {k: v for k, v in st.items() if k != "ids"})
+    except Exception as e:
+        print("公開資料校正失敗（略過）：", e)
     try:  # 人工更正（data/overrides.json）：{編號: {欄位: 值}}，避免每日抓取又被蓋回
         ov = json.load(open("data/overrides.json", encoding="utf-8"))
         for x in data["104"]:

@@ -24,6 +24,7 @@ def _age(x):
     return float(m[0]) if m else None
 # 屋齡 10 年內的新房子排最前面（由新到舊）；其餘維持台北、新北、桃園的順序
 def _order(x):
+    if x.get("資訊", {}).get("銷售狀態") == "待確認": return (2, 0, 0)   # 開標日期已過、待確認者排最後
     a = _age(x)
     return (0, a, 0) if a is not None and a <= 10 else (1, 0, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
 ITEMS = sorted(D["104"], key=_order)
