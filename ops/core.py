@@ -121,8 +121,10 @@ def import_104(db, items, court_of=None):
 
 
 def set_estimated_price(db, case_id, price, who):
+    cur = db.execute("SELECT estimated_price FROM cases WHERE case_id=?", (case_id,)).fetchone()[0]
+    if cur == price: return                      # 沒變就不重複寫紀錄
     db.execute("UPDATE cases SET estimated_price=? WHERE case_id=?", (price, case_id))
-    db.execute("INSERT INTO case_history (case_id,at,field,old,new,version,source) VALUES (?,?,?,?,?,0,?)", (case_id, now(), "estimated_price", None, str(price), "人工:" + who))
+    db.execute("INSERT INTO case_history (case_id,at,field,old,new,version,source) VALUES (?,?,?,?,?,0,?)", (case_id, now(), "estimated_price", None if cur is None else str(cur), str(price), "人工:" + who))
     db.commit()
 
 
