@@ -122,6 +122,14 @@ if __name__ == "__main__":
             print("開標結果", len(rs), "筆")
     except Exception as e:
         print("開標結果同步失敗（略過）：", e)
+    try:  # 桃園開標結果：透明房訊公開頁（不需登入）
+        import scrape_results
+        ty = [x for x in scrape_results.fetch_court() if x["status"] != "待標" and not x["land"]]
+        if ty:
+            json.dump({"更新時間": data["更新時間"], "items": ty}, open("data/results_tyd.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            print("桃園開標結果", len(ty), "筆")
+    except Exception as e:
+        print("桃園開標結果同步失敗（略過）：", e)
     try:  # 人工更正（data/overrides.json）：{編號: {欄位: 值}}，避免每日抓取又被蓋回
         ov = json.load(open("data/overrides.json", encoding="utf-8"))
         for x in data["104"]:

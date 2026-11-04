@@ -359,10 +359,18 @@ def gone_carousel(title, es, cap=12):
 def results_items():
     """近 7 天（含之後日期）的拍定／停拍／撤回等開標結果；資料來自法院公告彙整"""
     xs = []
-    for f in ("data/results.json", "data/results_manual.json"):   # 雙北：每日自動；桃園：人工更新（透明房訊需登入）
+    for f in ("data/results.json", "data/results_tyd.json"):   # 雙北（toro591）＋桃園（透明房訊公開頁），每日自動更新
         try: xs += json.load(open(f, encoding="utf-8"))["items"]
         except Exception: pass
     if not xs: return []
+    # 桃園流標很多（多為土地）：只保留本站有上架的物件；拍定／停拍／撤回全部保留
+    site = [re.sub(r"[\s　]", "", x["地址"]) for x in ITEMS]
+    def on_site(x):
+        m = re.search(r"([\u4e00-\u9fff]+(?:路|街|道)[^號]*號)", x.get("addr", ""))
+        k = m[1] if m else ""
+        k = re.sub(r"^.*?[區鄉鎮市](?=.{2,}[路街道])", "", k) if k else ""
+        return bool(k) and any(k in a for a in site)
+    xs = [x for x in xs if x.get("status") != "流標" or on_site(x)]
     t = _today(); keep = []
     for x in xs:
         m = re.match(r"(\d+)/(\d+)/(\d+)", x.get("date", ""))
@@ -372,7 +380,7 @@ def results_items():
         if (t - d).days <= 7: keep.append((d, x))
     return [x for d, x in sorted(keep, key=lambda z: z[0], reverse=True)]
 
-def results_carousel(title, xs, cap=12):
+def results_carousel(title, xs, cap=40):
     if not xs: return ""
     slides = ""
     for x in xs[:cap]:
