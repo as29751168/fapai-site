@@ -70,3 +70,9 @@ html{scroll-padding-top:96px}.header-inner{height:78px}.brand-type small{font-si
 
 h1,h2,h3{text-wrap:balance}
 @media(max-width:700px){.step-detail h3{font-size:25px;line-height:1.7}.step-detail{scroll-margin-top:96px}.check-list{gap:13px}.check-list li:before{font-size:14px;top:1px}}
+
+/* 物件入口按鈕：兩顆皆為明確按鈕，手機直向全寬 */
+.finder-actions{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+.finder-actions .button{flex:1 1 220px;min-height:52px;font-size:16px;justify-content:space-between}
+.finder-actions .button-outline{border-color:#aebcc5;color:var(--navy)}
+@media(max-width:700px){.finder-actions{flex-direction:column;flex-wrap:wrap}.finder-actions .button{flex:none;width:100%}}
