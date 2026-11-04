@@ -129,7 +129,51 @@ details{border-bottom:1px solid #eee;padding:8px 0}summary{cursor:pointer;font-w
 @media(min-width:900px){.hin{text-align:left;padding-right:380px;min-height:420px}.hin .tm{position:absolute;right:24px;top:24px;height:380px;margin:0}.cta2,.stats,.qk{justify-content:flex-start}}
 .team{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.team img{width:230px;max-width:100%;height:auto;border-radius:16px}.team ol{flex:1;min-width:230px;margin:0;padding-left:20px}.team li{margin:6px 0}
 @media(max-width:640px){header.top a.logo{font-size:16px;letter-spacing:0;white-space:nowrap}header.top a.tel{display:none}.hd{gap:10px}.fab{right:10px;bottom:12px;gap:8px}.fab a{width:44px;height:44px;border-radius:12px;font-size:12px}.fab svg{width:22px;height:22px}body{padding-bottom:70px}}
-@media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}"""
+@media(max-width:640px){h1{font-size:19px}.hero2 h1{font-size:26px}.hd nav{display:none}.hd{justify-content:space-between}.hin{padding:40px 14px 30px}.tbl .rt{display:none}}
+/* ===== 新版外觀：沿用新首頁的深藍、香檳金、襯線標題 ===== */
+:root{--navy:#18354b;--navy-deep:#112a3e;--ink:#233e50;--muted:#637581;--gold:#a78b5c;--gold-light:#d9c39c;--paper:#f8f7f3;--tint:#edf2f4;--line:#dce3e5}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:#fff;color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:var(--navy)}
+main{max-width:1200px;padding:28px 24px 40px}
+h1,h2,h3{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;color:var(--navy);letter-spacing:.04em}
+h1{font-size:30px;line-height:1.5}h2{font-size:22px}
+.lh{margin:8px 0 6px}.ls{color:var(--muted);font-size:15px;margin:0 0 18px}
+header.top{border-bottom:1px solid #edf0f1;background:#fffffff5;backdrop-filter:blur(14px)}
+.hd{max-width:1200px;padding:0 24px;height:78px;gap:22px}
+header.top a.logo{font-size:21px;letter-spacing:.13em;color:var(--navy)}.logo i{color:var(--gold)}
+.hd nav{gap:28px}.hd nav a{font-size:14px;color:var(--ink);letter-spacing:.03em}.hd nav a:hover{color:var(--gold)}
+header.top a.tel{background:transparent;color:var(--navy);border:1px solid #bfaa87;border-radius:3px;padding:9px 16px}
+.lg{background:var(--gold-light);color:var(--navy)!important;border-radius:3px;padding:10px 16px;font-weight:650}
+.mb{border:1px solid var(--line);border-radius:3px;color:var(--navy)}
+.box{border:1px solid var(--line);border-radius:3px;box-shadow:none;padding:22px}
+.tag{background:var(--tint);color:var(--navy);border-radius:2px}
+.price{color:var(--navy);font-family:"Noto Serif TC","Songti TC",serif}
+h2.sec{font-size:26px;text-align:left;color:var(--navy);border:0;background:none;padding:0;margin:44px 0 18px}
+.chips{gap:8px;margin:14px 0}.chips button{border:1px solid #c9d4d9;border-radius:3px;color:var(--navy);padding:9px 16px;min-height:44px;transition:background .15s,color .15s}.chips button:hover{background:var(--tint)}.chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.bar{gap:10px;margin:14px 0 8px}.bar input,.bar select{border:1px solid #cfd9de;border-radius:3px;min-height:46px;color:var(--ink)}.bar input:focus,.bar select:focus{outline:0;border-color:var(--gold)}
+.bar button{border:1px solid #aebcc5;border-radius:3px;color:var(--navy);min-height:46px;padding:0 18px;transition:background .15s}.bar button:hover{background:var(--tint)}.bar #go{background:var(--navy);border-color:var(--navy);color:#fff}
+#n{color:var(--muted);font-size:14px;margin:14px 0 14px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px}
+.card{border:1px solid var(--line);border-radius:3px;box-shadow:none;content-visibility:auto;contain-intrinsic-size:auto 380px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(24,53,75,.10);border-color:#c9b995}
+.ch{background:var(--paper);color:var(--navy);border-bottom:1px solid var(--line);font-family:inherit;font-size:13px;letter-spacing:.06em;padding:9px 10px}
+.rd2{background:var(--navy);color:#fff;border-radius:2px;box-shadow:none;font-size:13px;letter-spacing:.05em;padding:4px 10px}
+.card .b{padding:14px 16px 16px}.card .m{color:var(--muted);font-size:13px}.card .b h3{font-size:16px;line-height:1.55;letter-spacing:.03em}
+.card .pr{border-top:1px solid var(--line);color:var(--gold)}.card .pr b{color:var(--navy);font-size:21px}
+.btn{border-radius:3px;background:var(--navy)}.btn.line{background:var(--gold-light);color:var(--navy)!important}
+.gb{background:var(--paper);border:1px solid var(--line);border-radius:3px}.gb .btn.line{margin:0}
+.cta{border-top:1px solid var(--line)}.cta a,.cta button{border-radius:3px}.cta .l{background:var(--gold-light);color:var(--navy)}.cta .t{background:var(--navy)}
+.fab a{background:var(--navy);border-radius:3px;box-shadow:0 4px 14px rgba(17,42,62,.22)}.fab a.l{background:var(--gold-light);color:var(--navy)}.fab svg{fill:#fff}
+#dr .pn{background:var(--navy)}
+summary{font-weight:550}details{border-bottom:1px solid var(--line)}
+footer{background:var(--navy-deep);color:#9fb0bb;text-align:left;padding:30px 24px;font-size:12px;line-height:1.9}
+.areas a{color:var(--navy);border-bottom:1px solid #d9c9a8;text-decoration:none;margin-right:12px}
+@media(max-width:640px){main{padding:20px 16px 32px}.hd{padding:0 16px;height:68px}header.top a.logo{font-size:17px;letter-spacing:.06em}h1{font-size:24px}.grid{grid-template-columns:1fr;gap:16px}.bar input,.bar select,.bar button{font-size:16px}.chips button{font-size:15px}footer{padding:26px 16px 90px}}
+header.top a.lg{font-size:14px;font-weight:650;letter-spacing:.03em}
+.tg{border-radius:2px!important;font-size:12px!important;letter-spacing:.04em}.tg.l{background:var(--gold)!important}.tg.r{background:#9c3b32!important}
+@media(max-width:640px){.bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bar #q,.bar #go{grid-column:1/-1}.bar select,.bar button{width:100%;min-width:0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}}"""
 
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
@@ -164,7 +208,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/#list">物件列表</a><a href="/#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
@@ -412,7 +456,7 @@ def hero_html():
     if top: h += '<h2 class="sec">第 3 拍以上精選</h2><div class="grid">' + "".join(card(x) for x in top) + "</div>"
     return h
 
-def index_page():
+def index_page(list_mode=False):
     cities = sorted({area_of(x)[:2] for x in ITEMS}, key=lambda c: ({"台北": 0, "新北": 1, "桃園": 2}.get(c, 3), c))
     types = sorted({x["類型"] for x in ITEMS})
     areas = {}
@@ -432,8 +476,9 @@ var rc=$('rc');function chipsOn(){[].forEach.call(rc.querySelectorAll('button'),
 var go=$('go');function done(){if(document.activeElement)document.activeElement.blur();f();$('n').scrollIntoView({behavior:'smooth',block:'start'})}go.addEventListener('click',done);$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();done()}});
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();if(i==='pr')OVR=null;if(i==='y'){TY=[];TL=''}f()})});
 $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();f()})();</script>"""
-    body = (f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>'
-            + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>' +
+    lead = (f'<h1 class="lh">全部法拍屋物件</h1><p class="ls">共 {len(ITEMS)} 筆，含拍次、開標日期、底標價與法院筆錄，每日更新。</p><div id="list"></div>' if list_mode else
+            f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
+    body = (lead +
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
             f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
             f'<button type="button" data-v="3">第3拍（{sum(1 for x in ITEMS if round_of(x)==3)}）</button><button type="button" data-v="4">第4拍以上（{sum(1 for x in ITEMS if round_of(x)>=4)}）</button></div>'
@@ -445,12 +490,12 @@ $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(funct
             f'<select id="s" aria-label="排序"><option value="">預設（雙北優先）</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
             f'<div id="n" class="m"></div><div class="grid" id="g">{"".join(card(x) for x in ITEMS)}</div>'
             f'<section class="box areas" id="areas"><h2>依地區找法拍屋</h2>' + "".join(f'<a href="/{c[0]}"><b>{e(c[3])}</b></a>' for c in CITIES) + f'<br>{al}</section>'
-            f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + extras_index() + contact_box() + js + GATE_JS)
+            + (contact_box() if list_mode else f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + extras_index() + contact_box()) + js + GATE_JS)
     ld = [ORG, {"@context": "https://schema.org", "@type": "WebSite", "name": NAME, "url": SITE + "/", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]},
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
     first = next((photos(x)[0] for x in ITEMS if photos(x)), None)
-    return page(f"大台北法拍屋｜台北法拍屋・新北法拍屋・桃園法拍屋｜{NAME}", f"大台北法拍屋、台北法拍屋、新北法拍屋、桃園法拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/", body, ld, SITE + "/og.jpg", "", hero_banner())
+    return page(f"大台北法拍屋｜台北法拍屋・新北法拍屋・桃園法拍屋｜{NAME}", f"大台北法拍屋、台北法拍屋、新北法拍屋、桃園法拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/list" if list_mode else "/", body, ld, SITE + "/og.jpg", "", "" if list_mode else hero_banner())
 
 def list_page(path, h1, desc, xs):
     title = f"{h1}｜{len(xs)}筆｜{NAME}"
@@ -598,7 +643,8 @@ exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/index.html", index_page())
-    urls = [("/", 1.0), ("/member", 0.5)]
+    write("site/list.html", index_page(True))
+    urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8))
     areas = {}

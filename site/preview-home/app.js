@@ -100,7 +100,7 @@
     if (p) q.set('p', p);
     const t = BROWSE.types[$('#property-type').value];
     if (t) { q.set('t', t[0]); q.set('tl', t[1]); }
-    $('#browse-property').href = '/?' + q.toString() + '#list';
+    $('#browse-property').href = '/list?' + q.toString();
   }
   $$('[data-region]').forEach((b) => b.addEventListener('click', updateBrowse));
   $('#property-budget').addEventListener('change', updateBrowse);
