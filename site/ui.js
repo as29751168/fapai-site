@@ -60,7 +60,7 @@
       '<a href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">Google 地圖</a>' +
       '<a href="' + share + '" target="_blank" rel="noopener">分享到 LINE</a></div>' +
       '<h2 style="font-size:16px">貸款試算（可自行調整）</h2><div class="calc">' +
-      '<div><label>貸款成數 %</label><input id="c1" type="number" value="70" min="0" max="100"></div>' +
+      '<div><label>貸款成數 %</label><input id="c1" type="number" value="80" min="0" max="100"></div>' +
       '<div><label>年利率 %</label><input id="c2" type="number" value="2.5" step="0.01"></div>' +
       '<div><label>年限（年）</label><input id="c3" type="number" value="30" min="1" max="40"></div></div>' +
       '<div class="res" id="cr"></div><div class="note">試算僅供參考，實際成數、利率與核貸結果依銀行審核為準；另有法拍規費與稅費需自行評估。</div>';
