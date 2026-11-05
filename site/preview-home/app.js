@@ -128,7 +128,12 @@
     $('#message-review').hidden = false;
     $('#copy-status').textContent = '';
     $('#copy-message').textContent = '複製訊息';
+    $('#send-line').href = 'https://line.me/R/msg/text/?' + encodeURIComponent($('#inquiry-message').value);
   }
+  $('#send-line').addEventListener('click', () => {
+    try { navigator.clipboard && window.isSecureContext && navigator.clipboard.writeText($('#inquiry-message').value); } catch {}
+    $('#copy-status').textContent = '已開啟 LINE 並複製訊息。選擇「林小姐 Anna」按傳送；若沒看到她，請先加好友再貼上。';
+  });
   $('#inquiry-form').addEventListener('submit', (event) => { event.preventDefault(); buildInquiry(); $('#inquiry-message').focus({preventScroll:true}); $('#message-review').scrollIntoView({behavior:motion,block:'nearest'}); });
   $('#copy-message').addEventListener('click', async () => {
     const field = $('#inquiry-message');
@@ -142,4 +147,13 @@
       $('#copy-status').textContent = '請長按或按 Ctrl/Cmd+C 複製已選取的文字，再貼到 LINE。';
     }
   });
+})();
+
+(function () {
+  const bar = document.querySelector('.mobile-contact');
+  const target = document.getElementById('contact');
+  if (!bar || !target || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver((entries) => {
+    entries.forEach((e) => bar.classList.toggle('is-hidden', e.isIntersecting));
+  }, { rootMargin: '0px 0px -20% 0px' }).observe(target);
 })();
