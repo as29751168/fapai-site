@@ -140,7 +140,7 @@
       if (!navigator.clipboard || !window.isSecureContext) throw new Error('clipboard_unavailable');
       await navigator.clipboard.writeText(field.value);
       $('#copy-message').textContent = '已複製 ✓';
-      $('#copy-status').textContent = '已複製。開啟 Anna LINE，貼上後即可由你送出。';
+      $('#copy-status').textContent = '已複製。開啟 LINE@，貼上後即可由你送出。';
     } catch {
       field.focus(); field.select(); field.setSelectionRange(0, field.value.length);
       $('#copy-status').textContent = '請長按或按 Ctrl/Cmd+C 複製已選取的文字，再貼到 LINE。';
