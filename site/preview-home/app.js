@@ -156,3 +156,78 @@
     entries.forEach((e) => bar.classList.toggle('is-hidden', e.isIntersecting));
   }, { rootMargin: '0px 0px -20% 0px' }).observe(target);
 })();
+
+/* ===== 動態：開標倒數、即時符合筆數、記住上次條件 ===== */
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem('fp_last') || 'null'); } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem('fp_last', JSON.stringify(v)); } catch (e) {} }
+  };
+
+  // 開標倒數
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  document.querySelectorAll('.live-open[data-open]').forEach((el) => {
+    if (!el.dataset.open) return;
+    const d = new Date(el.dataset.open + 'T00:00:00');
+    const n = Math.round((d - today) / 86400000);
+    if (n === 0) el.textContent = '今日開標';
+    else if (n === 1) el.textContent = '明日開標';
+    else if (n > 1 && n <= 14) el.textContent = n + ' 天後開標';
+    else if (n < 0) el.textContent = '開標日已過，請洽最新拍次';
+    if (n >= 0 && n <= 3) el.classList.add('is-soon');
+  });
+
+  // 即時符合筆數（與 /list 篩選規則一致）
+  let IDX = [];
+  try { IDX = JSON.parse($('#live-index').textContent); } catch (e) {}
+  const CITY = { '台北市': '台北', '新北市': '新北', '桃園市': '桃園' };
+  const BUD = { '1,000 萬元以下': [0, 1000], '1,000–2,000 萬元': [1000, 2000], '2,000–3,000 萬元': [2000, 3000], '3,000 萬元以上': [3000, 1e6] };
+  const TYPE = { '電梯大樓': ['大樓', '華廈'], '透天住宅': ['透天'], '公寓': ['公寓'], '店面／辦公': ['店面', '商辦', '辦公室'] };
+  const btn = $('#browse-property'), hint = $('#match-hint');
+  function region() { const b = document.querySelector('[data-region][aria-pressed="true"]'); return b ? b.dataset.region : '台北市'; }
+  function count(withFilters) {
+    const c = CITY[region()], bd = BUD[$('#property-budget').value], ty = TYPE[$('#property-type').value];
+    return IDX.filter((r) => r[0] === c && (!withFilters || ((!bd || (r[2] >= bd[0] && r[2] < bd[1])) && (!ty || ty.indexOf(r[1]) > -1)))).length;
+  }
+  function label() {
+    const parts = [CITY[region()]];
+    if (BUD[$('#property-budget').value]) parts.push($('#property-budget').value);
+    if (TYPE[$('#property-type').value]) parts.push($('#property-type').value);
+    return parts.join('・');
+  }
+  function refresh() {
+    if (!btn || !IDX.length) return;
+    const n = count(true), all = count(false);
+    if (n > 0) {
+      btn.innerHTML = '看 <b>' + n + '</b> 筆物件 <span aria-hidden="true">↗</span>';
+      hint.className = 'match-hint';
+      hint.innerHTML = label() + '：目前有 <b>' + n + '</b> 筆符合';
+    } else {
+      btn.innerHTML = '看' + CITY[region()] + '全部 ' + all + ' 筆 <span aria-hidden="true">↗</span>';
+      hint.className = 'match-hint is-zero';
+      hint.textContent = '這組條件目前沒有案件，可放寬預算或類型，或先看' + CITY[region()] + '全部。';
+      btn.href = '/list?c=' + CITY[region()];
+    }
+  }
+  ['change'].forEach((ev) => { $('#property-budget').addEventListener(ev, refresh); $('#property-type').addEventListener(ev, refresh); });
+  document.querySelectorAll('[data-region]').forEach((b) => b.addEventListener('click', refresh));
+
+  // 記住上次條件
+  function save(href, text) { store.set({ href: href, text: text, region: region(), budget: $('#property-budget').value, type: $('#property-type').value }); }
+  if (btn) btn.addEventListener('click', () => save(btn.getAttribute('href'), label()));
+  document.querySelectorAll('.live-chips a:not(.chip-all)').forEach((a) => a.addEventListener('click', () => store.set({ href: a.getAttribute('href'), text: a.textContent.replace(/\d+$/, ''), region: a.textContent.replace(/\d+$/, '') + '市', budget: '尚未決定', type: '不限類型' })));
+  const last = store.get(), link = $('#resume-link');
+  if (last && last.href && link) {
+    link.href = last.href;
+    link.textContent = '繼續看上次的條件：' + last.text + ' →';
+    link.hidden = false;
+    const rb = document.querySelector('[data-region="' + last.region + '"]');
+    if (rb) rb.click();
+    if (last.budget) $('#property-budget').value = last.budget;
+    if (last.type) $('#property-type').value = last.type;
+    $('#property-budget').dispatchEvent(new Event('change'));
+    $('#property-type').dispatchEvent(new Event('change'));
+  }
+  refresh();
+})();

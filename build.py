@@ -638,6 +638,77 @@ def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
 
+# ---------- 新首頁（preview-home）動態區塊：隨每日資料自動更新 ----------
+def _open_date(x):
+    m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", x.get("資訊", {}).get("開標日期", ""))
+    if not m: return ""
+    try: return datetime.date(int(m.group(1)) + 1911, int(m.group(2)), int(m.group(3))).isoformat()
+    except ValueError: return ""
+
+def _live_pick(n=6):
+    """本週新增優先，台北／新北／桃園各取兩筆（需有照片）；不足再用 7 天內開標補滿"""
+    pool = [x for x in new_items() if photos(x) and _rank(x) < 3]
+    pool.sort(key=lambda x: (x.get("新增日", ""), ), reverse=True)
+    out, per = [], {}
+    for x in pool:
+        c = x["區域"][:2]
+        if per.get(c, 0) < 2:
+            out.append(x); per[c] = per.get(c, 0) + 1
+    for x in pool + [y for y in upcoming(7) if photos(y) and _rank(y) < 3]:
+        if len(out) >= n: break
+        if x not in out: out.append(x)
+    out = out[:n]
+    out.sort(key=lambda x: (_rank(x), x.get("新增日", "")))
+    return out
+
+def _live_card(x):
+    inf = x.get("資訊", {})
+    ph = photos(x)
+    od = _open_date(x)
+    price = re.sub(r"^售", "", x["價格"])
+    old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x.get("原價") else ""
+    tag = "新上架" if _within(x.get("新增日", "")) else ""
+    r = round_of(x)
+    meta = "｜".join(filter(None, [x["區域"].split("-")[0], x["類型"].split("_")[0], x["格局坪數"]]))
+    return (f'<a class="live-card" href="/h/{e(x["編號"])}">'
+            f'<div class="live-img"><img loading="lazy" decoding="async" width="400" height="300" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">'
+            f'{"<span class=live-tag>"+tag+"</span>" if tag else ""}</div>'
+            f'<div class="live-body"><p class="live-open" data-open="{od}">{e(re.sub(r"^\d+/", "", inf.get("開標日期", "")))} 開標</p>'
+            f'<h3>{e(x["地址"])}</h3><p class="live-meta-line">{e(meta)}{("｜第%d拍" % r) if r else ""}</p>'
+            f'<p class="live-price"><span>底價</span><b>{old}{e(price)}</b></p></div></a>')
+
+def home_live_html():
+    total = len(ITEMS)
+    tri = [x for x in ITEMS if _rank(x) < 3]
+    cnt = {c: sum(1 for x in tri if x["區域"][:2] == c) for c in ("台北", "新北", "桃園")}
+    new_n, soon_n = len(new_items()), len(upcoming(7))
+    idx = [[x["區域"][:2], x["類型"].split("_")[0], round(price_num(x["價格"]) / 10000)] for x in tri]
+    chips = "".join(f'<a href="/list?c={c}">{c}<b>{n}</b></a>' for c, n in cnt.items())
+    day = UPDATED[5:10].replace("-", "/")
+    return ('<!--LIVE:start-->'
+            '<section class="live-strip" id="live" aria-labelledby="live-title"><div class="container">'
+            '<a class="resume-link" id="resume-link" href="/list" hidden></a>'
+            '<div class="live-head"><div><p class="eyebrow">LIVE / 最新案件</p><h2 id="live-title">本週新增法拍物件</h2></div>'
+            f'<p class="live-stats">資料更新 {day}　上架 <b data-total>{total}</b> 筆・本週新增 <b>{new_n}</b> 筆・7 天內開標 <b>{soon_n}</b> 筆</p></div>'
+            f'<div class="live-chips" aria-label="依縣市瀏覽">{chips}<a class="chip-all" href="/list">全部 {total} 筆 →</a></div>'
+            f'<div class="live-grid">{"".join(_live_card(x) for x in _live_pick())}</div>'
+            f'<p class="live-more"><a class="button button-navy" href="/list">瀏覽全部 {total} 筆法拍物件 <span aria-hidden="true">↗</span></a></p>'
+            f'<script type="application/json" id="live-index">{jd(idx)}</script>'
+            '</div></section><!--LIVE:end-->')
+
+def write_home_preview():
+    p = "site/preview-home/index.html"
+    if not os.path.exists(p): return
+    t = open(p, encoding="utf-8").read()
+    blk = home_live_html()
+    if "<!--LIVE:start-->" in t:
+        t = re.sub(r"<!--LIVE:start-->.*?<!--LIVE:end-->", lambda m: blk, t, flags=re.S)
+    else:
+        t = t.replace('<nav class="quick-routes', blk + '\n    <nav class="quick-routes', 1)
+    t = re.sub(r'(<span data-total>)\d+(</span>)', lambda m: m.group(1) + str(len(ITEMS)) + m.group(2), t)
+    open(p, "w", encoding="utf-8").write(t)
+
+
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 
 if __name__ == "__main__":
@@ -673,6 +744,7 @@ if __name__ == "__main__":
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
+    write_home_preview()
     write("site/post.html", post_page())
     write("site/member.html", member_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/">回到法拍屋物件列表</a></p>'))
