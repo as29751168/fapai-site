@@ -131,7 +131,7 @@
   }
   $('#send-line').addEventListener('click', () => {
     try { navigator.clipboard && window.isSecureContext && navigator.clipboard.writeText($('#inquiry-message').value); } catch {}
-    $('#copy-status').textContent = '訊息已複製。加入 LINE@ 後，在對話框貼上並送出即可。';
+    $('#copy-status').textContent = '訊息已複製。加入 LINE@ 後，請在對話框貼上並按送出，我們才會收到通知。';
   });
   $('#inquiry-form').addEventListener('submit', (event) => { event.preventDefault(); buildInquiry(); $('#inquiry-message').focus({preventScroll:true}); $('#message-review').scrollIntoView({behavior:motion,block:'nearest'}); });
   $('#copy-message').addEventListener('click', async () => {
