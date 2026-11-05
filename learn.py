@@ -95,6 +95,23 @@ LEARN = [
    ("投標前檢查", "查謄本、共有人人數、是否有占用、是否有約定分管。"),
    ("建議", "不論買不買，都先查謄本和共有人狀況。持分、不點交案件的服務費另議，詳見「服務與收費」頁。")]),
 ]
+# 後台（SEO×GEO 管理後台）送出的文章：data/articles/*.json，經 PR 審核合併後才會出現
+def _load_admin_articles():
+    import glob, json as _json, re as _re
+    have = {x[0] for x in LEARN}
+    for _f in sorted(glob.glob("data/articles/*.json")):
+        try:
+            _a = _json.load(open(_f, encoding="utf-8"))
+            _s = str(_a.get("slug", ""))
+            if not _re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", _s) or _s in have:
+                continue
+            _secs = [(str(h), str(t)) for h, t in _a.get("sections", []) if h and t]
+            if _a.get("title") and _a.get("lead") and _secs:
+                LEARN.append((_s, str(_a["title"]), str(_a["lead"]), _secs)); have.add(_s)
+        except Exception as _e:
+            print("略過無法讀取的文章", _f, _e)
+_load_admin_articles()
+
 LEARN_NOTE = "本文為一般資訊，非法律或投資建議，實際內容請以法院拍賣公告為準。"
 
 def _article_ld(t, desc, path):
