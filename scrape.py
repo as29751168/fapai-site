@@ -15,7 +15,7 @@ def get(url):
 
 def txt(s): return H.unescape(re.sub(r"<[^>]+>", "", s)).strip()
 
-MASKED_NAME = re.compile(r"[一-鿿](?:[O○〇＊*Ｏ]{2}|[O○〇＊*Ｏ](?![A-Za-z])[一-鿿]?|０{2}(?![０-９]))")   # 法院遮罩的姓名，如 陳O恩、蔡OO、梁００
+MASKED_NAME = re.compile(r"[一-鿿](?:[O○〇＊*ＯΟО]{2}|[O○〇＊*ＯΟО](?![A-Za-z])[一-鿿]?|０{2}(?![０-９]))")   # 法院遮罩的姓名，如 陳O恩、蔡OO、梁００
 
 def mask_names(items):
     """筆錄公開前移除遮罩姓名（物件頁與 data.json 共用）"""
