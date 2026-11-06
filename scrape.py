@@ -15,6 +15,14 @@ def get(url):
 
 def txt(s): return H.unescape(re.sub(r"<[^>]+>", "", s)).strip()
 
+MASKED_NAME = re.compile(r"[一-鿿](?:[O○〇＊*Ｏ]{2}|[O○〇＊*Ｏ](?![A-Za-z])[一-鿿]?|０{2}(?![０-９]))")   # 法院遮罩的姓名，如 陳O恩、蔡OO、梁００
+
+def mask_names(items):
+    """筆錄公開前移除遮罩姓名（物件頁與 data.json 共用）"""
+    for x in items:
+        inf = x.get("資訊") or {}
+        if inf.get("筆錄"): inf["筆錄"] = MASKED_NAME.sub("（姓名已隱去）", inf["筆錄"])
+
 def clear_images():
     """不使用 104法拍屋.tw 的照片：每次執行都清掉網站內舊照片"""
     shutil.rmtree("site/img", ignore_errors=True)
@@ -142,6 +150,7 @@ if __name__ == "__main__":
             x.update(ov.get(x["編號"], {}))
     except Exception as e:
         print("overrides 略過：", e)
+    mask_names(data["104"])
     track(data["104"])
     json.dump(data, open("site/data.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(len(data["104"]), "筆 104")
