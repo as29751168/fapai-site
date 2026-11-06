@@ -2,11 +2,12 @@
 # 每日待辦：7 天內開標、本週新增、異動待更新、停拍／流標待下架、上架檢查（缺資料鎖住不產文）
 # 產文：每案 FB 粉專／FB 社團／LINE 文案，內含案件代碼、UTM、必要聲明
 # 新詢問速記：產生可貼到 Google 試算表的客戶列與 D1/D3/D7/D14 追蹤任務
+# 平台分配：依已付費額度（House-Info 500、我家網 200、樂屋網每月精選 30）排出每個平台該上哪些案件
 
 BROKER = "財欣不動產"   # 經紀業名稱：不動產經紀業管理條例第 21 條，廣告須註明
 UTM_SOURCES = [  # (utm_source, utm_medium, 顯示名稱)
     ("fb_page", "social", "FB 粉專"), ("fb_group", "social", "FB 社團"), ("line", "message", "LINE"),
-    ("houseinfo", "listing", "House-Info"), ("104woo", "listing", "買屋網"), ("myhomes", "listing", "我家網"), ("gbp", "profile", "Google 商家"), ("yt", "social", "YouTube"),
+    ("houseinfo", "listing", "House-Info"), ("104woo", "listing", "買屋網"), ("myhomes", "listing", "我家網"), ("rakuya", "listing", "樂屋網"), ("gbp", "profile", "Google 商家"), ("yt", "social", "YouTube"),
 ]
 NEED = ["案號", "拍次", "開標日期", "底價", "點交情形", "完整地址"]
 
@@ -39,8 +40,71 @@ def case_copy(x, source, medium):
                   f"或來電 林小姐 Anna {PHONE_A}／黃先生 Pitt {PHONE_P}"]
     lines += ["", "法拍屋原則上無法進屋看室內，我們可協助周邊、外觀勘查與公告解讀。",
               f"※ 資料以法院公告為準。經紀業：{BROKER}｜{NAME}"]
-    if source != "line": lines += ["", f"#法拍屋 #{area_of(x)[:2]}法拍 #{area_of(x)} #法拍屋代標"]
+    if medium == "social": lines += ["", f"#法拍屋 #{area_of(x)[:2]}法拍 #{area_of(x)} #法拍屋代標"]
     return "\n".join(lines)
+
+# 已付費刊登額度：(utm_source, 顯示名稱, 額度, 選案規則說明)
+PLATFORMS = [
+    ("houseinfo", "House-Info", 500, "可刊件數最多，且會同步到 889 等十多個網站：可上架的案件全部上。"),
+    ("myhomes", "我家網", 200, "依優先順序取前 200 件：台北、新北、桃園優先，點交優先，開標日近的優先。"),
+    ("rakuya", "樂屋網（每月精選）", 30, "每月初挑 30 件做精選：限點交、台北新北桃園、開標日在 7 天後（精選期間不會馬上結束）；拍次越後面（底價越低）越優先。"),
+]
+
+def open_date(x):
+    m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", x.get("資訊", {}).get("開標日期", ""))
+    try: return datetime.date(int(m.group(1)) + 1911, int(m.group(2)), int(m.group(3))) if m else None
+    except ValueError: return None
+
+def _prio(x):
+    return (_rank(x), deliver_of(x) != "點交", open_date(x) or datetime.date.max)
+
+def allocate():
+    """可上架池：待標中、上架檢查通過、開標日未過。回傳 {source: [案件...]}"""
+    today = _today()
+    pool = sorted([x for x in ITEMS if x["狀態"] == "待標中" and not missing_of(x) and (open_date(x) or today) >= today], key=_prio)
+    feat = [x for x in pool if deliver_of(x) == "點交" and _rank(x) <= 2 and (open_date(x) - today).days >= 7]
+    feat.sort(key=lambda x: (-round_of(x), _rank(x), open_date(x)))
+    pick = {"houseinfo": pool, "myhomes": pool, "rakuya": feat}
+    return {s: pick[s][:q] for s, _, q, _ in PLATFORMS}, pool
+
+def _arow(x, src):
+    inf = x.get("資訊", {})
+    return (f'<li><b>{e(x["編號"])}</b> {e(area_of(x))}｜<a href="/h/{e(x["編號"])}" target="_blank">{e(inf.get("完整地址") or x["地址"])}</a>'
+            f'<br><span>第{round_of(x)}拍・開標 {e(inf.get("開標日期", ""))}・{e(x["價格"])}・{e(deliver_of(x))}</span>'
+            f'<div class="hb"><button type="button" data-l="{e(x["編號"])}|{src}">刊登文</button></div></li>')
+
+def alloc_section():
+    alloc, pool = allocate()
+    h = (f'<section class="box" id="plat"><h2>⑦ 平台分配（已付費額度）</h2><p class="hm">可上架的案件共 {len(pool)} 件'
+         '（待標中、上架檢查通過、開標日未過）。每天依最新資料重排；停拍、流標、拍定的案件會自動移出，對照 ④ 去各平台下架，空出的額度補上清單裡的新案件。'
+         '各平台「刊登文」都附該平台的追蹤連結。</p>')
+    for src, name, quota, rule in PLATFORMS:
+        xs = alloc[src]
+        codes = " ".join(x["編號"] for x in xs)
+        h += (f'<details><summary><b>{e(name)}</b>：建議 {len(xs)} 件／額度 {quota}</summary><p class="hm">{e(rule)}</p>'
+              f'<div class="hb"><button type="button" data-k="{e(codes)}">複製全部代碼</button></div>'
+              + ("<ol>" + "".join(_arow(x, src) for x in xs) + "</ol>" if xs else "<p>目前沒有符合條件的案件。</p>") + "</details>")
+    return h + "</section>", pool
+
+BUMP_DAYS = (7, 3, 1)   # 每件可手動更新 5 次：開標前 7、3、1 天各 1 次，降價／降拍當天 1 次，保留 1 次機動
+
+def bump_list(pool):
+    today = _today()
+    out = []
+    for x in pool:
+        left = (open_date(x) - today).days
+        why = f"開標前 {left} 天" if left in BUMP_DAYS else ("今天降價／降拍" if x.get("異動日") == today.isoformat() else "")
+        if why: out.append((why, x))
+    return sorted(out, key=lambda t: _prio(t[1]))
+
+def bump_section(pool):
+    xs = bump_list(pool)
+    li = "".join(f'<li><b>{e(x["編號"])}</b> {e(area_of(x))}｜{e(x.get("資訊", {}).get("完整地址") or x["地址"])}<br><span>{e(why)}・{e(x["價格"])}</span></li>' for why, x in xs)
+    return (f'<section class="box" id="bump"><h2>⑧ 今日建議「手動更新排序」（{len(xs)}）</h2>'
+            '<p class="hm">平台的「更新」會把物件排回前面，每件次數有限（目前 5 次），不要一次「全部更新」用掉。'
+            '分配：開標前 7、3、1 天各 1 次，降價或降拍當天 1 次，保留 1 次機動。在平台 App 用案名或地址搜尋後按更新。'
+            '已上架的平台才需要更新。</p>'
+            + (f"<ol>{li}</ol>" if xs else "<p>今天沒有需要更新的案件。</p>") + "</section>")
 
 def _row(x, copy=True):
     inf = x.get("資訊", {})
@@ -64,13 +128,15 @@ def _sec(i, title, tip, xs, cap=60, copy=True):
 
 HELPER_CSS = """<style>.hc{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}.hc a{background:#1f3a4d;color:#fff;border-radius:10px;padding:10px;text-decoration:none;display:block}.hc b{font-size:1.6rem;color:#e6c98f;display:block}
 .box ol{padding-left:1.4em}.box li{margin:10px 0;line-height:1.5}.box li span{color:#666;font-size:.9rem}.hb button,#hf button{background:#c9a86a;color:#1f3a4d;border:0;border-radius:6px;padding:6px 10px;margin:4px 6px 0 0;font-weight:700;cursor:pointer}
-.hw{color:#a4442d;font-size:.85rem}.hm{color:#666;font-size:.88rem}#hf label{display:block;margin-top:8px;font-weight:700}#hf input,#hf select,#hf textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box}
+details{margin:10px 0;border-top:1px solid #eee;padding-top:8px}summary{cursor:pointer}.hw{color:#a4442d;font-size:.85rem}.hm{color:#666;font-size:.88rem}#hf label{display:block;margin-top:8px;font-weight:700}#hf input,#hf select,#hf textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box}
 #hf textarea{font-family:monospace;font-size:13px}#ht{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1f3a4d;color:#fff;padding:8px 16px;border-radius:20px;display:none;z-index:99}</style>"""
 
 HELPER_JS = r"""<script>(function(){var C=window.HC,U=window.HU,S=window.HS;
 function toast(t){var h=document.getElementById('ht');h.textContent=t;h.style.display='block';setTimeout(function(){h.style.display='none'},1600)}
 function cp(t,m){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast(m||'已複製')},function(){window.prompt('請手動複製',t)})}
 document.addEventListener('click',function(ev){var b=ev.target;if(b.dataset.c){var k=b.dataset.c.split('|');cp(C[k[0]][k[1]],'已複製'+b.textContent+'，發布後記得回貼網址')}
+if(b.dataset.l){var k=b.dataset.l.split('|');cp(C[k[0]].L.split('__SRC__').join(k[1]),'已複製刊登文')}
+if(b.dataset.k){cp(b.dataset.k,'已複製代碼清單')}
 if(b.dataset.u){var s=document.getElementById('us').value.split('|');cp(U(b.dataset.u,s[0],s[1]),'已複製追蹤連結（'+s[2]+'）')}});
 var f=document.getElementById('hf');function g(i){return(document.getElementById(i).value||'').trim()}
 function day(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
@@ -95,10 +161,15 @@ def helper_page():
     gaps = [x for x in live if missing_of(x)]
     unk = [x for x in ITEMS if "待確認" in x["狀態"]]
     copyable = {x["編號"]: x for x in soon + new + chg if x["狀態"] == "待標中" and not missing_of(x)}
+    asec, pool = alloc_section()
     hc = {k: {"t": (x.get("資訊", {}).get("完整地址") or x["地址"]), **{s: case_copy(x, s, m) for s, m, _ in UTM_SOURCES[:3]}} for k, x in copyable.items()}
+    for x in pool:
+        hc.setdefault(x["編號"], {})["L"] = case_copy(x, "__SRC__", "listing")
     for x in ITEMS:
-        hc.setdefault(x["編號"], {"t": x.get("資訊", {}).get("完整地址") or x["地址"]})
-    cards = [("soon", "7 天內開標", soon), ("new", "本週新增", new), ("chg", "降價・降拍待更新", chg), ("down", "停拍・流標待下架", down), ("gap", "待補資料", gaps)]
+        hc.setdefault(x["編號"], {})
+        hc[x["編號"]].setdefault("t", x.get("資訊", {}).get("完整地址") or x["地址"])
+    alloc = allocate()[0]
+    cards = [("soon", "7 天內開標", soon), ("new", "本週新增", new), ("chg", "降價・降拍待更新", chg), ("down", "停拍・流標待下架", down), ("gap", "待補資料", gaps), ("plat", "我家網建議上架", alloc["myhomes"]), ("plat", "樂屋網本月精選", alloc["rakuya"]), ("bump", "今日手動更新", bump_list(pool))]
     opts = "".join(f'<option value="{s}|{m}|{n}">{n}</option>' for s, m, n in UTM_SOURCES)
     body = (f'<h1>法拍小幫手</h1><p class="hm">內部工作頁，資料更新：{e(UPDATED)}（每日 11:00、16:30 自動更新）。此頁不會被搜尋引擎收錄。'
             f'所有文案發布前須經紀人審閱；價格、拍次、點交一律以法院公告為準。</p>'
@@ -110,6 +181,7 @@ def helper_page():
             + _sec("chg", "③ 降價・降拍待更新", "已刊登的平台要改拍次與價格，並回頭通知關注此案的客戶。", chg)
             + _sec("down", "④ 停拍・流標待下架", "到各平台下架或標註；已關注的客戶改推替代案。", down, copy=False)
             + _sec("gap", "⑤ 待補資料（上架檢查未過）", "缺" + "、".join(NEED) + "任一項就鎖住不產文，請先到法院公告核對補齊。", gaps)
+            + asec + bump_section(pool)
             + '<section class="box" id="ask"><h2>⑥ 新詢問速記</h2><p class="hm">接到詢問 2 小時內回覆。填完按「產生」，複製後貼到 Google 試算表（客戶表、任務表），會自動排 D1／D3／D7／D14 追蹤。'
               '不要用姓名合併客戶，以電話或 LINE 比對。客戶表示不要推播時，把「拒絕行銷」改成「是」。</p><form id="hf">'
               '<label>來源</label><select id="fs">' + "".join(f'<option>{n}</option>' for _, _, n in UTM_SOURCES) + '<option>電話</option><option>轉介紹</option><option>其他</option></select>'
