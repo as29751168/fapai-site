@@ -240,10 +240,10 @@ def card(x):
     price = re.sub(r"^售", "", x["價格"])
     old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
     top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"], "新上架" if _within(x.get("新增日", "")) else "", "降價" if _within(x.get("異動日", "")) and x.get("降價前", 0) else ""]))
-    text = f'{x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
+    text = f'{inf.get("完整地址","")} {x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
     return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}" data-f="{first_price(x)}">'
             f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
-            f'<div class="b"><div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><h3>{e(x["地址"])}</h3>'
+            f'<div class="b"><div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><h3>{e(x["地址"] if "號" in x["地址"] else inf.get("完整地址") or x["地址"])}</h3>'
             f'<div class="pr"><span>底價</span><b>{old}{e(price)}</b></div></div></a>')
 
 def kv(rows):
@@ -255,14 +255,15 @@ def detail_page(x):
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
     ph = photos(x)
     area = area_of(x)
-    full_title = f'{x["地址"]}｜{area}{x["類型"]}法拍屋｜{NAME}'
-    desc = (f'{area}{x["類型"]}法拍屋 {x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
+    addr = inf.get("完整地址") or x["地址"]
+    full_title = f'{addr}法拍屋｜{x["類型"]}｜{NAME}'
+    desc = (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + "提供代標、產權調查、貸款諮詢，歡迎聯絡透明房訊104法拍網。")
-    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(x["地址"])} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
+    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
-    top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", x["地址"]), ("地區", x["區域"]), ("物件編號", x["編號"])])
+    top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", x["區域"]), ("物件編號", x["編號"])])
     det = kv([(k, inf.get(k)) for k in DETAIL_KEYS])
     size = kv([(k, (inf.get(k) + "坪") if inf.get(k) and re.fullmatch(r"[\d.]+", inf.get(k)) else inf.get(k)) for k in SIZE_KEYS])
     srows = ""
@@ -276,20 +277,20 @@ def detail_page(x):
     same = [y for y in ITEMS if y is not x and area_of(y) == area][:3]
     sim = ('<section class="box"><h2>相似物件</h2><div class="grid">' + "".join(card(y) for y in same) + "</div></section>") if same else ""
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
-            f'<section class="box"><h1>{e(x["地址"])}</h1><div>{tags}</div><div class="price">{pr}</div>{gal}</section>'
+            f'<section class="box"><h1>{e(addr)}法拍屋</h1><p>{e(x["地址"])}</p><div>{tags}</div><div class="price">{pr}</div>{gal}</section>'
             f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
             + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + contact_box() + sim)
     ld = [ORG,
-          {"@context": "https://schema.org", "@type": "RealEstateListing", "name": x["地址"], "url": f'{SITE}/h/{x["編號"]}', "description": desc,
+          {"@context": "https://schema.org", "@type": "RealEstateListing", "name": f"{addr}法拍屋", "url": f'{SITE}/h/{x["編號"]}', "description": desc,
            "image": ph[:6] or None, "dateModified": UPDATED.replace(" ", "T") + ":00+08:00",
            "offers": {"@type": "Offer", "price": price_num(x["價格"]), "priceCurrency": "TWD", "availability": "https://schema.org/InStock", "seller": {"@id": SITE + "/#org"}},
-           "about": {"@type": "Place", "name": x["地址"], "address": {"@type": "PostalAddress", "streetAddress": x["地址"], "addressCountry": "TW"}}},
+           "about": {"@type": "Place", "name": addr, "address": {"@type": "PostalAddress", "streetAddress": addr, "addressCountry": "TW"}}},
           {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
               {"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"},
               {"@type": "ListItem", "position": 2, "name": area + "法拍屋", "item": f"{SITE}/area/{slug(area)}"},
-              {"@type": "ListItem", "position": 3, "name": x["地址"]}]}]
+              {"@type": "ListItem", "position": 3, "name": addr}]}]
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'

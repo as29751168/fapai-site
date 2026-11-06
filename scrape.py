@@ -39,6 +39,8 @@ def detail(hid):
     for k, v in re.findall(r'detail-house-key"><h4>(.*?)</h4></div>\s*<span>：</span>\s*<div[^>]*class="detail-house-value"[^>]*>(.*?)</div>', h, flags=re.S):
         k, v = txt(k), txt(v)
         if k and v and k != "瀏覽人次": info[k] = v
+    full = "".join(txt(re.search(rf'"{k}":\s*"([^"]*)"', h)[1]) for k in ("addressRegion", "addressLocality", "streetAddress") if re.search(rf'"{k}":\s*"([^"]*)"', h))
+    if "號" in full or "地號" in full: info["完整地址"] = full
     m = re.search(r"【法院筆錄】(.*?)(?=<font|<iframe|$)", h, flags=re.S)
     if m:
         lines = [txt(x) for x in re.split(r"<br\s*/?>", m.group(1))]
