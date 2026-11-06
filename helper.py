@@ -9,6 +9,19 @@ UTM_SOURCES = [  # (utm_source, utm_medium, 顯示名稱)
     ("fb_page", "social", "FB 粉專"), ("fb_group", "social", "FB 社團"), ("line", "message", "LINE"),
     ("houseinfo", "listing", "House-Info"), ("104woo", "listing", "買屋網"), ("myhomes", "listing", "我家網"), ("rakuya", "listing", "樂屋網"), ("gbp", "profile", "Google 商家"), ("yt", "social", "YouTube"),
 ]
+SHEET_URL = "https://docs.google.com/spreadsheets/d/18vjWPUSAl2RSm9zbPSKeGSahz_KdBkfMdU41M4Jtts8/edit"  # 客戶與刊登中樞（僅授權帳號可開）
+PLAT_NAME = {"houseinfo": "House-Info", "myhomes": "我家網", "rakuya": "樂屋網"}
+ROUTINE = [  # (頻率, 平台, 事項)
+    ("設定一次", "House-Info", "圖片加版權文字：設成「104法拍網 0986-678-928」。"),
+    ("設定一次", "House-Info", "網站關鍵字：填「區域＋法拍屋」「法拍代標」，獨立網站放 LINE 與官網連結。"),
+    ("設定一次", "我家網", "社群房仲個人頁：寫明法拍代標專業、經紀業名稱、LINE。"),
+    ("設定一次", "全部平台", "聯絡方式統一寫 LINE 與 Anna 電話，物件說明第一行放案件代碼。"),
+    ("每天", "全部平台", "照 ⑦ 補上架、照 ④ 下架、照 ⑧ 手動更新排序；做完把「複製刊登紀錄」貼到試算表「刊登狀態」。"),
+    ("每天", "我家網", "看「問與答」「預約看屋」有沒有新的，有就用 ⑥ 記到試算表。"),
+    ("每週一", "House-Info", "看「客戶共同委託買賣」與「屋主自售」，有想賣或想買的記到試算表。"),
+    ("每週一", "全部平台", "把各平台上週瀏覽數填進試算表「週報」。"),
+    ("每月 1 日", "樂屋網、我家網", "照 ⑦ 樂屋網精選清單換精選；我家網「主打物件」放同一批。"),
+]
 NEED = ["案號", "拍次", "開標日期", "底價", "點交情形", "完整地址"]
 
 def utm(path, source, medium, campaign, content=""):
@@ -67,6 +80,15 @@ def allocate():
     pick = {"houseinfo": pool, "myhomes": pool, "rakuya": feat}
     return {s: pick[s][:q] for s, _, q, _ in PLATFORMS}, pool
 
+def _sheet_rows(xs, src):
+    """刊登狀態分頁格式：案件代碼 平台 平台物件ID 刊登網址 上架日 最後更新日 已用更新次數 主打或精選 狀態"""
+    d = _today().isoformat()
+    return "\n".join("\t".join([x["編號"], PLAT_NAME[src], "", "", d, d, "0", "是" if src == "rakuya" else "否", "已上架"]) for x in xs)
+
+def routine_section():
+    rows = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td><td>{e(c)}</td></tr>" for a, b, c in ROUTINE)
+    return f'<section class="box" id="routine"><h2>⑨ 平台設定與例行工作</h2><table><tr><th>頻率</th><th>平台</th><th>事項</th></tr>{rows}</table></section>'
+
 def _arow(x, src):
     inf = x.get("資訊", {})
     return (f'<li><b>{e(x["編號"])}</b> {e(area_of(x))}｜<a href="/h/{e(x["編號"])}" target="_blank">{e(inf.get("完整地址") or x["地址"])}</a>'
@@ -83,6 +105,7 @@ def alloc_section():
         codes = " ".join(x["編號"] for x in xs)
         h += (f'<details><summary><b>{e(name)}</b>：建議 {len(xs)} 件／額度 {quota}</summary><p class="hm">{e(rule)}</p>'
               f'<div class="hb"><button type="button" data-k="{e(codes)}">複製全部代碼</button></div>'
+              + f'<div class="hb"><button type="button" data-k="{e(_sheet_rows(xs, src))}">複製刊登紀錄（貼到試算表）</button></div>'
               + ("<ol>" + "".join(_arow(x, src) for x in xs) + "</ol>" if xs else "<p>目前沒有符合條件的案件。</p>") + "</details>")
     return h + "</section>", pool
 
@@ -175,14 +198,14 @@ def helper_page():
             f'所有文案發布前須經紀人審閱；價格、拍次、點交一律以法院公告為準。</p>'
             '<div class="hc">' + "".join(f'<a href="#{i}"><b>{len(xs)}</b>{t}</a>' for i, t, xs in cards) + "</div>"
             f'<p class="hm">待標中 {len(live)} 筆；開標日已過待確認 {len(unk)} 筆（不產文，等開標結果）。'
-            f'追蹤連結來源：<select id="us">{opts}</select>　<a href="/post">本週精選貼文草稿 ›</a></p>'
+            f'追蹤連結來源：<select id="us">{opts}</select>　<a href="/post">本週精選貼文草稿 ›</a>　<a href="{SHEET_URL}" target="_blank" rel="noopener">開啟客戶與刊登試算表 ›</a></p>'
             + _sec("soon", "① 7 天內開標", "優先推：發粉專＋LINE 精選；有詢問的客戶確認保證金。", soon)
             + _sec("new", "② 本週新增", "上架到買屋網／House-Info、發粉專或社團（社團請手動）。", new)
             + _sec("chg", "③ 降價・降拍待更新", "已刊登的平台要改拍次與價格，並回頭通知關注此案的客戶。", chg)
             + _sec("down", "④ 停拍・流標待下架", "到各平台下架或標註；已關注的客戶改推替代案。", down, copy=False)
             + _sec("gap", "⑤ 待補資料（上架檢查未過）", "缺" + "、".join(NEED) + "任一項就鎖住不產文，請先到法院公告核對補齊。", gaps)
-            + asec + bump_section(pool)
-            + '<section class="box" id="ask"><h2>⑥ 新詢問速記</h2><p class="hm">接到詢問 2 小時內回覆。填完按「產生」，複製後貼到 Google 試算表（客戶表、任務表），會自動排 D1／D3／D7／D14 追蹤。'
+            + asec + bump_section(pool) + routine_section()
+            + '<section class="box" id="ask"><h2>⑥ 新詢問速記</h2><p class="hm">接到詢問 2 小時內回覆。填完按「產生」，複製後貼到「客戶與刊登試算表」（客戶、任務分頁），會自動排 D1／D3／D7／D14 追蹤。'
               '不要用姓名合併客戶，以電話或 LINE 比對。客戶表示不要推播時，把「拒絕行銷」改成「是」。</p><form id="hf">'
               '<label>來源</label><select id="fs">' + "".join(f'<option>{n}</option>' for _, _, n in UTM_SOURCES) + '<option>電話</option><option>轉介紹</option><option>其他</option></select>'
               '<label>案件代碼（例：HH2512789）</label><input id="fc"><p id="fx" class="hm"></p>'
