@@ -50,6 +50,12 @@ def _key(title):
     m = re.findall(r"([一-鿿]+(?:路|街|大道)[^號]*?號)", title or "")
     return m[-1] if m else ""
 
+def _floor(a):
+    """樓層＋分戶，例如 2-、6-2；標題可能先寫簡稱，取最後一段完整地址"""
+    a = re.split(r"[\s　|｜]+", (a or "").strip())[-1]
+    m = re.search(r"號(?:之\d+)?(地下)?(\d+|[一二三四五六七八九十])樓(?:之?-?(\d+))?", a)
+    return None if not m else (m[1] or "") + str(NUMS.index(m[2]) + 1 if m[2] in NUMS else m[2]) + "-" + (m[3] or "")
+
 def apply(items, rows=None, today=None):
     """校正 items；回傳 (items, 統計)。拍定／承受／撤回的物件移除；停拍保留並標註；流標且無新日期者標註待公告。"""
     today = today or datetime.date.today()
@@ -67,14 +73,16 @@ def apply(items, rows=None, today=None):
     kept = []
     for x in items:
         inf = x.setdefault("資訊", {})
-        dist = _district(x["區域"]); suf = _suffix(inf.get("案號", ""))
+        dist = _district(x["區域"]); raw = _suffix(inf.get("案號", "")); suf = re.sub(r"[金法]$", "", raw)
         title = re.sub(r"[\s　]", "", x["地址"])
         cands = []
         if suf and not suf.startswith("國"):
-            cs = by_suf.get(suf, [])
+            cs = by_suf.get(raw, []) or by_suf.get(suf, [])
             cands = [r for r in cs if (not dist) or dist in r["addr"]] or ([r for r in cs] if len({r["addr"] for r in cs}) == 1 else [])
+            if raw not in by_suf: cands = [r for r in cands if (c := core(r["addr"])) and c in title]   # 去掉金／法才對上時，要同門牌，避免不同年度同編號
         if not cands and dist:
             cands = [r for r in rows_by_dist.get(dist[:3], []) if r["addr"].startswith(dist) and (c := core(r["addr"])) and len(c) >= 5 and c in title]
+        if cands and _floor(x["地址"]): cands = [r for r in cands if _floor(r["addr"]) is None or _floor(r["addr"]) == _floor(x["地址"])]   # 同門牌不同樓層是不同物件，不可互相套用價格
         if not cands:
             stat["unmatched"] += 1; stat.setdefault("ids", []).append(x["編號"])
             m = re.match(r"(\d+)/(\d+)/(\d+)", inf.get("開標日期", ""))
