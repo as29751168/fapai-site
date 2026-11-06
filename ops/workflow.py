@@ -354,21 +354,23 @@ def advance_mandate(db, mandate_id, stage, note, next_step, next_due, owner=None
 
 
 # ---------- 收費條件 ----------
+DECIDED_ON = "2026-11-06"  # 業主回覆日；實際生效日若不同，用 confirm_fee 更新
 FEE_SEED = (
-    ("fee-apply", "聲請點交", "50,000 元", "服務項目 01–05", "網站 services.py", "確認中", "網站與收費表一致，生效日待確認"),
-    ("fee-package", "包辦點交", "120,000 元", "服務項目 01–11", "網站 services.py", "確認中", "網站與收費表一致，生效日待確認"),
-    ("fee-full-rate", "全程代標費率", "2%～5%", "依案件難易評估", "網站 services.py", "確認中", "費率一致，生效日待確認"),
-    ("fee-full-base", "全程代標計算基準", None, None, "衝突", "待確認", "網站寫「標價」；fees.md 寫「該拍次法院公告底價」"),
-    ("fee-full-under-6m", "600 萬元以下案件", None, None, "衝突", "待確認", "網站寫「最低 12 萬元」；fees.md 寫「另議」"),
-    ("fee-advance", "尾款代墊用語", None, None, "衝突", "待確認", "網站寫「協助代墊尾款」；fees.md 寫「保證代墊尾款」。依規則不得保證"),
-    ("fee-no-win", "未得標是否收費", None, None, "待提供", "待確認", "未經確認不得對外使用"),
-    ("fee-promo", "優惠期間", None, None, "待提供", "待確認", "目前未取得"),
-    ("fee-loan", "貸款條件", None, None, "待提供", "待確認", "不保證貸款成數；利率與成數須附日期"),
+    ("fee-apply", "聲請點交", "50,000 元", "服務項目 01–05", "網站 services.py", "確認中", None, "網站與收費表一致，生效日待確認"),
+    ("fee-package", "包辦點交", "120,000 元", "服務項目 01–11", "網站 services.py", "確認中", None, "網站與收費表一致，生效日待確認"),
+    ("fee-full-rate", "全程代標費率", "2%～5%", "依案件難易評估", "網站 services.py", "確認中", None, "費率一致，生效日待確認"),
+    ("fee-full-base", "全程代標計算基準", None, None, "業主決定", "不對外寫出", None, "對外內容不特別寫出計算基準"),
+    ("fee-full-under-3m", "全程代標：300 萬元以下", "固定 10 萬元", "300 萬元以下案件；不適用不點交、部分點交、持分案件（另議）", "業主決定", "已確認", DECIDED_ON, "業主回覆"),
+    ("fee-full-under-6m", "全程代標：600 萬元以下", "最低 12 萬元", "超過 300 萬元至 600 萬元案件", "業主決定", "已確認", DECIDED_ON, "業主回覆"),
+    ("fee-advance", "尾款代墊用語", "協助代墊尾款", "不得寫成保證", "業主決定", "已確認", DECIDED_ON, "業主回覆"),
+    ("fee-no-win", "未得標是否收費", None, None, "待提供", "待確認", None, "未經確認不得對外使用"),
+    ("fee-promo", "優惠期間", None, None, "待提供", "待確認", None, "目前未取得"),
+    ("fee-loan", "貸款條件", None, None, "待提供", "待確認", None, "不保證貸款成數；利率與成數須附日期"),
 )
 
 
 def seed_fee_terms(db):
-    db.executemany("INSERT OR IGNORE INTO fee_terms (term_id,item,value,condition,source,status,note) VALUES (?,?,?,?,?,?,?)", FEE_SEED)
+    db.executemany("INSERT OR IGNORE INTO fee_terms (term_id,item,value,condition,source,status,effective_from,note) VALUES (?,?,?,?,?,?,?,?)", FEE_SEED)
     db.commit()
 
 
