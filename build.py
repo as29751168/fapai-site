@@ -183,7 +183,7 @@ ORG = {
                 {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
     "areaServed": "TW", "sameAs": list(LINKS.values())[1:],
     "employee": [{"@type": "Person", "name": "黃先生 Pitt", "jobTitle": "法拍代標顧問", "telephone": "+886-918-313-888"}, {"@type": "Person", "name": "林小姐 Anna", "jobTitle": "法拍代標顧問", "telephone": "+886-986-678-928"}],
-    "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "依標價 2% 到 5%，600 萬元以下最低 12 萬元"}],
+    "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "2% 到 5%，300 萬元以下固定 10 萬元，超過 300 萬元至 600 萬元最低 12 萬元"}],
     "knowsAbout": ["法拍屋", "法拍屋代標", "不點交物件處理", "撤封代償", "產權調查", "法拍屋貸款"],
 }
 
@@ -302,7 +302,7 @@ FAQ = [
     ("法拍屋的「拍次」是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以各物件「拍賣紀錄」及法院公告為準。"),
     ("可以委託代標嗎？需要準備什麼？", "可以。透明房訊104法拍網提供法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢，請透過電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
-    ("代標服務費怎麼算？", "全程代標依標價收取 2% 到 5%（600 萬元以下最低 12 萬元）；只需聲請點交為 50,000 元，包辦點交為 120,000 元。服務項目與附註請見「服務與收費」頁。"),
+    ("代標服務費怎麼算？", "全程代標收取 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；只需聲請點交為 50,000 元，包辦點交為 120,000 元。服務項目與附註請見「服務與收費」頁。"),
     ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
     ("投標保證金不夠或忘記附本票會怎樣？", "保證金未繳足、未附本票，或本票、印章有瑕疵，投標會被判為無效。投標前請逐項核對拍賣公告。"),
     ("得標後要在多久內繳尾款？可以貸款嗎？", "得標後通常需在 7 天內繳清價金。需要貸款或代墊尾款，請在投標前先告知，讓我們協助準備銀行徵信資料。"),
@@ -597,18 +597,18 @@ FEE_ITEMS = [
  ("處理遺留神明、神主牌及祖先牌位", "協助寄託廟宇管理", 3), ("有價遺留物清點與保管", "以貨櫃屋或倉庫存放，通知權利人領取；未領取時，依法聲請拍賣", 3)]
 
 def fees_page():
-    cols = [("聲請點交", "50,000", "元", "服務項目 01–05", 1), ("包辦點交", "120,000", "元", "服務項目 01–11", 2), ("全程代標", "2–5%", "依標價計算", "服務項目 01–19；600 萬元以下最低 12 萬元，依案件難易評估", 3)]
+    cols = [("聲請點交", "50,000", "元", "服務項目 01–05", 1), ("包辦點交", "120,000", "元", "服務項目 01–11", 2), ("全程代標", "2–5%", "依案件難易評估", "服務項目 01–19；300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元", 3)]
     th = "".join(f'<th style="text-align:center;color:#123;font-weight:700"><div>{e(n)}</div><div style="font-size:22px">{p}</div><div style="font-weight:400;color:#666;font-size:13px">{e(u)}<br>{e(s)}</div></th>' for n, p, u, s, _ in cols)
     rows = ""
     for i, (t, sub, lv) in enumerate(FEE_ITEMS, 1):
         cells = "".join(f'<td style="text-align:center">{"●" if lv <= c[4] else "—"}</td>' for c in cols)
         rows += f'<tr><td style="width:auto;color:#123"><b>{i:02d}　{e(t)}</b>' + (f'<div style="color:#666;font-size:13px;font-weight:400">{e(sub)}</div>' if sub else "") + f'</td>{cells}</tr>'
-    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契約、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議。"]
+    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契約、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
     body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
             f'<section class="box"><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></section>'
             f'<section class="box"><h2>費用附註</h2>{nh}</section>' + know_box() + contact_box())
-    desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標依標價 2% 到 5%（600 萬元以下最低 12 萬元），並列出各方案服務項目與費用附註。"
+    desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元），並列出各方案服務項目與費用附註。"
     ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
     return page(f"服務與收費｜法拍屋代標費用｜{NAME}", desc, "/fees", body, ld, SITE + "/og.jpg")
 
@@ -627,7 +627,7 @@ def about_page():
     body = ('<nav class="bc"><a href="/">首頁</a> › 關於我們</nav><h1>關於透明房訊／104法拍網</h1>'
             '<p>透明房訊／104法拍網（一零四法拍網股份有限公司）提供法拍屋物件查詢與代標服務。物件資料每日更新，實際內容以法院拍賣公告為準。</p>'
             '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p></section>'
-            '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：標價 2% 到 5%（600 萬元以下最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
+            '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
             f'<section class="box"><h2>據點與聯絡</h2><ul><li>{e(ADDR[0])}</li><li>{e(ADDR[1])}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>林小姐 Anna：{e(PHONE_A)}</li></ul></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於透明房訊／104法拍網", "url": SITE + "/about", "inLanguage": "zh-TW"},
@@ -741,7 +741,7 @@ if __name__ == "__main__":
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標依標價 2% 到 5%（600 萬元以下最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
+          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
