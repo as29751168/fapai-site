@@ -5,6 +5,7 @@ import re, json, html, time, datetime, urllib.parse, concurrent.futures as cf, r
 OLD = "http://www.104woo.com.tw/tom1/house/lin2_k_index00a.asp"
 COURTS = ["台北市", "新北市", "基隆市", "高雄市", "台北法院", "士林法院", "新北法院", "桃園法院", "基隆法院", "新竹法院", "苗栗法院", "台中法院", "宜蘭法院", "台南法院", "高雄法院", "橋頭法院", "屏東法院"]
 NUMS = "一二三四五六七八九十"
+CLOSED = re.compile(r"停拍|撤|得標|拍定|承受|流標")   # 這些狀態的場次不會開標
 
 def _clean(t):
     t = re.sub(r"<script[\s\S]*?</script>|<style[\s\S]*?</style>", "", t)
@@ -83,8 +84,8 @@ def apply(items, rows=None, today=None):
                 x["狀態"] = "開標日期已過・待確認"; inf["銷售狀態"] = "待確認"; stat["stale"] = stat.get("stale", 0) + 1
             kept.append(x); continue
         cands.sort(key=lambda r: r["date"]); last = cands[-1]
-        st = last["status"]; fut = [r for r in cands if r["date"] >= today]
-        if fut:   # 還有未開標的場次：以最近一場為準
+        st = last["status"]; fut = [r for r in cands if r["date"] >= today and not CLOSED.search(r["status"])]
+        if fut:   # 還有仍有效的未開標場次：以最近一場為準；已停拍或撤回的未來場次不算
             r = fut[0]
             inf["拍次"] = re.sub(r"拍", "", r["round"]); inf["開標日期"] = f"{r['date'].year - 1911}/{r['date'].month}/{r['date'].day}"
             if r["base"]:
