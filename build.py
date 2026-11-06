@@ -603,7 +603,7 @@ def fees_page():
     for i, (t, sub, lv) in enumerate(FEE_ITEMS, 1):
         cells = "".join(f'<td style="text-align:center">{"●" if lv <= c[4] else "—"}</td>' for c in cols)
         rows += f'<tr><td style="width:auto;color:#123"><b>{i:02d}　{e(t)}</b>' + (f'<div style="color:#666;font-size:13px;font-weight:400">{e(sub)}</div>' if sub else "") + f'</td>{cells}</tr>'
-    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契約、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
+    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契稅、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
     body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
             f'<section class="box"><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></section>'
