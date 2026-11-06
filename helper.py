@@ -6,7 +6,7 @@
 BROKER = "財欣不動產"   # 經紀業名稱：不動產經紀業管理條例第 21 條，廣告須註明
 UTM_SOURCES = [  # (utm_source, utm_medium, 顯示名稱)
     ("fb_page", "social", "FB 粉專"), ("fb_group", "social", "FB 社團"), ("line", "message", "LINE"),
-    ("houseinfo", "listing", "House-Info"), ("104woo", "listing", "買屋網"), ("gbp", "profile", "Google 商家"), ("yt", "social", "YouTube"),
+    ("houseinfo", "listing", "House-Info"), ("104woo", "listing", "買屋網"), ("myhomes", "listing", "我家網"), ("gbp", "profile", "Google 商家"), ("yt", "social", "YouTube"),
 ]
 NEED = ["案號", "拍次", "開標日期", "底價", "點交情形", "完整地址"]
 
