@@ -321,7 +321,12 @@ def test_fee_conflicts_not_usable_until_confirmed():
     W.seed_fee_terms(db)
     W.seed_fee_terms(db)
     assert db.execute("SELECT COUNT(*) FROM fee_terms").fetchone()[0] == len(W.FEE_SEED)
-    assert W.fee_for_public_use(db, "fee-full-under-6m") is None
+    assert W.fee_for_public_use(db, "fee-no-win") is None
+    assert W.fee_for_public_use(db, "fee-full-base") is None
+    assert W.fee_for_public_use(db, "fee-full-under-3m") == "固定 10 萬元"
+    assert W.fee_for_public_use(db, "fee-full-under-6m") == "最低 12 萬元"
+    assert W.fee_for_public_use(db, "fee-advance") == "協助代墊尾款"
+    assert W.fee_for_public_use(db, "fee-apply") is None
     W.confirm_fee(db, "fee-apply", "50,000 元", "服務項目 01–05", "2026-01-01", "Anna")
     assert W.fee_for_public_use(db, "fee-apply") == "50,000 元"
     W.confirm_fee(db, "fee-package", "120,000 元", "x", "2026-01-01", "Anna", effective_to="2026-02-01")
