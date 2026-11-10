@@ -332,8 +332,8 @@ def drafts():
         r = round_of(x)
         desc = f'第{r}拍｜開標 {inf.get("開標日期", "")}｜底價 {re.sub(r"^售", "", x["價格"])}'
         link = f'{SITE}/h/{x["編號"]}'
-        fb += [f'{i}. {area_of(x)}｜{x["地址"]}', f'   {desc}', f'   👉 {link}?utm_source=fb', ""]
-        ln += [f'{i}. {area_of(x)} {x["地址"]}', f'   {desc}', f'   {link}?utm_source=line', ""]
+        fb += [f'{i}. {area_of(x)}｜{x["地址"]}', f'   {desc}', f'   👉 {utm(link[len(SITE):], "fb_page", "social", "weekly_" + f"{_today():%Y%m}", x["編號"])}', ""]
+        ln += [f'{i}. {area_of(x)} {x["地址"]}', f'   {desc}', f'   {utm(link[len(SITE):], "line", "message", "weekly_" + f"{_today():%Y%m}", x["編號"])}', ""]
     if nw:
         fb.append(f'本週新增 {nw} 筆物件，完整清單看網站 ↓')
         ln.append(f'本週新增 {nw} 筆，完整清單：')
@@ -713,6 +713,7 @@ def write_home():
     write("site/index.html", t)
 
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
+exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
 
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
@@ -748,6 +749,7 @@ if __name__ == "__main__":
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
     write_home()
     write("site/post.html", post_page())
+    write("site/helper.html", helper_page())
     write("site/member.html", member_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/list">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls))
