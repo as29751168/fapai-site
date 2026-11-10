@@ -71,12 +71,13 @@
   stepFromHash();
   window.addEventListener('hashchange', stepFromHash);
 
+  const toCity = (r) => r.replace(/[市縣]$/, '');
   let selectedRegion = '台北市';
   const regionNotes = { '台北市': '通勤、學區與生活機能，一起納入評估。', '新北市': '捷運沿線與不同生活圈，依需求一起篩選。', '桃園市': '空間、通勤與購屋預算，找到合適的平衡。' };
   $$('[data-region]').forEach((button) => button.addEventListener('click', () => {
     selectedRegion = button.dataset.region;
     $$('[data-region]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-    $('#region-caption').textContent = `${selectedRegion}｜${regionNotes[selectedRegion]}`;
+    $('#region-caption').textContent = `${selectedRegion}｜${regionNotes[selectedRegion] || '依預算、類型與生活圈，一起評估。'}`;
   }));
   $('#use-property').addEventListener('click', () => {
     $('#inquiry-region').value = selectedRegion;
@@ -95,7 +96,7 @@
   };
   function updateBrowse() {
     const q = new URLSearchParams();
-    q.set('c', BROWSE.cities[selectedRegion] || '');
+    q.set('c', toCity(selectedRegion));
     const p = BROWSE.budgets[$('#property-budget').value];
     if (p) q.set('p', p);
     const t = BROWSE.types[$('#property-type').value];
@@ -187,11 +188,11 @@
   const btn = $('#browse-property'), hint = $('#match-hint');
   function region() { const b = document.querySelector('[data-region][aria-pressed="true"]'); return b ? b.dataset.region : '台北市'; }
   function count(withFilters) {
-    const c = CITY[region()], bd = BUD[$('#property-budget').value], ty = TYPE[$('#property-type').value];
+    const c = toCity(region()), bd = BUD[$('#property-budget').value], ty = TYPE[$('#property-type').value];
     return IDX.filter((r) => r[0] === c && (!withFilters || ((!bd || (r[2] >= bd[0] && r[2] < bd[1])) && (!ty || ty.indexOf(r[1]) > -1)))).length;
   }
   function label() {
-    const parts = [CITY[region()]];
+    const parts = [toCity(region())];
     if (BUD[$('#property-budget').value]) parts.push($('#property-budget').value);
     if (TYPE[$('#property-type').value]) parts.push($('#property-type').value);
     return parts.join('・');
@@ -204,10 +205,10 @@
       hint.className = 'match-hint';
       hint.innerHTML = label() + '：目前有 <b>' + n + '</b> 筆符合';
     } else {
-      btn.innerHTML = '看' + CITY[region()] + '全部 ' + all + ' 筆 <span aria-hidden="true">↗</span>';
+      btn.innerHTML = '看' + toCity(region()) + '全部 ' + all + ' 筆 <span aria-hidden="true">↗</span>';
       hint.className = 'match-hint is-zero';
-      hint.textContent = '這組條件目前沒有案件，可放寬預算或類型，或先看' + CITY[region()] + '全部。';
-      btn.href = '/list?c=' + CITY[region()];
+      hint.textContent = '這組條件目前沒有案件，可放寬預算或類型，或先看' + toCity(region()) + '全部。';
+      btn.href = '/list?c=' + toCity(region());
     }
   }
   ['change'].forEach((ev) => { $('#property-budget').addEventListener(ev, refresh); $('#property-type').addEventListener(ev, refresh); });
