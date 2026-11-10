@@ -263,7 +263,7 @@ def detail_page(x):
     gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
-    top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", x["區域"]), ("物件編號", x["編號"])])
+    top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", re.sub(r"-0房$", "", x["區域"])), ("物件編號", x["編號"])])
     det = kv([(k, inf.get(k)) for k in DETAIL_KEYS])
     size = kv([(k, (inf.get(k) + "坪") if inf.get(k) and re.fullmatch(r"[\d.]+", inf.get(k)) else inf.get(k)) for k in SIZE_KEYS])
     srows = ""
