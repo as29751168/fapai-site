@@ -3,7 +3,8 @@ import json, re, time, datetime, urllib.request, urllib.parse, html as H
 
 MOBILE = "0986678928"
 BASE = "https://www.104woo.com.tw"
-CITIES = ["台北市", "新北市", "桃園市"]
+CITIES = ["台北市", "新北市", "桃園市"]   # 他人物件對照法院照的範圍
+ALL_CITIES = ["台北市", "新北市", "基隆市", "桃園市", "新竹市", "新竹縣", "苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣", "嘉義市", "嘉義縣", "台南市", "高雄市", "屏東縣", "宜蘭縣", "花蓮縣", "台東縣", "澎湖縣", "金門縣", "連江縣"]   # 自家物件：買屋網有上架的全部縣市
 UA = {"User-Agent": "Mozilla/5.0 (fapai-site daily sync)", "Content-Type": "application/json; charset=utf-8"}
 NUM = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 
@@ -47,14 +48,14 @@ def query(city, lo, hi, mobile=""):
             time.sleep(2)
     return []
 
-def market(city, lo=0, hi=200000, out=None):
+def market(city, lo=0, hi=200000, out=None, mobile=""):
     """列出透明房訊某縣市全部物件：單次最多回 30 筆，滿了就把價格區間對半切"""
     out = {} if out is None else out
-    items = query(city, lo, hi)
+    items = query(city, lo, hi, mobile)
     for it in items: out[it["NO"]] = it
     if len(items) >= 30 and hi - lo > 1:
         mid = (lo + hi) // 2
-        market(city, lo, mid, out); market(city, mid, hi, out)
+        market(city, lo, mid, out, mobile); market(city, mid, hi, out, mobile)
     return out
 
 COURT = re.compile(r"(wwwphoto|street)/")
@@ -68,8 +69,8 @@ def district(s):
 
 def fetch_all():
     allc = {}
-    for c in CITIES:
-        for it in post_items(c):
+    for c in ALL_CITIES:
+        for it in market(c, mobile=MOBILE).values():   # 單次最多 30 筆，靠價格對半切才抓得完
             if it.get("MOBILE") == MOBILE: allc[it["NO"]] = it
     return list(allc.values())
 
@@ -131,7 +132,8 @@ def sync(items):
     for c in cs:
         if re.search(r"撤", c.get("NOW_STATUS") or ""): continue   # 撤件/撤回不上；停拍仍上架
         s = norm(c.get("ADDRESS"))
-        hit = next((x for x in items if len(s) >= 5 and s in norm(x["地址"])), None) if s else None
+        cty = norm(c.get("FULL_ADDRESS"))[:2].replace("臺", "台")   # 同路名不同縣市不可視為同一件
+        hit = next((x for x in items if len(s) >= 5 and s in norm(x["地址"]) and x["區域"][:2].replace("臺", "台") == cty), None) if s else None
         if hit:
             key = hit["編號"][2:]
             if hit["編號"].startswith("HW"):   # 自家物件：每次重抓完整筆錄

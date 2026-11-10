@@ -363,7 +363,7 @@ def hero_banner():
             f'<p class="sub">兩個人把關，查得清、標得穩</p>'
             f'<div class="cta2"><a class="b1" href="#list">瀏覽全部物件</a><a class="b2" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 諮詢</a></div>'
             f'<div class="stats"><span><b>{len(ITEMS)}</b>筆物件</span><span><b>每日</b>更新</span></div>'
-            f'<div class="qk"><button type="button" data-c="台北">台北</button><button type="button" data-c="新北">新北</button><button type="button" data-c="桃園">桃園</button><button type="button" data-r="3+">第3拍以上</button></div></div></section>')
+            f'<div class="qk">' + "".join(f'<button type="button" data-c="{e(c)}">{e(c)}</button>' for c, _ in _city_counts()) + '<button type="button" data-r="3+">第3拍以上</button></div></div></section>')
 
 def carousel(title, xs, href, cap=12, auto=False):
     """橫向滑動卡片（一次一張，底下圓點，最後 more 按鈕）"""
@@ -488,7 +488,7 @@ $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(funct
             f'<input type="hidden" id="r">'
             f'<select id="j" aria-label="點交情形"><option value="">點交不拘</option><option>點交</option><option>不點交</option><option>其他</option></select>'
             f'<select id="pr" aria-label="價格"><option value="">價格不拘</option><option value="0-500">500萬以下</option><option value="500-1000">500～1000萬</option><option value="1000-2000">1000～2000萬</option><option value="2000-3000">2000～3000萬</option><option value="3000-1000000">3000萬以上</option></select>'
-            f'<select id="s" aria-label="排序"><option value="">預設（雙北優先）</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
+            f'<select id="s" aria-label="排序"><option value="">預設</option><option value="pa">價格低→高</option><option value="pd">價格高→低</option><option value="da">開標日期近→遠</option><option value="dd">開標日期遠→近</option></select><button id="rs" type="button">重設</button></div>'
             f'<div id="n" class="m"></div><div class="grid" id="g">{"".join(card(x) for x in ITEMS)}</div>'
             f'<section class="box areas" id="areas"><h2>依地區找法拍屋</h2>' + "".join(f'<a href="/{c[0]}"><b>{e(c[3])}</b></a>' for c in CITIES) + f'<br>{al}</section>'
             + (contact_box() if list_mode else f'<section class="box" id="faq"><h2>法拍屋常見問題</h2>{faq}</section>' + extras_index() + contact_box()) + js + GATE_JS)
@@ -496,7 +496,7 @@ $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(funct
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]},
           {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(ITEMS[:50])]}]
     first = next((photos(x)[0] for x in ITEMS if photos(x)), None)
-    return page(f"大台北法拍屋｜台北法拍屋・新北法拍屋・桃園法拍屋｜{NAME}", f"大台北法拍屋、台北法拍屋、新北法拍屋、桃園法拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/list" if list_mode else "/", body, ld, SITE + "/og.jpg", "", "" if list_mode else hero_banner())
+    return page(f"全台法拍屋查詢｜台北・新北・桃園・台中・台南・高雄法拍屋｜{NAME}", f"全台各縣市法拍屋物件查詢，含拍次、開標日期、底標價與法院筆錄；提供法拍屋代標、產權調查、不點交處理、貸款諮詢。共{len(ITEMS)}筆，每日更新。", "/list" if list_mode else "/", body, ld, SITE + "/og.jpg", "", "" if list_mode else hero_banner())
 
 def list_page(path, h1, desc, xs):
     title = f"{h1}｜{len(xs)}筆｜{NAME}"
@@ -515,8 +515,24 @@ CITIES = [
     ("taipei", "台北", ["台北"], "台北法拍屋", "台北市"),
     ("new-taipei", "新北", ["新北"], "新北法拍屋", "新北市"),
     ("taoyuan", "桃園", ["桃園"], "桃園法拍屋", "桃園市"),
+    ("keelung", "基隆", ["基隆"], "基隆法拍屋", "基隆市"),
+    ("hsinchu", "新竹", ["新竹"], "新竹法拍屋", "新竹市、新竹縣"),
+    ("miaoli", "苗栗", ["苗栗"], "苗栗法拍屋", "苗栗縣"),
+    ("taichung", "台中", ["台中"], "台中法拍屋", "台中市"),
+    ("changhua", "彰化", ["彰化"], "彰化法拍屋", "彰化縣"),
+    ("nantou", "南投", ["南投"], "南投法拍屋", "南投縣"),
+    ("yunlin", "雲林", ["雲林"], "雲林法拍屋", "雲林縣"),
+    ("chiayi", "嘉義", ["嘉義"], "嘉義法拍屋", "嘉義市、嘉義縣"),
+    ("tainan", "台南", ["台南"], "台南法拍屋", "台南市"),
+    ("kaohsiung", "高雄", ["高雄"], "高雄法拍屋", "高雄市"),
+    ("pingtung", "屏東", ["屏東"], "屏東法拍屋", "屏東縣"),
+    ("yilan", "宜蘭", ["宜蘭"], "宜蘭法拍屋", "宜蘭縣"),
+    ("hualien", "花蓮", ["花蓮"], "花蓮法拍屋", "花蓮縣"),
+    ("taitung", "台東", ["台東"], "台東法拍屋", "台東縣"),
+    ("kinmen", "金門", ["金門"], "金門法拍屋", "金門縣"),
     ("greater-taipei", "大台北", ["台北", "新北", "基隆"], "大台北法拍屋", "台北、新北、基隆"),
 ]
+CITIES = [c for c in CITIES if any(x["區域"][:2] in c[2] for x in ITEMS)]   # 沒有物件的縣市不產生空頁
 
 def city_faq(kw, scope):
     return [
@@ -647,15 +663,15 @@ def _open_date(x):
     except ValueError: return ""
 
 def _live_pick(n=6):
-    """本週新增優先，台北／新北／桃園各取兩筆（需有照片）；不足再用 7 天內開標補滿"""
-    pool = [x for x in new_items() if photos(x) and _rank(x) < 3]
+    """本週新增優先，各縣市最多取兩筆（需有照片）；不足再用 7 天內開標補滿"""
+    pool = [x for x in new_items() if photos(x)]
     pool.sort(key=lambda x: (x.get("新增日", ""), ), reverse=True)
     out, per = [], {}
     for x in pool:
         c = x["區域"][:2]
         if per.get(c, 0) < 2:
             out.append(x); per[c] = per.get(c, 0) + 1
-    for x in pool + [y for y in upcoming(7) if photos(y) and _rank(y) < 3]:
+    for x in pool + [y for y in upcoming(7) if photos(y)]:
         if len(out) >= n: break
         if x not in out: out.append(x)
     out = out[:n]
@@ -680,8 +696,8 @@ def _live_card(x):
 
 def home_live_html():
     total = len(ITEMS)
-    tri = [x for x in ITEMS if _rank(x) < 3]
-    cnt = {c: sum(1 for x in tri if x["區域"][:2] == c) for c in ("台北", "新北", "桃園")}
+    tri = ITEMS
+    cnt = dict(_city_counts())
     new_n, soon_n = len(new_items()), len(upcoming(7))
     idx = [[x["區域"][:2], x["類型"].split("_")[0], round(price_num(x["價格"]) / 10000)] for x in tri]
     chips = "".join(f'<a href="/list?c={c}">{c}<b>{n}</b></a>' for c, n in cnt.items())
@@ -697,9 +713,27 @@ def home_live_html():
             f'<script type="application/json" id="live-index">{jd(idx)}</script>'
             '</div></section><!--LIVE:end-->')
 
+def _city_counts():
+    """各縣市件數，台北／新北／桃園在前，其餘依件數多到少"""
+    c = {}
+    for x in ITEMS: c[x["區域"][:2]] = c.get(x["區域"][:2], 0) + 1
+    return sorted(c.items(), key=lambda t: ({"台北": 0, "新北": 1, "桃園": 2}.get(t[0], 3), -t[1], t[0]))
+
+_CITY_FULL = {"台北": "台北市", "新北": "新北市", "桃園": "桃園市", "台中": "台中市", "台南": "台南市", "高雄": "高雄市", "基隆": "基隆市", "苗栗": "苗栗縣", "彰化": "彰化縣", "南投": "南投縣", "雲林": "雲林縣", "屏東": "屏東縣", "宜蘭": "宜蘭縣", "花蓮": "花蓮縣", "台東": "台東縣", "澎湖": "澎湖縣", "金門": "金門縣", "連江": "連江縣"}
+
+def _home_regions(t):
+    """首頁找屋的縣市按鈕與諮詢表單選項：跟著實際有物件的縣市產生"""
+    names = [_CITY_FULL.get(c, c) for c, _ in _city_counts()]
+    st = "flex:0 0 auto;font-size:16px;min-height:40px;padding:0 14px"
+    tabs = "".join('<button type="button" data-region="%s" aria-pressed="%s" style="%s">%s</button>' % (e(n), "true" if i == 0 else "false", st, e(n)) for i, n in enumerate(names))
+    t = re.sub(r'<div class="region-tabs"([^>]*)>.*?</div>', lambda m: '<div class="region-tabs"' + m[1] + ' style="display:flex;flex-wrap:wrap">' + tabs + "</div>", t, count=1, flags=re.S)
+    opts = "".join("<option>%s</option>" % e(n) for n in names) + "<option>其他地區／尚未決定</option>"
+    return re.sub(r'(<select id="inquiry-region">).*?(</select>)', lambda m: m[1] + opts + m[2], t, count=1, flags=re.S)
+
 def write_home():
     """新首頁：由 tpl/home.html 產生 site/index.html（資產在 site/home/）"""
     t = open("tpl/home.html", encoding="utf-8").read()
+    t = _home_regions(t)
     blk = home_live_html()
     if "<!--LIVE:start-->" in t:
         t = re.sub(r"<!--LIVE:start-->.*?<!--LIVE:end-->", lambda m: blk, t, flags=re.S)
