@@ -623,7 +623,8 @@ def fees_page():
     notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契稅、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
     body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
-            f'<section class="box"><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></section>'
+            f'<section class="box" style="text-align:center"><img src="/img/fees-chart.jpg" alt="104透明房訊服務費用與收費標準：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2–5%" width="1200" height="1870" loading="eager" style="width:100%;max-width:900px;height:auto;border-radius:8px"></section>'
+            f'<section class="box"><details><summary>文字版服務項目</summary><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></details></section>'
             f'<section class="box"><h2>費用附註</h2>{nh}</section>' + know_box() + contact_box())
     desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元），並列出各方案服務項目與費用附註。"
     ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
