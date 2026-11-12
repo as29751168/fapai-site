@@ -504,10 +504,36 @@ def list_page(path, h1, desc, xs):
     ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": h1, "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
     return page(title, desc, path, body, ld, SITE + "/og.jpg")
 
+def wan(n): return f"{n / 100000000:.1f}".rstrip("0").rstrip(".") + "億" if n >= 100000000 else f"{n / 10000:,.0f}萬"
+
+def area_summary(a, xs):
+    """區域整理文（原 部落格草稿 寫法）：件數、類型、底價範圍、最近開標，只用資料裡有的內容。"""
+    t = datetime.date.today(); today = (t.year - 1911) * 10000 + t.month * 100 + t.day
+    kinds = {}
+    for x in xs:
+        k = (x["類型"] or "其他").split("_")[0]; kinds[k] = kinds.get(k, 0) + 1
+    kind_txt = "、".join(f"{k} {v} 件" for k, v in sorted(kinds.items(), key=lambda kv: -kv[1]))
+    ps = sorted(p for p in (price_num(x["價格"]) for x in xs) if p > 0)
+    up = sorted((x for x in xs if today <= date_key(x) < 99999999), key=date_key)
+    md = lambda x: "/".join(str(int(v)) for v in x["資訊"]["開標日期"].split("/")[1:])
+    r3 = sum(1 for x in xs if round_of(x) >= 3)
+    dv = sum(1 for x in xs if deliver_of(x) == "點交")
+    parts = [f"整理{a}近期法拍物件，共 {len(xs)} 件（{kind_txt}）"]
+    if ps: parts.append(f"底價 {wan(ps[0])}～{wan(ps[-1])}")
+    if up: parts.append(f"最近一場 {md(up[0])} 開標")
+    if r3: parts.append(f"第三拍以上 {r3} 件")
+    if dv: parts.append(f"筆錄記載點交 {dv} 件")
+    intro = "，".join(parts) + f"。資料每日更新（{UPDATED}），拍次與底價會變動，投標前請以法院最新公告為準。"
+    soon = "".join(f'<li><a href="/h/{e(x["編號"])}">{e(md(x))}｜{e(x["地址"])}</a>｜{e("第%d拍" % round_of(x) if round_of(x) else "")} 底價 {e(re.sub(r"^售", "", x["價格"]))}</li>' for x in up[:6])
+    head = f"{a}法拍屋｜{len(xs)}件待標" + (f"・底價{wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"・最近{md(up[0])}開標" if up else "")
+    return head, intro, (f'<h2>{e(a)}近期開標</h2><ul class="soon">{soon}</ul>' if soon else "")
+
 def area_page(a, xs):
-    title = f"{a}法拍屋｜{len(xs)}筆物件｜{NAME}"
-    desc = f"{a}法拍屋物件列表，共{len(xs)}筆，含拍次、開標日期、底標價與法院筆錄；提供{a}法拍屋代標、產權調查與貸款諮詢。"
-    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a)}法拍屋（{len(xs)}筆）</h1><p>{e(desc)}</p><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
+    head, intro, soon = area_summary(a, xs)
+    title = f"{head}｜{NAME}"
+    desc = intro[:150]
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a)}法拍屋整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
     return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
 
