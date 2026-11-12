@@ -250,6 +250,28 @@ def kv(rows):
     rows = [(k, v) for k, v in rows if v]
     return "<table>" + "".join(f"<tr><td>{e(k)}</td><td>{e(v)}</td></tr>" for k, v in rows) + "</table>" if rows else ""
 
+_HAUNT_W = re.compile(r"非自然死亡|凶宅|兇宅|自殺|他殺|命案")
+
+def _haunt_lines(notes):
+    """筆錄中提到非自然死亡等字眼的「整句」（法院制式說明常寫『並無發生非自然死亡』，只截片段會誤導）。"""
+    out = []
+    for s in re.split(r"[。●\n]", notes or ""):
+        s = s.strip()
+        if _HAUNT_W.search(s) and s not in out:
+            out.append(s[:160] + ("…" if len(s) > 160 else ""))
+    return out[:2]
+
+def verify_box(addr, notes):
+    """凶宅與點交查證：只寫筆錄裡有的字，查不到就照實說查不到。"""
+    m = re.search(r"點交情形→([^●\n]+)", notes or "")
+    dv = m.group(1).strip()[:120] if m else ""
+    h = _haunt_lines(notes)
+    rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。"),
+            ("非自然死亡", ("筆錄原文：" + "／".join(h) + "。查不到不等於沒有，投標前仍請查台灣凶宅網並向管委會確認。") if h else "法院筆錄未提到非自然死亡。查不到不等於沒有，投標前請用完整門牌查台灣凶宅網，並向管委會或鄰里確認。"),
+            ("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。")]
+    return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
+            + '<p><a href="https://www.unluckyhouse.com/" target="_blank" rel="noopener nofollow">台灣凶宅網</a>｜<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>')
+
 def detail_page(x):
     inf = dict(x.get("資訊", {}))
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
@@ -274,6 +296,7 @@ def detail_page(x):
             rows.append(f"<tr><td>{e(m.group(1))}</td><td>{e(m.group(2) or '')}</td><td>{e(m.group(3))}</td></tr>" if m else f'<tr><td colspan="3">{e(ln)}</td></tr>')
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
     nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
+    nsec += verify_box(addr, notes)
     same = [y for y in ITEMS if y is not x and area_of(y) == area][:3]
     sim = ('<section class="box"><h2>相似物件</h2><div class="grid">' + "".join(card(y) for y in same) + "</div></section>") if same else ""
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
