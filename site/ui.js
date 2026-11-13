@@ -54,7 +54,15 @@
   var t = document.getElementById('tools');
   if (t) {
     var id = t.dataset.id, addr = t.dataset.addr, price = +t.dataset.price || 0;
-    var q = encodeURIComponent(addr.replace(/【[^】]*】/g, ''));
+    // 地圖只送『縣市＋路名門牌』：原始地址夾帶「法拍屋｜坪數｜底價」會讓 Google 誤比到同名商家
+    var mq = (function(a){
+      a = a.replace(/【[^】]*】/g, '').trim();
+      var city = (a.match(/^(?:[\u4e00-\u9fff]{1,3}[縣市])?[\u4e00-\u9fff]{1,3}[區鄉鎮市]/) || [''])[0];
+      var no = (a.match(/[^\s｜]*?[\u4e00-\u9fff\d]+號/g) || []).pop() || '';
+      if (no) { if (city && no.indexOf(city) === 0) no = no.slice(city.length); return (city + no).trim(); }
+      return a.split('法拍屋')[0].split('｜')[0].trim();
+    })(addr);
+    var q = encodeURIComponent(mq);
     var share = 'https://line.me/R/msg/text/?' + encodeURIComponent(addr + '\n' + location.href);
     t.innerHTML = '<h2>物件工具</h2><div class="tl2"><button type="button" id="fv2"></button>' +
       '<a href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">Google 地圖</a>' +
