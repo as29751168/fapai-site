@@ -91,6 +91,9 @@ def track(items):
         r = (x.get("資訊") or {}).get("拍次", "")
         rd = int(r) if r.isdigit() else 0
         s0 = seen.get(i)
+        if s0 is None and x.get("inherit") in seen and not seen[x["inherit"]].get("twin"):
+            seen[x["inherit"]]["twin"] = i; twin_of[i] = seen[x["inherit"]]
+        x.pop("inherit", None)
         if s0 is None and i in twin_of:   # HO 停用後改由透明房訊提供的同一物件：沿用原上架日，不算本週新增
             t = twin_of[i]
             s0 = seen[i] = {"first": t.get("first", ""), "price": t.get("price", pr), "round": t.get("round", rd)}
@@ -116,21 +119,35 @@ def track(items):
     for x in items:
         v = seen[x["編號"]]; v.pop("gone", None)
         inf = x.get("資訊") or {}
-        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", ""), "type": x.get("類型", "")})
+        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", ""), "type": x.get("類型", ""), "full": inf.get("完整地址", "")})
         if x.get("twin"): v["twin"] = x.pop("twin")
     os.makedirs("data", exist_ok=True)
     json.dump(seen, open(p, "w", encoding="utf-8"), ensure_ascii=False)
 
 def ho_items():
-    """House-Info（104法拍屋.tw）物件；HO 停用或抓不到時網站不能變空：
-    - 環境變數 HO_OFF=1 或 data/ho_status.json 的 off=true：完全不抓 HO，只用透明房訊（買屋網）
+    """House-Info（104法拍屋.tw）物件；預設不讀 HO（廠商要求），網站也不能因此變空：
+    - 預設、HO_OFF=1 或 data/ho_status.json 的 off=true：不讀 HO，沿用最後一次抓好的 HO 物件快照（見下方說明）
+    - 只有設定 HO_ON=1 才會讀 HO，且：
     - 抓取失敗或件數不到上次的一半：沿用上次的 HO 物件（價格拍次仍由公開資料校正），連續 3 次（每天跑 2 次，約一天半）都這樣就自動停用 HO；要恢復就刪掉 data/ho_status.json"""
     p = "data/ho_status.json"
     st = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
-    if os.environ.get("HO_OFF") == "1" or st.get("off"):
-        print("House-Info 已停用，只用透明房訊資料"); return []
+    # 2026-11-15 House-Info 廠商要求停止程式讀取它的網站（伺服器效能）；Anna 也確認資料以透明房訊為準。
+    # 預設不抓 HO；除非廠商同意且設定 HO_ON=1 才會再讀。
     try: prev = [x for x in json.load(open("site/data.json", encoding="utf-8"))["104"] if x["編號"].startswith("HH")]
     except Exception: prev = []
+    if os.environ.get("HO_ON") != "1" or os.environ.get("HO_OFF") == "1" or st.get("off"):
+        # 不讀 HO：沿用最後一次抓好的 HO 物件（快照）。拍次、日期、底價、狀態之後照常由透明房訊公開開標清單每天校正；
+        # 拍定／撤回會被校正程式拿掉；「待確認」（開標日過了、公開清單查無新場次）照下架規則（流標留著、停拍留三個月）
+        # 留到開標日後 90 天才拿掉，因為沒有其他來源能確認。
+        def old(x):
+            m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", (x.get("資訊") or {}).get("開標日期", ""))
+            if not m: return False
+            try: d = datetime.date(int(m[1]) + 1911, int(m[2]), int(m[3]))
+            except ValueError: return False
+            return (datetime.date.today() - d).days > 90
+        keep = [x for x in prev if not ((x.get("資訊") or {}).get("銷售狀態") == "待確認" and old(x))]
+        print("House-Info 不讀取（廠商要求），沿用最後一次的 HO 物件", len(keep), "件（拿掉開標日超過 90 天的待確認", len(prev) - len(keep), "件）")
+        return keep
     try: cur = s104()
     except Exception as e: print("House-Info 抓取失敗：", e); cur = []
     if prev and len(cur) < 0.5 * len(prev):

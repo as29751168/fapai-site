@@ -28,6 +28,12 @@ def get_text(path):
 
 def norm(s): return re.sub(r"[\s　]|<[^>]*>", "", s or "")
 
+def addr_tail(full):
+    """完整地址只留路名門牌到「號」（去掉縣市、行政區、樓層），用來比對同一物件"""
+    a = re.sub(r"^.{2,3}?[市縣].{1,3}?[區鄉鎮市]", "", norm(full).replace("臺", "台"))
+    m = re.match(r"(.*?號)", a)
+    return m.group(1) if m else ""
+
 def photo_list(c):
     out = []
     for k in range(1, 13):
@@ -112,6 +118,12 @@ def to_item(c):
     if age: info["屋齡"] = age + "年"
     if fl: info["所在樓層"] = fl
     if c.get("COMMUMITY"): info["社區/大樓"] = c["COMMUMITY"]
+    if "號" in full: info["完整地址"] = full
+    cn = g(r"案號：\s*([^\s｜|]+)")
+    if cn: info["案號"] = cn
+    for k, pat in (("主建物", r"主建物\s*([\d.]+)\s*坪"), ("附屬建物", r"附屬\s*([\d.]+)\s*坪"), ("公共設施", r"公設\s*([\d.]+)\s*坪"), ("土地登記總坪數", r"土地：合計約\s*([\d.]+)\s*坪")):
+        v = g(pat)
+        if v: info[k] = v
     fn = full_notes(d)
     if fn: info["筆錄"] = fn
     elif dj: info["筆錄"] = f"●點交情形→{dj}●"
@@ -129,11 +141,17 @@ def sync(items):
     try: P = json.load(open("site/photos.json", encoding="utf-8"))
     except Exception: pass
     pics = added = extra = 0
+    try: seen = json.load(open("data/seen.json", encoding="utf-8"))
+    except Exception: seen = {}
+    cur = {x["編號"] for x in items}
+    ho_seen = [(k, v) for k, v in seen.items() if k.startswith("HH") and k not in cur and "gone" not in v and not v.get("twin")]
+    ho_ghost = {(v.get("area", "")[:2], addr_tail(v.get("full"))): k for k, v in ho_seen if len(addr_tail(v.get("full"))) >= 5}
     for c in cs:
         if re.search(r"撤", c.get("NOW_STATUS") or ""): continue   # 撤件/撤回不上；停拍仍上架
         s = norm(c.get("ADDRESS"))
         cty = norm(c.get("FULL_ADDRESS"))[:2].replace("臺", "台")   # 同路名不同縣市不可視為同一件
-        hit = next((x for x in items if len(s) >= 5 and s in norm(x["地址"]) and x["區域"][:2].replace("臺", "台") == cty), None) if s else None
+        ft = addr_tail(c.get("FULL_ADDRESS"))
+        hit = next((x for x in items if x["區域"][:2].replace("臺", "台") == cty and ((len(s) >= 5 and s in norm(x["地址"])) or (len(ft) >= 5 and ft == addr_tail((x.get("資訊") or {}).get("完整地址"))))), None) if s or ft else None
         if hit:
             key = hit["編號"][2:]
             if hit["編號"].startswith("HH"): hit["twin"] = f"HW{c['NO']}"   # 記下同一物件在透明房訊的編號：HO 停用後舊網址轉過去
@@ -145,6 +163,8 @@ def sync(items):
                 time.sleep(0.3)
         else:
             x = to_item(c); items.append(x); key = x["編號"][2:]; extra += 1; time.sleep(0.3)
+            ho = ho_ghost.get((cty, ft)) or next((k for k, v in ho_seen if len(s) >= 5 and v.get("area", "")[:2] == cty and s in norm(v.get("addr"))), None)
+            if ho: x["inherit"] = ho   # HO 停用後由透明房訊接手的同一物件：舊網址轉過來、沿用上架日
         pl = photo_list(c)
         if pl and P.get(key) != pl: P[key] = pl; pics += 1
     # 其他尚無照片的物件：到透明房訊用地址對應，只取法院現場照
