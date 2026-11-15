@@ -99,7 +99,7 @@ h1{font-size:22px;line-height:1.4;margin:6px 0}h2{font-size:18px;margin:0 0 10px
 .card .m{font-size:13px;color:#666}.card .p{margin-top:6px;font-size:17px;font-weight:700;color:#b3261e}.card .p s{font-size:13px;font-weight:400;color:#999;margin-right:6px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}#n{scroll-margin-top:70px}.bar input,.bar select{padding:9px 10px;border:1px solid #ccc;border-radius:6px;font-size:16px;background:#fff}.bar input{flex:1;min-width:180px}
 .btn{display:inline-block;margin:6px 8px 0 0;padding:9px 15px;border-radius:6px;background:#1f3a4d;color:#fff!important;text-decoration:none;font-size:14px}.btn.line{background:#06c755}
-.cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
+.cd{margin:8px 0 0;color:var(--muted,#637581);font-size:15px}.cd b{display:inline-block;margin-left:10px;background:#9c3b32;color:#fff;border-radius:2px;padding:2px 10px;font-size:14px;font-weight:600}.cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
 .bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
 .cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:8px 12px;display:flex;gap:8px;z-index:9}.cta a,.cta button{flex:1;text-align:center;padding:12px;border-radius:8px;font-size:16px;border:0;color:#fff;text-decoration:none;cursor:pointer;font-family:inherit}.cta .l{background:#06c755}.cta .t{background:#1f3a4d}
 .hero{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.hero a{padding:10px 16px;border-radius:8px;color:#fff;text-decoration:none;font-size:15px;background:#1f3a4d}.hero a.l{background:#06c755}.hero a.f{background:#1877f2}
@@ -272,6 +272,28 @@ def verify_box(addr, notes):
     return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
             + '<p><a href="https://www.unluckyhouse.com/" target="_blank" rel="noopener nofollow">台灣凶宅網</a>｜<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>')
 
+def map_query(x):
+    """給 Google 地圖的乾淨地址：縣市＋行政區＋路名門牌（到「號」為止）。案名裡的「法拍屋｜坪數｜底價」、社區名都不送，避免比對到同名商家"""
+    q = (x.get("資訊") or {}).get("完整地址") or ""
+    if not q:
+        a = re.sub(r"【[^】]*】", "", x.get("地址") or "").strip()
+        a = a.split()[-1] if a.split() else a
+        a = a.split("｜")[-1]
+        area = area_of(x); c2, dist = area[:2], area[2:]
+        city = {"新竹": "新竹市" if dist.endswith("區") else "新竹縣", "嘉義": "嘉義市" if dist.endswith("區") else "嘉義縣"}.get(c2) or _CITY_FULL.get(c2, c2)
+        a = re.sub(r"^.{1,3}?[市縣](?=.{1,3}?[區鄉鎮市])", "", a)
+        if dist and a.startswith(dist): a = a[len(dist):]
+        q = city + dist + a
+    m = re.match(r"(.*?\d+(?:[-之]\d+)?號)", q)
+    return m.group(1) if m else q
+
+def countdown(x):
+    od = _open_date(x)
+    if not od: return ""
+    return (f'<p class="cd" data-open="{od}">開標日期 {e(x["資訊"].get("開標日期", ""))}</p>'
+            '<script>(function(){var p=document.querySelector(".cd");if(!p)return;var n=Math.ceil((new Date(p.dataset.open+"T00:00:00+08:00")-Date.now())/864e5);'
+            'var t=n>1?"還有 "+n+" 天開標":n===1?"明天開標":n===0?"今天開標":"";if(t)p.innerHTML+="<b>"+t+"</b>"})()</script>')
+
 def city_of(x):
     """物件所屬的縣市專區（CITIES 的一筆）；沒有專區時回傳 None"""
     return next((c for c in CITIES if c[0] != "greater-taipei" and area_of(x)[:2] in c[2]), None)
@@ -339,8 +361,8 @@ def detail_page(x):
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
-            f'<section class="box"><h1>{e(addr)}法拍屋</h1><p>{e(x["地址"])}</p><div>{tags}</div><div class="price">{pr}</div>{gal}</section>'
-            f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-id="{e(x["編號"])}"></section>'
+            f'<section class="box"><h1>{e(addr)}法拍屋</h1><p>{e(x["地址"])}</p><div>{tags}</div>{countdown(x)}<div class="price">{pr}</div>{gal}</section>'
+            f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-map="{e(map_query(x))}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
             + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + contact_box() + sim)
