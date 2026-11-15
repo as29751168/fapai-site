@@ -278,8 +278,9 @@ def detail_page(x):
     ph = photos(x)
     area = area_of(x)
     addr = inf.get("完整地址") or x["地址"]
-    full_title = f'{addr}法拍屋｜{x["類型"]}｜{NAME}'
-    desc = (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
+    comm = (re.search(r"【([^】]{2,20})】", x.get("地址") or "") or [None, ""])[1]
+    full_title = (f'{comm}法拍屋｜{addr}｜{x["類型"]}｜{NAME}' if comm else f'{addr}法拍屋｜{x["類型"]}｜{NAME}')
+    desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + "提供代標、產權調查、貸款諮詢，歡迎聯絡透明房訊104法拍網。")
     gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
