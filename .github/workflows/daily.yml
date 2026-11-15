@@ -1,9 +1,8 @@
 name: 每日更新法拍資料
-# 2026-11-10 GitHub 帳號恢復後重新註冊排程
+# 2026-11-10 GitHub 帳號恢復後重新註冊排程；2026-11-15 改成每天中午一次
 on:
   schedule:
-    - cron: "0 3 * * *"     # 台北時間 11:00
-    - cron: "30 8 * * *"    # 台北時間 16:30（當天開標結果）
+    - cron: "0 4 * * *"     # 台北時間 12:00（2026-11-15 Anna：只排中午；開標結果改隔天中午更新）
   workflow_dispatch:
 concurrency:
   group: daily-update
