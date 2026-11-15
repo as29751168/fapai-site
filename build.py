@@ -272,6 +272,44 @@ def verify_box(addr, notes):
     return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
             + '<p><a href="https://www.unluckyhouse.com/" target="_blank" rel="noopener nofollow">台灣凶宅網</a>｜<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>')
 
+def city_of(x):
+    """物件所屬的縣市專區（CITIES 的一筆）；沒有專區時回傳 None"""
+    return next((c for c in CITIES if c[0] != "greater-taipei" and area_of(x)[:2] in c[2]), None)
+
+def _comm(x): return (re.search(r"【([^】]{2,20})】", x.get("地址") or "") or [None, ""])[1]
+def _road(x):
+    a = re.sub(r"^.{2,3}?[市縣].{1,3}?[區鄉鎮市]", "", (x.get("資訊") or {}).get("完整地址") or "")
+    m = re.match(r"([^\d]{1,8}?(?:路|街|大道)(?:[一二三四五六七八九十]段)?)", a)
+    return m.group(1) if m else ""
+
+_IDX = {}
+def related_box(x, comm, area):
+    """相關物件（內部連結）：同社區 → 同路段 → 同區同類型 → 同區，最多 6 筆，並附區、縣市、類型專區連結"""
+    rd, ty = _road(x), x.get("類型", "")
+    if not _IDX:   # 一次建好索引，避免每頁掃全部物件
+        for y in ITEMS:
+            a = area_of(y)
+            for key in (("c", a[:2], _comm(y)), ("r", a, _road(y)), ("t", a, y.get("類型")), ("a", a)):
+                if all(key): _IDX.setdefault(key, []).append(y)
+    pools = [("同社區", _IDX.get(("c", area[:2], comm), []) if comm else []),
+             ("同路段", _IDX.get(("r", area, rd), []) if rd else []),
+             ("同區同類型", _IDX.get(("t", area, ty), [])),
+             ("同區", _IDX.get(("a", area), []))]
+    out, why = [], {}
+    for lab, ys in pools:
+        for y in ys:
+            if y is x or y in out or len(out) >= 6: continue
+            out.append(y); why[lab] = why.get(lab, 0) + 1
+    cc = city_of(x)
+    links = [f'<a href="/area/{slug(area)}">{e(area)}全部法拍屋</a>']
+    if cc:
+        links.append(f'<a href="/{cc[0]}">{e(cc[3])}</a>')
+        t = next((t for t in TYPES if t[2] in ty and len(type_items(cc, t[2])) >= 3), None)
+        if t: links.append(f'<a href="/{cc[0]}-{t[0]}">{e(cc[1] + t[1])}法拍屋</a>')
+    head = "附近與相似物件" + (f'（{"、".join(f"{k}{v}筆" for k, v in why.items())}）' if why else "")
+    grid = ('<div class="grid">' + "".join(card(y) for y in out) + "</div>") if out else ""
+    return f'<section class="box"><h2>{e(head)}</h2>{grid}<p class="areas">{"".join(links)}</p></section>'
+
 def detail_page(x):
     inf = dict(x.get("資訊", {}))
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
@@ -298,9 +336,9 @@ def detail_page(x):
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
     nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
     nsec += verify_box(addr, notes)
-    same = [y for y in ITEMS if y is not x and area_of(y) == area][:3]
-    sim = ('<section class="box"><h2>相似物件</h2><div class="grid">' + "".join(card(y) for y in same) + "</div></section>") if same else ""
-    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
+    sim = related_box(x, comm, area)
+    cc = city_of(x)
+    body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
             f'<section class="box"><h1>{e(addr)}法拍屋</h1><p>{e(x["地址"])}</p><div>{tags}</div><div class="price">{pr}</div>{gal}</section>'
             f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
@@ -315,6 +353,10 @@ def detail_page(x):
               {"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"},
               {"@type": "ListItem", "position": 2, "name": area + "法拍屋", "item": f"{SITE}/area/{slug(area)}"},
               {"@type": "ListItem", "position": 3, "name": addr}]}]
+    if cc:   # 麵包屑加縣市層：首頁 › 縣市法拍屋 › 行政區法拍屋 › 物件
+        bl = ld[-1]["itemListElement"]
+        bl.insert(1, {"@type": "ListItem", "position": 2, "name": cc[3], "item": f"{SITE}/{cc[0]}"})
+        for i, it in enumerate(bl, 1): it["position"] = i
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
@@ -702,6 +744,40 @@ def about_page():
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]
     return page(f"關於我們｜透明房訊／104法拍網法拍代標團隊｜{NAME}", "透明房訊／104法拍網：黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問，提供法拍屋查詢、產權調查、點交與代標服務。", "/about", body, ld, SITE + "/og.jpg")
 
+def gone_page(k, v):
+    """已從列表消失的物件：保留網址（不讓 Google、FB 舊連結變 404），標示已下架並導到同區現有物件；不放進 sitemap、不收錄"""
+    addr, area = v.get("addr", ""), (v.get("area", "").split("-")[0])
+    x = {"編號": k, "地址": addr, "區域": v.get("area", ""), "類型": v.get("type", ""), "資訊": {}}
+    rows = kv([("案名／地址", addr), ("地區", area), ("最後拍次", ("第%s拍" % v["rd"]) if v.get("rd") else ""), ("最後開標日期", v.get("date", "")),
+               ("最後底價", re.sub(r"^售", "", v.get("ptxt", ""))), ("下架日期", v.get("gone", ""))])
+    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › 已下架物件</nav>'
+            f'<section class="box"><h1>{e(addr)}（已下架）</h1><p>這筆物件已從列表下架，可能是拍定、停拍或撤回，實際結果請以法院公告為準。想知道結果或找類似物件，歡迎 LINE 或電話詢問。</p>{rows}'
+            f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 詢問</a> <a class="btn" href="tel:0918313888">電話洽詢</a> <a class="btn" href="/area/{slug(area)}">看{e(area)}現有物件</a></p></section>'
+            + related_box(x, _comm(x), area))
+    return page(f"{addr}（已下架）｜{area}法拍屋｜{NAME}", f"{addr}已從法拍物件列表下架，結果以法院公告為準；可查看{area}其他現有法拍屋。", f"/h/{k}", body).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
+
+def write_gone(cur_ids, keep_days=180):
+    """下架物件：有透明房訊同一物件（HO 停用後）就 301 轉址過去，其餘產生已下架頁；回傳 (已下架頁數, 轉址數)"""
+    try: seen = json.load(open("data/seen.json", encoding="utf-8"))
+    except Exception: return 0, 0
+    red, n = [], 0
+    for k, v in seen.items():
+        if k in cur_ids or not v.get("addr"): continue
+        if v.get("twin") in cur_ids:
+            red.append(f'/h/{k} /h/{v["twin"]} 301'); continue
+        if not v.get("gone"): continue
+        try:
+            if (_today() - datetime.date.fromisoformat(v["gone"])).days > keep_days: continue
+        except ValueError: continue
+        write(f"site/h/{k}.html", gone_page(k, v)); n += 1
+    write("site/_redirects", "# 自動產生：House-Info 舊物件網址轉到透明房訊同一物件\n" + "".join(r + "\n" for r in red[:1900]))
+    return n, len(red)
+
+def lastmod(x):
+    """物件最後變動日（新增或降價降拍），沒有紀錄就不寫，避免每天都報全部更新"""
+    d = max(x.get("新增日") or "", x.get("異動日") or "")
+    return d if re.fullmatch(r"\d{4}-\d{2}-\d{2}", d) else ""
+
 def write(path, s):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
@@ -805,7 +881,8 @@ if __name__ == "__main__":
     write("site/list.html", index_page(True))
     urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
     for x in ITEMS:
-        write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8))
+        write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8, lastmod(x)))
+    ng, nr = write_gone({x["編號"] for x in ITEMS})
     areas = {}
     for x in ITEMS: areas.setdefault(area_of(x), []).append(x)
     for a, xs in areas.items():
@@ -824,7 +901,7 @@ if __name__ == "__main__":
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-          "".join(f"<url><loc>{e(SITE + p)}</loc><lastmod>{day}</lastmod><priority>{pr}</priority></url>\n" for p, pr in urls) + "</urlset>\n")
+          "".join(f"<url><loc>{e(SITE + u[0])}</loc>" + (f"<lastmod>{u[2] if len(u) > 2 else day}</lastmod>" if len(u) < 3 or u[2] else "") + f"<priority>{u[1]}</priority></url>\n" for u in urls) + "</urlset>\n")
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
@@ -837,4 +914,4 @@ if __name__ == "__main__":
     write("site/helper.html", helper_page())
     write("site/member.html", member_page())
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/list">回到法拍屋物件列表</a></p>'))
-    print("pages:", len(urls))
+    print("pages:", len(urls), "已下架頁:", ng, "轉址:", nr)

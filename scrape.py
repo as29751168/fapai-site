@@ -85,11 +85,17 @@ def track(items):
         m = re.search(r"([\d.,]+)\s*(億|萬)?", t or "")
         if not m: return 0
         return int(float(m.group(1).replace(",", "")) * (100000000 if m.group(2) == "億" else 10000 if m.group(2) == "萬" else 1))
+    twin_of = {v["twin"]: v for v in seen.values() if v.get("twin")}   # 透明房訊編號 -> 同一物件的 House-Info 紀錄
     for x in items:
         i, pr = x["編號"], num(x["價格"])
         r = (x.get("資訊") or {}).get("拍次", "")
         rd = int(r) if r.isdigit() else 0
         s0 = seen.get(i)
+        if s0 is None and i in twin_of:   # HO 停用後改由透明房訊提供的同一物件：沿用原上架日，不算本週新增
+            t = twin_of[i]
+            s0 = seen[i] = {"first": t.get("first", ""), "price": t.get("price", pr), "round": t.get("round", rd)}
+            for k in ("old", "changed"):
+                if t.get(k): s0[k] = t[k]
         if s0 is None:
             s0 = seen[i] = {"first": "" if first_run else today, "price": pr, "round": rd}
         else:
@@ -102,20 +108,47 @@ def track(items):
         x["新增日"], x["異動日"], x["降價前"] = s0["first"], s0.get("changed", ""), s0.get("old", 0)
     # 下架偵測：今天沒出現的物件記下 gone 日期（拍定／停拍／撤回都會從列表消失）；抓取量異常偏少時不判定，避免誤判
     cur = {x["編號"] for x in items}
-    active = [k for k, v in seen.items() if "gone" not in v]
+    srcs = {k[:2] for k in cur}   # 整個來源停用（例如 HO 不續約）時，該來源不列入比例計算，照常判定下架
+    active = [k for k, v in seen.items() if "gone" not in v and k[:2] in srcs]
     if not first_run and active and len(cur) >= 0.8 * len(active):
         for k, v in seen.items():
             if k not in cur and "gone" not in v: v["gone"] = today
     for x in items:
         v = seen[x["編號"]]; v.pop("gone", None)
         inf = x.get("資訊") or {}
-        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", "")})
+        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", ""), "type": x.get("類型", "")})
+        if x.get("twin"): v["twin"] = x.pop("twin")
     os.makedirs("data", exist_ok=True)
     json.dump(seen, open(p, "w", encoding="utf-8"), ensure_ascii=False)
 
+def ho_items():
+    """House-Info（104法拍屋.tw）物件；HO 停用或抓不到時網站不能變空：
+    - 環境變數 HO_OFF=1 或 data/ho_status.json 的 off=true：完全不抓 HO，只用透明房訊（買屋網）
+    - 抓取失敗或件數不到上次的一半：沿用上次的 HO 物件（價格拍次仍由公開資料校正），連續 3 次（每天跑 2 次，約一天半）都這樣就自動停用 HO；要恢復就刪掉 data/ho_status.json"""
+    p = "data/ho_status.json"
+    st = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+    if os.environ.get("HO_OFF") == "1" or st.get("off"):
+        print("House-Info 已停用，只用透明房訊資料"); return []
+    try: prev = [x for x in json.load(open("site/data.json", encoding="utf-8"))["104"] if x["編號"].startswith("HH")]
+    except Exception: prev = []
+    try: cur = s104()
+    except Exception as e: print("House-Info 抓取失敗：", e); cur = []
+    if prev and len(cur) < 0.5 * len(prev):
+        st["fail"] = st.get("fail", 0) + 1
+        if st["fail"] >= 3:
+            st["off"] = True; out = []
+            print("House-Info 連續", st["fail"], "次抓不到，自動停用，改用透明房訊")
+        else:
+            out = prev; print("House-Info 只抓到", len(cur), "件，沿用上次", len(prev), "件（第", st["fail"], "次）")
+    else:
+        st["fail"] = 0; out = cur
+    os.makedirs("data", exist_ok=True)
+    json.dump(st, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+    return out
+
 if __name__ == "__main__":
     data = {"更新時間": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-            "104": s104()}
+            "104": ho_items()}
     clear_images()
     try:
         import scrape_woo

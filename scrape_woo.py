@@ -136,6 +136,7 @@ def sync(items):
         hit = next((x for x in items if len(s) >= 5 and s in norm(x["地址"]) and x["區域"][:2].replace("臺", "台") == cty), None) if s else None
         if hit:
             key = hit["編號"][2:]
+            if hit["編號"].startswith("HH"): hit["twin"] = f"HW{c['NO']}"   # 記下同一物件在透明房訊的編號：HO 停用後舊網址轉過去
             if hit["編號"].startswith("HW"):   # 自家物件：每次重抓完整筆錄
                 try:
                     fn = full_notes(get_text(f"/Sales/{MOBILE}/{c['NO']}"))
