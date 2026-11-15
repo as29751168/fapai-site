@@ -55,7 +55,7 @@
   if (t) {
     var id = t.dataset.id, addr = t.dataset.addr, price = +t.dataset.price || 0;
     // 地圖只送『縣市＋路名門牌』：原始地址夾帶「法拍屋｜坪數｜底價」會讓 Google 誤比到同名商家
-    var mq = (function(a){
+    var mq = t.dataset.map || (function(a){
       a = a.replace(/【[^】]*】/g, '').trim();
       var city = (a.match(/^(?:[\u4e00-\u9fff]{1,3}[縣市])?[\u4e00-\u9fff]{1,3}[區鄉鎮市]/) || [''])[0];
       var no = (a.match(/[^\s｜]*?[\u4e00-\u9fff\d]+號/g) || []).pop() || '';
