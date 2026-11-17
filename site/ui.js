@@ -1,5 +1,7 @@
 /* 透明房訊 UI 強化：開標倒數、較首拍降幅、收藏、分享、地圖、貸款試算 */
 (function () {
+  // 記下訪客從哪個管道來（網址的 utm_source）；物件頁按「LINE 詢問」時會附在詢問文字後面，用來算詢問來源
+  try { var um = location.search.match(/[?&]utm_source=([\w-]{1,24})/); if (um) sessionStorage.setItem('tm_src', um[1]); } catch (e) {}
   var K = 'fav104';
   function get() { try { return JSON.parse(localStorage.getItem(K) || '[]'); } catch (e) { return []; } }
   function set(a) { try { localStorage.setItem(K, JSON.stringify(a)); } catch (e) {} }
