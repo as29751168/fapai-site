@@ -1,6 +1,6 @@
 # 透明房訊｜104法拍網
 
-> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（2026-11-16 18:52）。
+> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（2026-11-17 12:52）。
 
 ## 主要頁面
 - [物件列表](https://tomin104.com/list): 全部法拍屋物件與搜尋
@@ -28,8 +28,8 @@
 - [南投集集鎮法拍屋](https://tomin104.com/area/%E5%8D%97%E6%8A%95%E9%9B%86%E9%9B%86%E9%8E%AE): 1筆
 - [台中中區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E4%B8%AD%E5%8D%80): 1筆
 - [台中北區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8C%97%E5%8D%80): 8筆
-- [台中北屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8C%97%E5%B1%AF%E5%8D%80): 14筆
-- [台中南區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%8D%80): 8筆
+- [台中北屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8C%97%E5%B1%AF%E5%8D%80): 12筆
+- [台中南區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%8D%80): 7筆
 - [台中南屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%B1%AF%E5%8D%80): 10筆
 - [台中后里區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%90%8E%E9%87%8C%E5%8D%80): 1筆
 - [台中外埔區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%A4%96%E5%9F%94%E5%8D%80): 1筆
@@ -49,21 +49,21 @@
 - [台中神岡區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E7%A5%9E%E5%B2%A1%E5%8D%80): 3筆
 - [台中西區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%A5%BF%E5%8D%80): 10筆
 - [台中西屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%A5%BF%E5%B1%AF%E5%8D%80): 14筆
-- [台中豐原區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%B1%90%E5%8E%9F%E5%8D%80): 3筆
+- [台中豐原區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%B1%90%E5%8E%9F%E5%8D%80): 2筆
 - [台中霧峰區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E9%9C%A7%E5%B3%B0%E5%8D%80): 1筆
 - [台中龍井區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E9%BE%8D%E4%BA%95%E5%8D%80): 1筆
-- [台北中山區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E4%B8%AD%E5%B1%B1%E5%8D%80): 20筆
-- [台北中正區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E4%B8%AD%E6%AD%A3%E5%8D%80): 6筆
+- [台北中山區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E4%B8%AD%E5%B1%B1%E5%8D%80): 17筆
+- [台北中正區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E4%B8%AD%E6%AD%A3%E5%8D%80): 5筆
 - [台北信義區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E4%BF%A1%E7%BE%A9%E5%8D%80): 11筆
 - [台北內湖區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%85%A7%E6%B9%96%E5%8D%80): 12筆
-- [台北北投區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%8C%97%E6%8A%95%E5%8D%80): 4筆
+- [台北北投區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%8C%97%E6%8A%95%E5%8D%80): 5筆
 - [台北南港區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%8D%97%E6%B8%AF%E5%8D%80): 4筆
 - [台北士林區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E5%8D%80): 10筆
 - [台北大同區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A4%A7%E5%90%8C%E5%8D%80): 2筆
 - [台北大安區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E5%A4%A7%E5%AE%89%E5%8D%80): 14筆
 - [台北文山區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E6%96%87%E5%B1%B1%E5%8D%80): 10筆
 - [台北松山區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E6%9D%BE%E5%B1%B1%E5%8D%80): 14筆
-- [台北萬華區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E8%90%AC%E8%8F%AF%E5%8D%80): 6筆
+- [台北萬華區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8C%97%E8%90%AC%E8%8F%AF%E5%8D%80): 5筆
 - [台南七股區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E4%B8%83%E8%82%A1%E5%8D%80): 1筆
 - [台南中西區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E4%B8%AD%E8%A5%BF%E5%8D%80): 2筆
 - [台南仁德區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E4%BB%81%E5%BE%B7%E5%8D%80): 1筆
@@ -74,13 +74,12 @@
 - [台南善化區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%96%84%E5%8C%96%E5%8D%80): 3筆
 - [台南大內區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%A4%A7%E5%85%A7%E5%8D%80): 1筆
 - [台南學甲區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%AD%B8%E7%94%B2%E5%8D%80): 2筆
-- [台南安南區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%AE%89%E5%8D%97%E5%8D%80): 8筆
-- [台南安定區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%AE%89%E5%AE%9A%E5%8D%80): 1筆
+- [台南安南區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%AE%89%E5%8D%97%E5%8D%80): 6筆
 - [台南安平區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%AE%89%E5%B9%B3%E5%8D%80): 6筆
 - [台南將軍區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%B0%87%E8%BB%8D%E5%8D%80): 3筆
 - [台南山上區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%B1%B1%E4%B8%8A%E5%8D%80): 1筆
 - [台南後壁區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E5%BE%8C%E5%A3%81%E5%8D%80): 1筆
-- [台南新營區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E6%96%B0%E7%87%9F%E5%8D%80): 7筆
+- [台南新營區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E6%96%B0%E7%87%9F%E5%8D%80): 6筆
 - [台南東區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E6%9D%B1%E5%8D%80): 5筆
 - [台南柳營區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E6%9F%B3%E7%87%9F%E5%8D%80): 1筆
 - [台南歸仁區法拍屋](https://tomin104.com/area/%E5%8F%B0%E5%8D%97%E6%AD%B8%E4%BB%81%E5%8D%80): 3筆
@@ -101,14 +100,14 @@
 - [嘉義溪口鄉法拍屋](https://tomin104.com/area/%E5%98%89%E7%BE%A9%E6%BA%AA%E5%8F%A3%E9%84%89): 1筆
 - [基隆七堵區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E4%B8%83%E5%A0%B5%E5%8D%80): 4筆
 - [基隆中山區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E4%B8%AD%E5%B1%B1%E5%8D%80): 1筆
-- [基隆中正區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E4%B8%AD%E6%AD%A3%E5%8D%80): 6筆
+- [基隆中正區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E4%B8%AD%E6%AD%A3%E5%8D%80): 5筆
 - [基隆信義區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E4%BF%A1%E7%BE%A9%E5%8D%80): 4筆
 - [基隆安樂區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E5%AE%89%E6%A8%82%E5%8D%80): 3筆
 - [基隆暖暖區法拍屋](https://tomin104.com/area/%E5%9F%BA%E9%9A%86%E6%9A%96%E6%9A%96%E5%8D%80): 5筆
 - [宜蘭五結鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E4%BA%94%E7%B5%90%E9%84%89): 2筆
 - [宜蘭冬山鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E5%86%AC%E5%B1%B1%E9%84%89): 1筆
-- [宜蘭壯圍鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E5%A3%AF%E5%9C%8D%E9%84%89): 3筆
-- [宜蘭宜蘭市法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E5%AE%9C%E8%98%AD%E5%B8%82): 3筆
+- [宜蘭壯圍鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E5%A3%AF%E5%9C%8D%E9%84%89): 2筆
+- [宜蘭宜蘭市法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E5%AE%9C%E8%98%AD%E5%B8%82): 2筆
 - [宜蘭礁溪鄉法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E7%A4%81%E6%BA%AA%E9%84%89): 2筆
 - [宜蘭羅東鎮法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E7%BE%85%E6%9D%B1%E9%8E%AE): 1筆
 - [宜蘭蘇澳鎮法拍屋](https://tomin104.com/area/%E5%AE%9C%E8%98%AD%E8%98%87%E6%BE%B3%E9%8E%AE): 1筆
@@ -116,7 +115,7 @@
 - [屏東九如鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E4%B9%9D%E5%A6%82%E9%84%89): 2筆
 - [屏東佳冬鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E4%BD%B3%E5%86%AC%E9%84%89): 2筆
 - [屏東內埔鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%85%A7%E5%9F%94%E9%84%89): 2筆
-- [屏東屏東市法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%B1%8F%E6%9D%B1%E5%B8%82): 6筆
+- [屏東屏東市法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%B1%8F%E6%9D%B1%E5%B8%82): 5筆
 - [屏東恆春鎮法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%81%86%E6%98%A5%E9%8E%AE): 3筆
 - [屏東新園鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%96%B0%E5%9C%92%E9%84%89): 1筆
 - [屏東枋寮鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%9E%8B%E5%AF%AE%E9%84%89): 1筆
@@ -179,18 +178,18 @@
 - [新竹芎林鄉法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E8%8A%8E%E6%9E%97%E9%84%89): 1筆
 - [新竹香山區法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E9%A6%99%E5%B1%B1%E5%8D%80): 2筆
 - [桃園中壢區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E4%B8%AD%E5%A3%A2%E5%8D%80): 17筆
-- [桃園八德區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%85%AB%E5%BE%B7%E5%8D%80): 10筆
+- [桃園八德區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%85%AB%E5%BE%B7%E5%8D%80): 11筆
 - [桃園大園區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%A4%A7%E5%9C%92%E5%8D%80): 1筆
 - [桃園大溪區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%A4%A7%E6%BA%AA%E5%8D%80): 10筆
 - [桃園平鎮法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%B9%B3%E9%8E%AE): 3筆
 - [桃園平鎮區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E5%B9%B3%E9%8E%AE%E5%8D%80): 10筆
 - [桃園新屋區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%96%B0%E5%B1%8B%E5%8D%80): 3筆
-- [桃園桃園區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A1%83%E5%9C%92%E5%8D%80): 26筆
+- [桃園桃園區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A1%83%E5%9C%92%E5%8D%80): 27筆
 - [桃園楊梅區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E6%A5%8A%E6%A2%85%E5%8D%80): 18筆
 - [桃園蘆竹區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E8%98%86%E7%AB%B9%E5%8D%80): 9筆
-- [桃園觀音區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E8%A7%80%E9%9F%B3%E5%8D%80): 9筆
+- [桃園觀音區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E8%A7%80%E9%9F%B3%E5%8D%80): 8筆
 - [桃園龍潭區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E9%BE%8D%E6%BD%AD%E5%8D%80): 11筆
-- [桃園龜山區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E9%BE%9C%E5%B1%B1%E5%8D%80): 8筆
+- [桃園龜山區法拍屋](https://tomin104.com/area/%E6%A1%83%E5%9C%92%E9%BE%9C%E5%B1%B1%E5%8D%80): 9筆
 - [花蓮光復鄉法拍屋](https://tomin104.com/area/%E8%8A%B1%E8%93%AE%E5%85%89%E5%BE%A9%E9%84%89): 1筆
 - [花蓮吉安鄉法拍屋](https://tomin104.com/area/%E8%8A%B1%E8%93%AE%E5%90%89%E5%AE%89%E9%84%89): 3筆
 - [花蓮花蓮市法拍屋](https://tomin104.com/area/%E8%8A%B1%E8%93%AE%E8%8A%B1%E8%93%AE%E5%B8%82): 2筆
@@ -217,7 +216,7 @@
 - [高雄林園區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%9E%97%E5%9C%92%E5%8D%80): 2筆
 - [高雄梓官區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%A2%93%E5%AE%98%E5%8D%80): 1筆
 - [高雄楠梓區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%A5%A0%E6%A2%93%E5%8D%80): 6筆
-- [高雄橋頭區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%A9%8B%E9%A0%AD%E5%8D%80): 3筆
+- [高雄橋頭區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%A9%8B%E9%A0%AD%E5%8D%80): 2筆
 - [高雄燕巢區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E7%87%95%E5%B7%A2%E5%8D%80): 1筆
 - [高雄苓雅區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E8%8B%93%E9%9B%85%E5%8D%80): 9筆
 - [高雄路竹區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E8%B7%AF%E7%AB%B9%E5%8D%80): 2筆
@@ -286,7 +285,6 @@
 - [高雄公寓法拍屋](https://tomin104.com/kaohsiung-apartment)
 - [高雄大樓法拍屋](https://tomin104.com/kaohsiung-building)
 - [屏東透天法拍屋](https://tomin104.com/pingtung-townhouse)
-- [屏東公寓法拍屋](https://tomin104.com/pingtung-apartment)
 - [宜蘭透天法拍屋](https://tomin104.com/yilan-townhouse)
 - [宜蘭大樓法拍屋](https://tomin104.com/yilan-building)
 - [花蓮透天法拍屋](https://tomin104.com/hualien-townhouse)
