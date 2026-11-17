@@ -416,6 +416,11 @@ def related_box(x, comm, area):
     grid = ('<div class="grid">' + "".join(card(y) for y in out) + "</div>") if out else ""
     return f'<section class="box"><h2>{e(head)}</h2>{grid}<p class="areas">{"".join(links)}</p></section>'
 
+def utm(path, source, medium="", campaign="", content=""):
+    """各管道連結統一加 UTM：source 用 fb_group、fb_page、marketplace、youtube、line、591、ho（對照表在 部門建議／各管道連結_UTM對照表.md）"""
+    q = urllib.parse.urlencode([(k, v) for k, v in (("utm_source", source), ("utm_medium", medium), ("utm_campaign", campaign), ("utm_content", content)) if v])
+    return SITE + path + ("&" if "?" in path else "?") + q
+
 def detail_page(x):
     inf = dict(x.get("資訊", {}))
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
@@ -424,14 +429,21 @@ def detail_page(x):
     addr = inf.get("完整地址") or x["地址"]
     comm = community_of(x)
     # 2026-11-17 Search Console：有曝光的查詢多是「社區名／路名＋凶宅」，標題要有「凶宅點交查證」才對得上
-    full_title = (f'{comm}法拍屋｜{addr}｜凶宅點交查證｜{NAME}' if comm else f'{addr}法拍屋｜{x["類型"]}・凶宅點交查證｜{NAME}')
+    # 2026-11-17 Anna：免費曝光先做。標題、H1、內文都要有「社區名＋法拍屋＋區＋路名」，搜社區名才找得到
+    dist, rd = (area[2:] or area), _road(x)
+    loc = addr if dist in addr else f"{dist}{rd}｜{addr}"
+    full_title = (f'{comm}法拍屋｜{loc}｜凶宅點交查證｜{NAME}' if comm else f'{loc}法拍屋｜{x["類型"]}・凶宅點交查證｜{NAME}')
+    h1 = (f"{comm}法拍屋｜{dist}{rd}" if rd else f"{comm}法拍屋｜{addr}") if comm else f"{addr}法拍屋"
+    lead = ((f"{comm}法拍屋，位於{dist}{rd}" if comm else f"{dist}{rd}法拍屋") + f"，門牌 {addr}，{x['類型']}"
+            + (f"，第{inf['拍次']}拍" if inf.get("拍次") else "") + (f"，開標日期 {inf['開標日期']}" if inf.get("開標日期") else "")
+            + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
     vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
              + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。") if notes else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
-    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
+    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
     top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", re.sub(r"-0房$", "", x["區域"])), ("物件編號", x["編號"])])
@@ -449,13 +461,13 @@ def detail_page(x):
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
-            f'<section class="box"><h1>{e(addr)}法拍屋</h1><p>{e(x["地址"])}</p><div>{tags}</div>{countdown(x)}<div class="price">{pr}</div>{gal}</section>'
+            f'<section class="box"><h1>{e(h1)}</h1><p>{e(x["地址"])}</p>' + (f'<p>{e(lead)}</p>' if lead else "") + f'<div>{tags}</div>{countdown(x)}<div class="price">{pr}</div>{gal}</section>'
             f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-map="{e(map_query(x))}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
             + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + contact_box() + sim)
     ld = [ORG,
-          {"@context": "https://schema.org", "@type": "RealEstateListing", "name": f"{addr}法拍屋", "url": f'{SITE}/h/{x["編號"]}', "description": desc,
+          {"@context": "https://schema.org", "@type": "RealEstateListing", "name": (f"{comm}法拍屋｜{addr}" if comm else f"{addr}法拍屋"), "url": f'{SITE}/h/{x["編號"]}', "description": desc,
            "image": ph[:6] or None, "dateModified": UPDATED.replace(" ", "T") + ":00+08:00",
            "offers": {"@type": "Offer", "price": price_num(x["價格"]), "priceCurrency": "TWD", "availability": "https://schema.org/InStock", "seller": {"@id": SITE + "/#org"}},
            "about": {"@type": "Place", "name": addr, "address": {"@type": "PostalAddress", "streetAddress": addr, "addressCountry": "TW"}}},
@@ -471,7 +483,7 @@ def detail_page(x):
         for k in [k for k, v in o.items() if v is None]: del o[k]
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
-           f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)};try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
+           f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s)t+="（來源:"+s+"）";try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
     return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
 
 FAQ = [
