@@ -119,7 +119,8 @@ def track(items):
     for x in items:
         v = seen[x["編號"]]; v.pop("gone", None)
         inf = x.get("資訊") or {}
-        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", ""), "type": x.get("類型", ""), "full": inf.get("完整地址", "")})
+        v.update({"addr": x["地址"], "area": x["區域"], "ptxt": x["價格"], "rd": inf.get("拍次", ""), "date": inf.get("開標日期", ""), "type": x.get("類型", ""), "full": inf.get("完整地址", ""),
+                  "comm": re.sub(r"[（(].*$", "", inf.get("社區/大樓") or "").strip()})
         if x.get("twin"): v["twin"] = x.pop("twin")
     os.makedirs("data", exist_ok=True)
     json.dump(seen, open(p, "w", encoding="utf-8"), ensure_ascii=False)

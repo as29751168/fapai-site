@@ -298,7 +298,89 @@ def city_of(x):
     """物件所屬的縣市專區（CITIES 的一筆）；沒有專區時回傳 None"""
     return next((c for c in CITIES if c[0] != "greater-taipei" and area_of(x)[:2] in c[2]), None)
 
-def _comm(x): return (re.search(r"【([^】]{2,20})】", x.get("地址") or "") or [None, ""])[1]
+def community_of(x):
+    """社區名：只用來源資料的「社區/大樓」欄（去掉括號裡的建商名）；不從案名的【】猜，那裡常是「頂加」「一樓」「捷運站」"""
+    v = re.sub(r"[（(].*$", "", ((x.get("資訊") or {}).get("社區/大樓") or "")).strip()
+    return v if len(v) >= 2 and v not in ("無社區", "不詳") else ""
+
+def _comm(x): return community_of(x)
+def _safe(s): return re.sub(r'[\\/:*?"<>|\s#%&.]', "", s or "")
+def comm_key(x):
+    c = community_of(x)
+    return f"{area_of(x)[:2]}-{_safe(c)}" if c else ""
+
+_CG = None
+def community_groups():
+    """社區頁的資料：同縣市同社區的現有物件＋近半年下架的；合計 2 件以上才做頁面，避免內容太薄"""
+    global _CG
+    if _CG is not None: return _CG
+    g = {}
+    for x in ITEMS:
+        c = community_of(x)
+        if c: g.setdefault(comm_key(x), {"name": c, "city": area_of(x)[:2], "cur": [], "past": []})["cur"].append(x)
+    try: seen = json.load(open("data/seen.json", encoding="utf-8"))
+    except Exception: seen = {}
+    cur_ids = {x["編號"] for x in ITEMS}
+    for k, v in seen.items():
+        if k in cur_ids or not v.get("gone") or not v.get("addr") or v.get("twin") in cur_ids: continue
+        try:
+            if (_today() - datetime.date.fromisoformat(v["gone"])).days > 180: continue
+        except ValueError: continue
+        city = v.get("area", "")[:2]
+        if v.get("comm"):
+            g.setdefault(f"{city}-{_safe(v['comm'])}", {"name": v["comm"], "city": city, "cur": [], "past": []})["past"].append((k, v)); continue
+        for grp in g.values():   # 舊紀錄沒存社區名：案名裡有寫到同縣市的社區名才算
+            if grp["city"] == city and len(grp["name"]) >= 3 and grp["name"] in v["addr"]: grp["past"].append((k, v)); break
+    _CG = {k: v for k, v in g.items() if k and len(v["cur"]) + len(v["past"]) >= 2}
+    return _CG
+
+def comm_links(pred, title):
+    """某縣市或行政區裡有社區頁的社區連結"""
+    gs = [(k, v) for k, v in community_groups().items() if pred(v)]
+    if not gs: return ""
+    gs.sort(key=lambda t: (-len(t[1]["cur"]), t[1]["name"]))
+    return (f'<section class="box areas"><h2>{e(title)}</h2>' + "".join(f'<a href="/c/{slug(k)}">{e(v["name"])}法拍屋（{len(v["cur"])}）</a>' for k, v in gs[:40]) + '</section>')
+
+def community_page(key, g):
+    name, cur, past = g["name"], g["cur"], g["past"]
+    cur = sorted(cur, key=date_key)
+    areas = sorted({area_of(x) for x in cur} | {v.get("area", "").split("-")[0] for _, v in past if v.get("area")})
+    a0 = areas[0] if areas else g["city"]
+    t = _today(); today = (t.year - 1911) * 10000 + t.month * 100 + t.day
+    md = lambda x: "/".join(str(int(v)) for v in x["資訊"]["開標日期"].split("/")[1:])
+    up = [x for x in cur if today <= date_key(x) < 99999999]
+    ps = sorted(p for p in (price_num(x["價格"]) for x in cur) if p > 0)
+    if cur:
+        title = f"{name}法拍屋｜{a0}{len(cur)}件" + (f"・最近{md(up[0])}開標" if up else "") + f"・凶宅點交查證｜{NAME}"
+        intro = (f"{name}（{a0}）目前有 {len(cur)} 件法拍物件" + (f"，底價 {wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"，最近一場 {md(up[0])} 開標" if up else "")
+                 + (f"；近半年另有 {len(past)} 件已下架（拍定、停拍或撤回）" if past else "") + f"。資料每日更新（{UPDATED}），拍次與底價以法院最新公告為準。")
+    else:
+        title = f"{name}法拍屋｜{a0}近期拍賣紀錄｜{NAME}"
+        intro = f"{name}（{a0}）目前沒有待拍的法拍物件；近半年有 {len(past)} 件已下架（拍定、停拍或撤回，實際結果以法院公告為準）。有新的拍賣公告時本頁會自動更新（{UPDATED}）。"
+    vrows = ""
+    for x in cur:
+        inf = x.get("資訊", {}); notes = inf.get("筆錄", "")
+        m = re.search(r"點交情形→([^●\n]+)", notes); h = _haunt_lines(notes)
+        vrows += (f'<tr><td><a href="/h/{e(x["編號"])}">{e(inf.get("完整地址") or x["地址"])}</a></td><td>{e(("第%d拍" % round_of(x)) if round_of(x) else "")} {e(inf.get("開標日期", ""))}</td>'
+                  f'<td>{e(re.sub(r"^售", "", x["價格"]))}</td><td>{e(m.group(1).strip()[:60] if m else "筆錄未載明")}</td><td>{e(("筆錄原文：" + "／".join(h)) if h else ("法院筆錄未提到非自然死亡" if notes else "沒有筆錄資料"))}</td></tr>')
+    vsec = (f'<section class="box" id="verify"><h2>{e(name)}凶宅與點交查證</h2><div style="overflow-x:auto"><table class="tbl"><tr><th>地址</th><th>拍次／開標</th><th>底價</th><th>點交（法院筆錄）</th><th>非自然死亡（法院筆錄）</th></tr>{vrows}</table></div>'
+            '<p>以上只照法院筆錄原文整理。查不到不等於沒有，投標前請用完整門牌查台灣凶宅網，並向管委會或鄰里確認。<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>') if cur else ""
+    prow = "".join(f'<tr><td>{e(v.get("gone", ""))}</td><td><a href="/h/{e(k)}">{e(v.get("addr", ""))}</a></td><td>{e(("第%s拍" % v["rd"]) if v.get("rd") else "")}</td><td>{e(re.sub(r"^售", "", v.get("ptxt", "")))}</td></tr>'
+                   for k, v in sorted(past, key=lambda t: t[1].get("gone", ""), reverse=True))
+    psec = (f'<section class="box"><h2>{e(name)}近半年已下架的法拍物件</h2><table class="tbl"><tr><th>下架日期</th><th>物件</th><th>最後拍次</th><th>最後底價</th></tr>{prow}</table>'
+            '<p class="note">下架可能是拍定、停拍或撤回，實際結果請以法院公告為準。</p></section>') if past else ""
+    cc = next((c for c in CITIES if c[0] != "greater-taipei" and g["city"] in c[2]), None)
+    links = "".join(f'<a href="/area/{slug(a)}">{e(a)}法拍屋</a>' for a in areas) + (f'<a href="/{cc[0]}">{e(cc[3])}</a>' if cc else "")
+    body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'{e(name)}法拍屋</nav>'
+            f'<h1>{e(name)}法拍屋｜{e(a0)}（{len(cur)}件）</h1><p>{e(intro)}</p>'
+            + (f'<h2>{e(name)}法拍物件</h2><div class="grid">{"".join(card(x) for x in cur)}</div>' if cur else "") + vsec + psec
+            + f'<section class="box areas"><h2>附近法拍屋</h2>{links}</section>' + contact_box())
+    desc = intro[:150]
+    ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{name}法拍屋", "url": f"{SITE}/c/{slug(key)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
+          {"@context": "https://schema.org", "@type": "ItemList", "name": f"{name}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(cur)]},
+          {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": ([{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}]
+              + ([{"@type": "ListItem", "position": 2, "name": cc[3], "item": f"{SITE}/{cc[0]}"}] if cc else []) + [{"@type": "ListItem", "position": 3 if cc else 2, "name": f"{name}法拍屋"}])}]
+    return page(title, desc, f"/c/{slug(key)}", body, ld, SITE + "/og.jpg")
 def _road(x):
     a = re.sub(r"^.{2,3}?[市縣].{1,3}?[區鄉鎮市]", "", (x.get("資訊") or {}).get("完整地址") or "")
     m = re.match(r"([^\d]{1,8}?(?:路|街|大道)(?:[一二三四五六七八九十]段)?)", a)
@@ -324,6 +406,8 @@ def related_box(x, comm, area):
             out.append(y); why[lab] = why.get(lab, 0) + 1
     cc = city_of(x)
     links = [f'<a href="/area/{slug(area)}">{e(area)}全部法拍屋</a>']
+    ck = comm_key(x)
+    if ck in community_groups(): links.insert(0, f'<a href="/c/{slug(ck)}">{e(comm)}法拍屋整理</a>')
     if cc:
         links.append(f'<a href="/{cc[0]}">{e(cc[3])}</a>')
         t = next((t for t in TYPES if t[2] in ty and len(type_items(cc, t[2])) >= 3), None)
@@ -338,11 +422,15 @@ def detail_page(x):
     ph = photos(x)
     area = area_of(x)
     addr = inf.get("完整地址") or x["地址"]
-    comm = (re.search(r"【([^】]{2,20})】", x.get("地址") or "") or [None, ""])[1]
-    full_title = (f'{comm}法拍屋｜{addr}｜{x["類型"]}｜{NAME}' if comm else f'{addr}法拍屋｜{x["類型"]}｜{NAME}')
+    comm = community_of(x)
+    # 2026-11-17 Search Console：有曝光的查詢多是「社區名／路名＋凶宅」，標題要有「凶宅點交查證」才對得上
+    full_title = (f'{comm}法拍屋｜{addr}｜凶宅點交查證｜{NAME}' if comm else f'{addr}法拍屋｜{x["類型"]}・凶宅點交查證｜{NAME}')
+    _dv = deliver_of(x)
+    vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
+             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。") if notes else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
-            + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + "提供代標、產權調查、貸款諮詢，歡迎聯絡透明房訊104法拍網。")
+            + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
     gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
@@ -357,7 +445,7 @@ def detail_page(x):
             rows.append(f"<tr><td>{e(m.group(1))}</td><td>{e(m.group(2) or '')}</td><td>{e(m.group(3))}</td></tr>" if m else f'<tr><td colspan="3">{e(ln)}</td></tr>')
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
     nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
-    nsec += verify_box(addr, notes)
+    nsec += verify_box((comm + " " if comm else "") + addr, notes)
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
@@ -609,19 +697,21 @@ def area_summary(a, xs):
     parts = [f"整理{a}近期法拍物件，共 {len(xs)} 件（{kind_txt}）"]
     if ps: parts.append(f"底價 {wan(ps[0])}～{wan(ps[-1])}")
     if up: parts.append(f"最近一場 {md(up[0])} 開標")
-    if r3: parts.append(f"第三拍以上 {r3} 件")
+    r1, r2 = sum(1 for x in xs if round_of(x) == 1), sum(1 for x in xs if round_of(x) == 2)
+    rt = "、".join(t for t in [f"第一拍 {r1} 件" if r1 else "", f"第二拍 {r2} 件" if r2 else "", f"第三拍以上 {r3} 件" if r3 else ""] if t)
+    if rt: parts.append(rt)
     if dv: parts.append(f"筆錄記載點交 {dv} 件")
     intro = "，".join(parts) + f"。資料每日更新（{UPDATED}），拍次與底價會變動，投標前請以法院最新公告為準。"
     soon = "".join(f'<li><a href="/h/{e(x["編號"])}">{e(md(x))}｜{e(x["地址"])}</a>｜{e("第%d拍" % round_of(x) if round_of(x) else "")} 底價 {e(re.sub(r"^售", "", x["價格"]))}</li>' for x in up[:6])
-    head = f"{a}法拍屋｜{len(xs)}件待標" + (f"・底價{wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"・最近{md(up[0])}開標" if up else "")
+    head = f"{a[2:] or a}法拍屋｜{a}{len(xs)}件待標" + (f"・底價{wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"・最近{md(up[0])}開標" if up else "")
     return head, intro, (f'<h2>{e(a)}近期開標</h2><ul class="soon">{soon}</ul>' if soon else "")
 
 def area_page(a, xs):
     head, intro, soon = area_summary(a, xs)
     title = f"{head}｜{NAME}"
     desc = intro[:150]
-    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a)}法拍屋整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
-            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
     return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
 
@@ -673,6 +763,7 @@ def city_page(slug_, short, prefixes, kw, scope):
              f'每筆物件都列出拍次、開標日期、底標價與法院筆錄，並由黃先生 Pitt、林小姐 Anna 提供代標與產權調查。</p>')
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(kw)}</nav><h1>{e(kw)}｜{e(scope)}最新法拍物件（{len(xs)}筆）</h1>{intro}'
             f'<section class="box areas"><h2>{e(short)}各區法拍屋</h2>{al}</section>'
+            + comm_links(lambda g: g["city"] in prefixes, short + "熱門社區法拍屋")
             + (lambda cc: f'<section class="box areas"><h2>依類型找{e(short)}法拍屋</h2>' + "".join(f'<a href="/{cc[0]}-{t[0]}">{e(short + t[1])}法拍屋（{len(type_items(cc, t[2]))}）</a>' for t in TYPES if len(type_items(cc, t[2])) >= 3) + '</section>')(next(c for c in CITIES if c[0] == slug_))
             +
             f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
@@ -769,7 +860,7 @@ def about_page():
 def gone_page(k, v):
     """已從列表消失的物件：保留網址（不讓 Google、FB 舊連結變 404），標示已下架並導到同區現有物件；不放進 sitemap、不收錄"""
     addr, area = v.get("addr", ""), (v.get("area", "").split("-")[0])
-    x = {"編號": k, "地址": addr, "區域": v.get("area", ""), "類型": v.get("type", ""), "資訊": {}}
+    x = {"編號": k, "地址": addr, "區域": v.get("area", ""), "類型": v.get("type", ""), "資訊": {"社區/大樓": v.get("comm") or next((g["name"] for g in community_groups().values() if (k, v) in g["past"]), "")}}
     rows = kv([("案名／地址", addr), ("地區", area), ("最後拍次", ("第%s拍" % v["rd"]) if v.get("rd") else ""), ("最後開標日期", v.get("date", "")),
                ("最後底價", re.sub(r"^售", "", v.get("ptxt", ""))), ("下架日期", v.get("gone", ""))])
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › 已下架物件</nav>'
@@ -907,6 +998,9 @@ if __name__ == "__main__":
     ng, nr = write_gone({x["編號"] for x in ITEMS})
     areas = {}
     for x in ITEMS: areas.setdefault(area_of(x), []).append(x)
+    shutil.rmtree("site/c", ignore_errors=True)
+    for ck, cg in community_groups().items():
+        write(f"site/c/{ck}.html", community_page(ck, cg)); urls.append((f"/c/{slug(ck)}", 0.8))
     for a, xs in areas.items():
         write(f"site/area/{a}.html", area_page(a, xs)[1]); urls.append((f"/area/{slug(a)}", 0.7))
     for c in CITIES:
