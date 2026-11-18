@@ -849,7 +849,7 @@ def fees_page():
 
 def know_box():
     items = [("what-is-foreclosure-auction", "法拍屋是什麼？流程"), ("delivery-or-not", "點交與不點交"), ("how-long-to-move-in", "得標後多久交屋"), ("deposit-invalid", "投標保證金"), ("proxy-bid-process", "委託代標怎麼進行")]
-    return '<section class="box areas"><h2>法拍知識與服務</h2>' + "".join(f'<a href="/learn/{s}">{e(t)}</a>' for s, t in items) + '<a href="/process">購屋流程</a><a href="/fees">服務與收費</a><a href="/about">關於我們</a></section>'
+    return '<section class="box areas"><h2>法拍知識與服務</h2>' + "".join(f'<a href="/learn/{s}">{e(t)}</a>' for s, t in items) + '<a href="/process">購屋流程</a><a href="/fees">服務與收費</a><a href="/about">關於我們</a>' + ('<a href="/promo">年前上車｜2 萬代標券</a>' if _today() <= PROMO_END else '') + '</section>'
 
 ABOUT_FAQ = [
     ("透明房訊／104法拍網是什麼？", "透明房訊／104法拍網（一零四法拍網股份有限公司）是提供法拍屋查詢與代標服務的公司，網站每日更新物件的拍次、開標日期、底標價與法院筆錄。"),
@@ -996,7 +996,106 @@ def write_home():
     t = re.sub(r'\s*<div class="preview-note">.*?</div>', '', t, count=1, flags=re.S)
     t = t.replace("https://tomin104.com/preview-home/assets/", SITE + "/home/assets/").replace("https://tomin104.com/preview-home/", SITE + "/")
     t = t.replace('"./', '"/home/')
+    t = re.sub(r"\s*<!--PROMO:start-->.*?<!--PROMO:end-->", "", t, flags=re.S)
+    t = t.replace('<a class="skip-link" href="#main">跳至主要內容</a>', '<a class="skip-link" href="#main">跳至主要內容</a>' + promo_banner(), 1)
     write("site/index.html", t)
+
+# ---------- 活動頁：年前上車｜2 萬代標券（2026-11-18 Anna 同意上線；活動至 2027/2/5 除夕） ----------
+PROMO_END = datetime.date(2027, 2, 5)
+PROMO_CLAIM = "https://lin.ee/z4MUUbK"   # 領券
+PROMO_LINE = "https://lin.ee/Y2bGSIB"    # 加 LINE@ 好友
+PROMO_COMPANY = "財欣不動產管理顧問有限公司"
+# 活動辦法全文：照定稿，一字不刪（來源：00_法拍事業部/01_營運總管/年前上車_上線素材_20261118.md）
+PROMO_RULES = [
+    "活動期間：即日起至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準。",
+    "名額：優惠券限量 30 張，送完即止，以 LINE@ 領取紀錄為準；額滿即停止領取，已領取者於活動期間內仍可使用。",
+    "參加方式：加入 104法拍網 LINE@（@635nftwk）並領取「全程代標服務折 20,000 元」優惠券，於簽訂委託時出示，始得使用。未領券者不適用。",
+    "適用範圍：限「全程代標服務」。單純聲請點交、包辦點交等其他服務不適用。",
+    "折抵方式：得標並收取服務費時，自服務費中折抵新台幣 20,000 元；未得標不收取服務費，亦不予折抵。優惠券不得兌換現金、不找零。",
+    "每一案件限用一張，每張限用一次，不得轉讓、不得與其他優惠併用。",
+    "服務費依委託書約定之收費標準計算；優惠內容以委託書記載為準。",
+    "法院拍賣之底價、拍次、開標日期、點交與否等，均以法院公告為準。本公司提供專業評估與投標協助，不保證得標，亦不保證投資報酬。",
+    "本公司保留修改、暫停或終止本活動之權利，如有變更，以 LINE@ 公告為準。",
+]
+PROMO_SIGN = "財欣不動產管理顧問有限公司｜Pitt 0918-313-888｜Anna 0986-678-928"
+PROMO_CSS = ("<style>.pm{max-width:760px;margin:0 auto}.pm-hero{text-align:center;background:#fbf7ef;border:1px solid #e6d6b4;border-radius:10px;padding:22px 16px 18px;margin-bottom:16px}"
+             ".pm-hero .eb{color:#8a6a2f;font-size:14px;letter-spacing:.08em;margin:0 0 6px}.pm-hero h1{font-size:clamp(26px,7vw,40px);line-height:1.25;margin:0 0 10px;color:#18354b}"
+             ".pm-hero .lead{font-size:17px;line-height:1.7;margin:0 0 6px;color:#222}.pm-tag{display:inline-block;background:#fff;border:1px solid #d9b97a;color:#18354b;border-radius:999px;padding:6px 14px;font-weight:700;margin:6px 0 4px}"
+             ".pm-cta{display:flex;flex-direction:column;gap:10px;margin:16px auto 4px;max-width:420px}.pm-cta a{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:18px;border-radius:8px;padding:15px 12px}"
+             ".pm-cta .c1{background:#06c755;color:#fff}.pm-cta .c2{background:#18354b;color:#fff}.pm-cta small{display:block;font-weight:400;font-size:13px;opacity:.9;margin-top:2px}"
+             ".pm-img{margin:0 0 16px;text-align:center}.pm-img img{width:100%;max-width:560px;height:auto;border-radius:10px;border:1px solid #e6d6b4}"
+             ".pm-rules ol{padding-left:1.4em;margin:8px 0 12px}.pm-rules li{line-height:1.8;margin:0 0 8px}.pm-sign{font-weight:700;color:#18354b;line-height:1.8}"
+             ".pm-contact a{display:inline-block;margin:6px 10px 0 0;padding:10px 14px;border:1px solid #18354b;border-radius:6px;text-decoration:none;color:#18354b;font-weight:700}"
+             ".pm-upd{color:#666;font-size:13px;margin:10px 0 0}.pm-end{background:#fff3cd;border:1px solid #e0c36a;border-radius:8px;padding:10px 14px;font-weight:700}"
+             ".pm-tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}.pm-tbl th,.pm-tbl td{border:1px solid #e2e2de;padding:8px 10px;text-align:left;vertical-align:top;line-height:1.6}.pm-tbl th{background:#f6f2ea;color:#18354b;white-space:nowrap;width:7.5em}"
+             "@media(max-width:480px){.pm-tbl th{white-space:normal;width:5.5em}}"
+             "@media(min-width:640px){.pm-cta{flex-direction:row}.pm-cta a{flex:1}}</style>")
+
+PROMO_UPDATED = "2026-11-18"   # 活動內容更新日（改活動辦法時一起改）
+PROMO_FAQ = [
+    ("年前上車 2 萬代標券到什麼時候？", "活動至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準；優惠券限量 30 張，送完即止。"),
+    ("怎麼領 2 萬代標券？", "加入 104法拍網 LINE@（@635nftwk）領取「全程代標服務折 20,000 元」優惠券，簽訂委託時出示才能使用；未領券者不適用。"),
+    ("沒有得標也會折 2 萬嗎？", "不會。得標並收取服務費時，才自服務費中折抵新台幣 20,000 元；未得標不收取服務費，亦不予折抵。"),
+    ("聲請點交、包辦點交可以用這張券嗎？", "不行。優惠限「全程代標服務」，單純聲請點交、包辦點交等其他服務不適用。"),
+    ("委託代標保證得標嗎？", "不保證。本公司提供專業評估與投標協助，不保證得標，亦不保證投資報酬；底價、拍次、開標日期、點交與否等，均以法院公告為準。"),
+]
+
+def promo_page():
+    claim = e(PROMO_CLAIM); line = e(PROMO_LINE)
+    ended = _today() > PROMO_END
+    url = SITE + "/promo"
+    cta = (f'<div class="pm-cta"><a class="c1" href="{claim}" target="_blank" rel="noopener">領取 2 萬代標券<small>LINE@ 領券（限量 30 名）</small></a>'
+           f'<a class="c2" href="{line}" target="_blank" rel="noopener">加 LINE@ 好友<small>@635nftwk・傳「活動」也能領</small></a></div>')
+    answer = (f"{PROMO_COMPANY}（104法拍網，黃先生 Pitt、林小姐 Anna）推出「年前上車｜2 萬代標券」：委託全程代標，得標並收取服務費時折抵新台幣 20,000 元。"
+              "加入 LINE@（@635nftwk）領券、簽訂委託時出示即可使用；限量 30 張，送完即止，活動至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準。")
+    rows = [("主辦", PROMO_COMPANY), ("優惠內容", "全程代標服務折抵新台幣 20,000 元"), ("適用服務", "限「全程代標服務」"),
+            ("不適用", "單純聲請點交、包辦點交等其他服務"), ("什麼時候折", "得標並收取服務費時，自服務費中折抵；未得標不收取服務費，亦不予折抵"),
+            ("名額", "限量 30 張，送完即止，以 LINE@ 領取紀錄為準"), ("活動期間", "即日起至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準"),
+            ("怎麼領", "加入 LINE@（@635nftwk）領券，簽訂委託時出示"), ("使用限制", "每一案件限用一張，每張限用一次，不得轉讓、不得與其他優惠併用；不得兌換現金、不找零"),
+            ("收費依據", "服務費依委託書約定之收費標準計算；優惠內容以委託書記載為準"),
+            ("資料來源與更新日", f"{PROMO_COMPANY}活動辦法定稿；更新日 {PROMO_UPDATED}")]
+    tbl = '<table class="pm-tbl">' + "".join(f"<tr><th>{e(k)}</th><td>{e(v)}</td></tr>" for k, v in rows) + "</table>"
+    faq = "".join(f"<details open><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in PROMO_FAQ)
+    notice = '<p class="pm-end">活動已結束，以下為活動辦法存檔。</p>' if ended else ""
+    body = ('<nav class="bc"><a href="/">首頁</a> › 年前上車活動</nav><div class="pm">' + notice +
+            '<section class="pm-hero"><p class="eb">104法拍網・限時活動</p><h1>年前上車｜2 萬代標券</h1>'
+            '<p class="lead">委託全程代標，得標收費時折 20,000 元</p>'
+            '<p class="pm-tag">限量 30 名｜至 2027/2/5 除夕</p>' + ("" if ended else cta) +
+            f'<p class="pm-upd">最後更新：{PROMO_UPDATED}</p></section>'
+            f'<section class="box pm-ans"><h2>活動重點</h2><p>{e(answer)}</p>{tbl}</section>'
+            '<figure class="pm-img"><img src="/img/promo/nianqian-4x5.jpg" width="1080" height="1350" alt="年前上車｜2 萬代標券：委託全程代標，得標收費時折 20,000 元，限量 30 名，至 2027/2/5 除夕" loading="lazy"></figure>'
+            '<section class="box pm-rules" id="rules"><h2>※ 活動辦法</h2><ol>' + "".join(f"<li>{e(r)}</li>" for r in PROMO_RULES) + '</ol>'
+            f'<p class="pm-sign">{e(PROMO_SIGN)}</p></section>'
+            f'<section class="box" id="faq"><h2>常見問題</h2>{faq}</section>'
+            f'<section class="box pm-contact" id="contact"><h2>主辦與聯絡</h2><p class="pm-sign">{e(PROMO_COMPANY)}</p>'
+            f'<p>{e(ADDR[0])}<br>{e(ADDR[1])}</p>'
+            f'<p><a href="tel:0918313888">黃先生 Pitt {PHONE_P}</a><a href="tel:0986678928">林小姐 Anna {PHONE_A}</a><a href="{line}" target="_blank" rel="noopener">LINE@ @635nftwk（lin.ee/Y2bGSIB）</a></p>'
+            + ("" if ended else cta) + '</section>'
+            '<section class="box areas"><h2>延伸閱讀</h2><a href="/fees">服務與收費</a><a href="/process">購屋流程</a><a href="/learn/proxy-bid-process">委託代標怎麼進行</a><a href="/about">關於我們</a></section></div>')
+    desc = "年前上車｜2 萬代標券：委託全程代標，得標並收取服務費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）。加 LINE@ @635nftwk 領券。主辦：" + PROMO_COMPANY
+    org = {"@context": "https://schema.org", "@type": "Organization", "@id": url + "#org", "name": PROMO_COMPANY, "alternateName": "104法拍網", "url": SITE + "/",
+           "telephone": ["+886-918-313-888", "+886-986-678-928"],
+           "address": [{"@type": "PostalAddress", "streetAddress": "金城路二段396號11樓", "addressLocality": "土城區", "addressRegion": "新北市", "addressCountry": "TW"},
+                       {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
+           "sameAs": [PROMO_LINE]}
+    svc = {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋全程代標服務", "serviceType": "法拍屋代標", "areaServed": "TW", "provider": {"@id": url + "#org"},
+           "offers": {"@type": "Offer", "name": "年前上車｜2 萬代標券", "url": url,
+                      "description": "委託全程代標，得標並收取服務費時自服務費中折抵新台幣 20,000 元；未得標不收取服務費，亦不予折抵。限量 30 張，以簽訂委託書之日期為準。",
+                      "priceSpecification": {"@type": "PriceSpecification", "price": "-20000", "priceCurrency": "TWD", "description": "自服務費中折抵新台幣 20,000 元"},
+                      "validFrom": "2026-11-18", "validThrough": "2027-02-05T23:59:00+08:00", "inventoryLevel": {"@type": "QuantitativeValue", "value": 30},
+                      "availability": "https://schema.org/LimitedAvailability", "seller": {"@id": url + "#org"}}}
+    bc = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "年前上車活動", "item": url}]}
+    fq = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in PROMO_FAQ]}
+    return page(f"年前上車｜2 萬代標券｜全程代標得標折 20,000 元・限量 30 名・至 2027/2/5｜{NAME}", desc, "/promo", body, [org, svc, bc, fq], SITE + "/img/promo/nianqian-4x5.jpg", PROMO_CSS)
+
+def promo_banner():
+    """首頁最上方活動橫幅：活動期間（至 2027/2/5）才出現，過期自動消失"""
+    if _today() > PROMO_END: return ""
+    href = e("/promo?utm_source=tomin104&utm_medium=home_banner&utm_campaign=nianqian2w")
+    return ('<!--PROMO:start--><a class="promo-bar" href="' + href + '" style="display:block;background:#18354b;color:#fff;text-align:center;text-decoration:none;'
+            'padding:10px 12px;font-size:clamp(14px,3.9vw,16px);line-height:1.5;font-weight:700;border-bottom:3px solid #d9b97a">'
+            '<span style="color:#f1d48f">年前上車｜2 萬代標券</span>（限量 30 名，至 2/5 除夕）'
+            '<span style="display:inline-block;margin-left:6px;background:#d9b97a;color:#18354b;border-radius:999px;padding:2px 12px;font-size:14px">看活動辦法 →</span></a><!--PROMO:end-->')
 
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
@@ -1026,6 +1125,7 @@ if __name__ == "__main__":
     write("site/new-house.html", list_page("/new-house", "10年內新屋法拍屋", "屋齡 10 年以內的法拍屋，由新到舊排列，含拍次、開標日期與底標價。", sorted([x for x in ITEMS if _age(x) is not None and _age(x) <= 10], key=lambda x: (_age(x), date_key(x))))); urls.append(("/new-house", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write("site/about.html", about_page()); urls.append(("/about", 0.7))
+    write("site/promo.html", promo_page()); urls.append(("/promo", 0.8))
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -1033,7 +1133,7 @@ if __name__ == "__main__":
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
+          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n- [年前上車｜2 萬代標券]({SITE}/promo): 財欣不動產管理顧問有限公司活動，委託全程代標、得標收費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）23:59，加 LINE@ @635nftwk 領券\n"
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
