@@ -24,12 +24,22 @@ export async function onRequestGet({ request, env }) {
   }).then((r) => r.json());
   if (!p.userId) return new Response("無法取得 LINE 資料。", { status: 400 });
 
+  // 有沒有加 LINE@ 好友（登入頻道沒連結官方帳號時查不到，就留空）
+  let friend = "";
+  try {
+    const fr = await fetch("https://api.line.me/friendship/v1/status", {
+      headers: { Authorization: "Bearer " + tok.access_token },
+    }).then((r) => (r.ok ? r.json() : null));
+    if (fr && typeof fr.friendFlag === "boolean") friend = fr.friendFlag ? "是" : "否";
+  } catch (e) {}
+
   const key = "u:" + p.userId;
   const old = JSON.parse((await env.LEADS.get(key)) || "null");
   const now = new Date().toISOString();
   await env.LEADS.put(key, JSON.stringify({
     name: p.displayName, first: old ? old.first : now, last: now,
     count: (old ? old.count : 0) + 1, from: old ? old.from : next,
+    friend: friend || (old && old.friend) || "",
   }));
   const h = new Headers({ Location: next });
   h.append("Set-Cookie", "ls=; Path=/; Max-Age=0");

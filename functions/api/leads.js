@@ -19,13 +19,13 @@ export async function onRequestGet({ request, env }) {
   const auth = request.headers.get("Authorization") || "";
   const key = auth.startsWith("Bearer ") ? auth.slice(7) : new URL(request.url).searchParams.get("key");
   if (!env.ADMIN_KEY || !same(key, env.ADMIN_KEY)) return new Response("Forbidden", { status: 403, headers: NOSTORE });
-  const rows = [["LINE名稱", "首次登入", "最近登入", "登入次數", "從哪頁進來"]];
+  const rows = [["LINE名稱", "首次登入", "最近登入", "登入次數", "從哪頁進來", "已加LINE@"]];
   let cursor;
   do {
     const l = await env.LEADS.list({ prefix: "u:", cursor });
     for (const k of l.keys) {
       const v = JSON.parse((await env.LEADS.get(k.name)) || "{}");
-      rows.push([v.name, v.first, v.last, v.count, v.from]);
+      rows.push([v.name, v.first, v.last, v.count, v.from, v.friend || ""]);
     }
     cursor = l.list_complete ? null : l.cursor;
   } while (cursor);
