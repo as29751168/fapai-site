@@ -1,13 +1,25 @@
 // LINE 登入完成後回到這裡：驗證、取得名稱、存進名單（KV: LEADS）
+import { sign } from "./line-login.js";
+const fromB64u = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0)));
+const safeNext = (n) => (typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? n : "/");
+
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
-  const m = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)ls=([^;]+)/);
-  const [saved, nextRaw] = m ? decodeURIComponent(m[1]).split("|") : [];
-  if (!code || !state || state !== saved) return new Response("登入失敗，請回上一頁重試。", { status: 400 });
-  let next = decodeURIComponent(nextRaw || "/");
-  if (!next.startsWith("/") || next.startsWith("//")) next = "/";
+  const state = url.searchParams.get("state") || "";
+  // 驗 state：時間＋回跳頁＋簽章，10 分鐘內有效（不靠 cookie）
+  let next = "/", ok = false;
+  const parts = state.split(".");
+  if (parts.length === 3) {
+    try {
+      const age = Date.now() - parseInt(parts[0], 36);
+      ok = age >= 0 && age < 600000 && (await sign(env.LINE_CHANNEL_SECRET, parts[0] + "." + parts[1])) === parts[2];
+      if (ok) next = safeNext(fromB64u(parts[1]));
+    } catch (e) { ok = false; }
+  }
+  // 客人按取消或 LINE 回錯誤：直接回原頁，不顯示錯誤
+  if (url.searchParams.get("error")) return new Response(null, { status: 302, headers: { Location: ok ? next : "/" } });
+  if (!code || !ok) return new Response("登入逾時，請回上一頁再按一次「LINE 登入」。", { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 
   const tok = await fetch("https://api.line.me/oauth2/v2.1/token", {
     method: "POST",
