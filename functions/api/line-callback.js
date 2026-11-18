@@ -3,6 +3,14 @@ import { sign } from "./line-login.js";
 const fromB64u = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0)));
 const safeNext = (n) => (typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? n : "/");
 
+// 出錯也放行：客人照樣回原頁看全部物件，只是名單沒記到；原因另存 KV（err:時間）方便查
+async function letIn(env, next, why) {
+  try { await env.LEADS.put("err:" + new Date().toISOString(), String(why).slice(0, 80), { expirationTtl: 2592000 }); } catch (e) {}
+  const h = new Headers({ Location: next });
+  h.append("Set-Cookie", "tl=1; Path=/; Max-Age=31536000; Secure; SameSite=Lax");
+  return new Response(null, { status: 302, headers: h });
+}
+
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -19,7 +27,7 @@ export async function onRequestGet({ request, env }) {
   }
   // 客人按取消或 LINE 回錯誤：直接回原頁，不顯示錯誤
   if (url.searchParams.get("error")) return new Response(null, { status: 302, headers: { Location: ok ? next : "/" } });
-  if (!code || !ok) return new Response("登入逾時，請回上一頁再按一次「LINE 登入」。", { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  if (!code || !ok) return letIn(env, next, "state:" + (code ? "bad" : "nocode"));
 
   const tok = await fetch("https://api.line.me/oauth2/v2.1/token", {
     method: "POST",
@@ -28,13 +36,13 @@ export async function onRequestGet({ request, env }) {
       grant_type: "authorization_code", code, redirect_uri: `${url.origin}/api/line-callback`,
       client_id: env.LINE_CHANNEL_ID, client_secret: env.LINE_CHANNEL_SECRET,
     }),
-  }).then((r) => r.json());
-  if (!tok.access_token) return new Response("登入失敗，請稍後再試。", { status: 400 });
+  }).then((r) => r.json()).catch(() => ({ error: "fetch" }));
+  if (!tok.access_token) return letIn(env, next, "token:" + (tok.error || "unknown") + ":" + (tok.error_description || ""));
 
   const p = await fetch("https://api.line.me/v2/profile", {
     headers: { Authorization: "Bearer " + tok.access_token },
   }).then((r) => r.json());
-  if (!p.userId) return new Response("無法取得 LINE 資料。", { status: 400 });
+  if (!p.userId) return letIn(env, next, "profile:" + (p.message || "unknown"));
 
   // 有沒有加 LINE@ 好友（登入頻道沒連結官方帳號時查不到，就留空）
   let friend = "";
