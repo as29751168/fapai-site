@@ -16,6 +16,16 @@ ADDR = ["新北市土城區金城路二段396號11樓", "桃園市桃園區莊�
 PHOTO_BASE = "https://www.104woo.com.tw/"
 
 D = json.load(open("site/data.json", encoding="utf-8"))
+# 2026-11-18 Anna：開標日已過卻還寫「待標」的不能照舊顯示（HO 快照沒更新拍次）；改標「開標日期已過・待確認」並排到最後
+_TODAY = datetime.date.today()
+for _x in D["104"]:
+    _i = _x.get("資訊") or {}
+    _m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", _i.get("開標日期", ""))
+    if not _m or _i.get("銷售狀態") not in ("待標中", "待標"): continue
+    try: _d = datetime.date(int(_m[1]) + 1911, int(_m[2]), int(_m[3]))
+    except ValueError: continue
+    if _d < _TODAY:
+        _i["銷售狀態"] = "待確認"; _x["狀態"] = "開標日期已過・待確認"
 def _age(x):
     """屋齡（年）；預售屋視為 0；查無則回傳 None"""
     v = (x.get("資訊") or {}).get("屋齡", "")
@@ -40,6 +50,15 @@ def photos(x):
     v = P.get(x["編號"][2:], [])
     if isinstance(v, str): v = [v]
     return [(SITE + p if p.startswith("/") else PHOTO_BASE + urllib.parse.quote(p, safe="/")) for p in v]
+def is_ying(x):
+    """公告應買（一買）：沒有開標日，先買先贏（2026-11-18 Anna）"""
+    return "應買" in (x.get("資訊", {}).get("拍次", "") or "")
+YING = "公告應買｜先買先贏"
+# 照片載入失敗時自動換下一張，全部失敗就換成「照片請洽業務」（2026-11-18 Anna：卡片不可出現問號破圖）
+IMG_FB = ("var a=(this.dataset.alt||'').split('|').filter(Boolean);if(a.length){this.src=a.shift();this.dataset.alt=a.join('|')}"
+          "else{this.onerror=null;var d=document.createElement('div');d.className='noimg';d.textContent='照片請洽業務';this.replaceWith(d)}")
+def img_fb(ph):
+    return f' data-alt="{e("|".join(ph[1:4]))}" onerror="{e(IMG_FB)}"'
 def price_num(s):
     m = re.search(r"([\d.,]+)\s*(億|萬)?", str(s or ""))
     if not m: return 0
@@ -235,11 +254,11 @@ def card(x):
     inf = x.get("資訊", {})
     r = round_of(x)
     dv = deliver_of(x)
-    badge = f'<span class="rd2">{e("｜".join(filter(None, [("第%d拍" % r) if r else "拍次洽詢", dv])))}</span>'
-    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
+    badge = f'<span class="rd2">{e("｜".join(filter(None, [YING if is_ying(x) else ("第%d拍" % r) if r else "拍次洽詢", dv])))}</span>'
+    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片"{img_fb(ph)}>' if ph else '<div class="noimg">照片請洽業務</div>'
     price = re.sub(r"^售", "", x["價格"])
     old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
-    top = "｜".join(filter(None, [inf.get("開標日期", ""), x["狀態"], "新上架" if _within(x.get("新增日", "")) else "", "降價" if _within(x.get("異動日", "")) and x.get("降價前", 0) else ""]))
+    top = "｜".join(filter(None, ["先買先贏" if is_ying(x) else inf.get("開標日期", ""), x["狀態"], "新上架" if _within(x.get("新增日", "")) else "", "降價" if _within(x.get("異動日", "")) and x.get("降價前", 0) else ""]))
     text = f'{inf.get("完整地址","")} {x["地址"]} {x["區域"]} {x["類型"]} {inf.get("案號","")}'
     return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}" data-f="{first_price(x)}">'
             f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
@@ -288,6 +307,8 @@ def map_query(x):
     return m.group(1) if m else q
 
 def countdown(x):
+    if is_ying(x):
+        return '<p class="cd"><b>公告應買・先買先贏</b>（應買期間與條件以法院公告為準）</p>'
     od = _open_date(x)
     if not od: return ""
     return (f'<p class="cd" data-open="{od}">開標日期 {e(x["資訊"].get("開標日期", ""))}</p>'
@@ -443,7 +464,7 @@ def detail_page(x):
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
-    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
+    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}" onerror="this.remove()">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
     top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", re.sub(r"-0房$", "", x["區域"])), ("物件編號", x["編號"])])
@@ -559,9 +580,9 @@ def carousel(title, xs, href, cap=12, auto=False):
     slides = ""
     for x in xs[:cap]:
         ph = photos(x); inf = x.get("資訊", {}); r = round_of(x); dv = deliver_of(x)
-        img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">' if ph else '<div class="noimg">照片請洽業務</div>'
-        tag = "｜".join(filter(None, [("%d拍" % r) if r else "", dv]))
-        top = "｜".join(filter(None, [inf.get("開標日期", ""), x.get("狀態", "")]))
+        img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片"{img_fb(ph)}>' if ph else '<div class="noimg">照片請洽業務</div>'
+        tag = "｜".join(filter(None, [YING if is_ying(x) else ("%d拍" % r) if r else "", dv]))
+        top = "｜".join(filter(None, ["先買先贏" if is_ying(x) else inf.get("開標日期", ""), x.get("狀態", "")]))
         sub = "｜".join(filter(None, [x.get("類型", ""), inf.get("總登記坪數", "") or x.get("格局坪數", "")]))
         slides += (f'<a class="crs" href="/h/{e(x["編號"])}"><div class="crh">{e(top)}</div><div class="cri">{img}<span class="crtg">{e(tag)}</span></div>'
                    f'<div class="crb"><div class="crct">{e(sub)}</div><div class="crn">{e(x["地址"])}</div><div class="crp"><span>底價</span><b>{e(re.sub("^售", "", x["價格"]))}</b></div></div></a>')
@@ -939,11 +960,13 @@ def _live_card(x):
     tag = "新上架" if _within(x.get("新增日", "")) else ""
     r = round_of(x)
     meta = "｜".join(filter(None, [x["區域"].split("-")[0], x["類型"].split("_")[0], x["格局坪數"]]))
+    od_txt = re.sub(r"^\d+/", "", inf.get("開標日期", ""))
+    lo = f'<p class="live-open is-soon">{YING}</p>' if is_ying(x) else f'<p class="live-open" data-open="{od}">{e(od_txt)} 開標</p>'
     return (f'<a class="live-card" href="/h/{e(x["編號"])}">'
-            f'<div class="live-img"><img loading="lazy" decoding="async" width="400" height="300" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片">'
+            f'<div class="live-img"><img loading="lazy" decoding="async" width="400" height="300" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片"{img_fb(ph)}>'
             f'{"<span class=live-tag>"+tag+"</span>" if tag else ""}</div>'
-            f'<div class="live-body"><p class="live-open" data-open="{od}">{e(re.sub(r"^\d+/", "", inf.get("開標日期", "")))} 開標</p>'
-            f'<h3>{e(x["地址"])}</h3><p class="live-meta-line">{e(meta)}{("｜第%d拍" % r) if r else ""}</p>'
+            f'<div class="live-body">{lo}'
+            f'<h3>{e(x["地址"])}</h3><p class="live-meta-line">{e(meta)}{"｜公告應買" if is_ying(x) else ("｜第%d拍" % r) if r else ""}</p>'
             f'<p class="live-price"><span>底價</span><b>{old}{e(price)}</b></p></div></a>')
 
 def home_live_html():
