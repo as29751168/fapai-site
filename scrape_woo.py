@@ -114,6 +114,7 @@ def to_item(c):
     ann = c.get("houseSize")
     info = {"拍次": str(rnd) if rnd else "", "開標日期": roc, "銷售狀態": c.get("NOW_STATUS") or "待標", "法拍件": "是"}
     if total: info["總登記坪數"] = total + "坪"
+    if ann: info["建坪（不含公設）"] = f"{ann}坪"
     if total and pv: info["每坪單價"] = f"{pv / float(total):.2f}萬/坪"
     if age: info["屋齡"] = age + "年"
     if fl: info["所在樓層"] = fl
@@ -130,7 +131,8 @@ def to_item(c):
     if bm and rnd and pv: info["拍賣紀錄"] = f"第{rnd}拍 {int(bm[2]):02d}/{int(bm[3]):02d} 底標價：{pv:g} 萬"
     typ = c.get("TYPE") or ""
     return {"來源": "透明房訊", "編號": f"HW{c['NO']}", "地址": t, "區域": f"{city}{dist}-{typ}", "類型": typ,
-            "格局坪數": f"{ann}坪" if ann else "", "原價": "", "價格": f"售{ptxt}" if ptxt else "",
+            # 2026-11-19：卡片坪數用總坪數（含公設，與買屋網、HO 一致）；houseSize 是建坪（主建＋附屬，不含公設），另存「建坪」
+            "格局坪數": f"{total}坪" if total else (f"建坪{ann}坪" if ann else ""), "原價": "", "價格": f"售{ptxt}" if ptxt else "",
             "狀態": "待標中", "圖片": "", "資訊": info}
 
 def sync(items):

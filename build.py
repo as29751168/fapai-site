@@ -29,13 +29,18 @@ _PPHONE = re.compile(r"(?<![\d,])0(?:9\d{2}[-\s]?\d{3}[-\s]?\d{3}|\d{1,2}[-)）\
 def _hide_pii(t):
     t = _PNAME.sub(lambda m: m.group(0) if re.search(r"先|小姐|女士", m.group(2)) else m.group(1) + "（姓名已隱去）", t)
     return _PPHONE.sub("（電話已隱去）", t)
+# 2026-11-19：舊資料的「格局坪數」是建坪（不含公設），有總登記坪數就改用總坪數，跟買屋網、HO 一致
+_area_n = 0
+for _x in D.get("104", []):
+    _t = (_x.get("資訊") or {}).get("總登記坪數", "")
+    if _x.get("來源") == "透明房訊" and _t and _x.get("格局坪數") != _t: _x["格局坪數"] = _t; _area_n += 1
 _pii_n = 0
 for _x in D.get("104", []):
     _inf = _x.get("資訊") or {}
     if _inf.get("筆錄"):
         _new = _hide_pii(_inf["筆錄"])
         if _new != _inf["筆錄"]: _inf["筆錄"] = _new; _pii_n += 1
-if _pii_n:
+if _pii_n or _area_n:
     json.dump(D, open("site/data.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("筆錄遮個資:", _pii_n, "筆")
 # 2026-11-18 Anna：開標日已過卻還寫「待標」的不能照舊顯示（HO 快照沒更新拍次）；改標「開標日期已過・待確認」並排到最後
