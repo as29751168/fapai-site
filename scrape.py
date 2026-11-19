@@ -88,6 +88,8 @@ def ho_items():
     # 預設不抓 HO；除非廠商同意且設定 HO_ON=1 才會再讀。
     try: prev = [x for x in json.load(open("site/data.json", encoding="utf-8"))["104"] if x["編號"].startswith("HH")]
     except Exception: prev = []
+    if datetime.date.today() > datetime.date(2026, 12, 31):   # 2026-11-19 Anna 選 B：舊 House-Info 資料逐步淘汰，12/31 後全部下架（留下架頁、不刪網址）
+        print("House-Info 舊資料已過 12/31 淘汰期限，全部下架"); return []
     if True:   # 2026-11-19：一律不讀 HO（讀取程式已刪除），只沿用舊快照；有透明房訊同一件的由 scrape_woo 換掉
         # 不讀 HO：沿用最後一次抓好的 HO 物件（快照）。拍次、日期、底價、狀態之後照常由透明房訊公開開標清單每天校正；
         # 拍定／撤回會被校正程式拿掉；「待確認」（開標日過了、公開清單查無新場次）照下架規則（流標留著、停拍留三個月）
