@@ -1053,7 +1053,7 @@ def write_home():
     write("site/index.html", t)
 
 # ---------- 活動頁：年前上車｜2 萬代標券（2026-11-18 Anna 同意上線；活動至 2027/2/5 除夕） ----------
-PROMO_END = datetime.date(2027, 2, 5)
+PROMO_END = datetime.date(2026, 11, 18)   # 2026-11-19 Anna：代標券全面取消（原訂至 2027/2/5）；過期後首頁橫幅、連結自動消失，活動頁改取消公告、不收錄
 PROMO_CLAIM = "https://lin.ee/z4MUUbK"   # 領券
 PROMO_LINE = "https://lin.ee/Y2bGSIB"    # 加 LINE@ 好友
 PROMO_COMPANY = "財欣不動產管理顧問有限公司"
@@ -1108,7 +1108,7 @@ def promo_page():
             ("資料來源與更新日", f"{PROMO_COMPANY}活動辦法定稿；更新日 {PROMO_UPDATED}")]
     tbl = '<table class="pm-tbl">' + "".join(f"<tr><th>{e(k)}</th><td>{e(v)}</td></tr>" for k, v in rows) + "</table>"
     faq = "".join(f"<details open><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in PROMO_FAQ)
-    notice = '<p class="pm-end">活動已結束，以下為活動辦法存檔。</p>' if ended else ""
+    notice = '<p class="pm-end">本活動已取消，不再發放代標券。服務與收費請見<a href="/fees">服務與收費</a>，有問題歡迎 LINE@ 詢問。</p>' if ended else ""
     body = ('<nav class="bc"><a href="/">首頁</a> › 年前上車活動</nav><div class="pm">' + notice +
             '<section class="pm-hero"><p class="eb">104法拍網・限時活動</p><h1>年前上車｜2 萬代標券</h1>'
             '<p class="lead">委託全程代標，得標收費時折 20,000 元</p>'
@@ -1135,7 +1135,7 @@ def promo_page():
                       "availability": "https://schema.org/LimitedAvailability", "seller": {"@id": url + "#org"}}}
     bc = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "年前上車活動", "item": url}]}
     fq = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in PROMO_FAQ]}
-    return page(f"年前上車｜2 萬代標券｜全程代標得標折 20,000 元・限量 30 名・至 2027/2/5｜{NAME}", desc, "/promo", body, [org, svc, bc, fq], SITE + "/img/promo/nianqian-4x5.jpg", PROMO_CSS)
+    return page(f"年前上車｜2 萬代標券｜全程代標得標折 20,000 元・限量 30 名・至 2027/2/5｜{NAME}", desc, "/promo", body, [org, svc, bc, fq], SITE + "/img/promo/nianqian-4x5.jpg", PROMO_CSS) if not ended else page("年前上車活動已取消｜" + NAME, "年前上車代標券活動已取消。", "/promo", '<nav class="bc"><a href="/">首頁</a> › 活動</nav><h1>年前上車活動已取消</h1>' + notice).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
 
 def promo_banner():
     """首頁最上方活動橫幅：活動期間（至 2027/2/5）才出現，過期自動消失"""
@@ -1176,7 +1176,8 @@ if __name__ == "__main__":
     write("site/new-house.html", list_page("/new-house", "10年內新屋法拍屋", "屋齡 10 年以內的法拍屋，由新到舊排列，含拍次、開標日期與底標價。", sorted([x for x in ITEMS if _age(x) is not None and _age(x) <= 10], key=lambda x: (_age(x), date_key(x))))); urls.append(("/new-house", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write("site/about.html", about_page()); urls.append(("/about", 0.7))
-    write("site/promo.html", promo_page()); urls.append(("/promo", 0.8))
+    write("site/promo.html", promo_page())
+    if _today() <= PROMO_END: urls.append(("/promo", 0.8))
     write_learn(urls)
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
