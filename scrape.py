@@ -138,10 +138,10 @@ if __name__ == "__main__":
         tw = x.pop("_tw", None)
         if not x["編號"].startswith("HH"): continue
         inf = x.setdefault("資訊", {})
-        if inf.get("_透明房訊") and not tw: continue   # 之前已換過、這次沒比對到：保持留白
+        if inf.get("_透明房訊") and not tw: inf.pop("案號", None); continue   # 之前已換過、這次沒比對到：保持留白
         new_inf = {k: v for k, v in inf.items() if k in KEEP}
         if tw:
-            new_inf["案號"] = f'{tw["court"]} {tw["case"]}'.strip()
+            # 開標清單沒有完整案號（只有案名＋股別號），案號留白
             if tw.get("deliver"): new_inf["筆錄"] = f'●點交情形→{tw["deliver"]}●（依透明房訊開標清單，實際以法院公告為準）'
         new_inf["_透明房訊"] = "1"
         x["資訊"] = new_inf; x["格局坪數"] = ""
