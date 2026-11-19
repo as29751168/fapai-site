@@ -915,6 +915,9 @@ def about_page():
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]
     return page(f"關於我們｜Pitt & Anna 104法拍網團隊｜{SLOGAN}", "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴：全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。財欣不動產管理顧問有限公司。", "/about", body, ld, SITE + "/og.jpg")
 
+try: SOLD = json.load(open("data/sold.json", encoding="utf-8"))   # 透明房訊開標結果：拍定／承受／撤回
+except Exception: SOLD = {}
+
 def gone_page(k, v):
     """已從列表消失的物件：保留網址（不讓 Google、FB 舊連結變 404），標示已下架並導到同社區／同區現有物件。
     2026-11-19：有社區名的下架頁保留收錄並放進 sitemap（社區名＋凶宅／法拍的查詢拍完還是有人搜）；沒社區名的才 noindex"""
@@ -922,8 +925,12 @@ def gone_page(k, v):
     x = {"編號": k, "地址": addr, "區域": v.get("area", ""), "類型": v.get("type", ""), "資訊": {"社區/大樓": v.get("comm") or next((g["name"] for g in community_groups().values() if (k, v) in g["past"]), "")}}
     rows = kv([("案名／地址", addr), ("地區", area), ("最後拍次", ("第%s拍" % v["rd"]) if v.get("rd") else ""), ("最後開標日期", v.get("date", "")),
                ("最後底價", re.sub(r"^售", "", v.get("ptxt", ""))), ("下架日期", v.get("gone", ""))])
-    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › 已下架物件</nav>'
-            f'<section class="box"><h1>{e(addr)}（已下架）</h1><p>這筆物件已從列表下架，可能已拍定、停拍或撤回，實際結果請以法院公告為準。下面可以看同社區與附近其他現有物件；想知道這件的結果，歡迎 LINE@ 或電話詢問。</p>{rows}'
+    sd = SOLD.get(k) or {}
+    tag = "已" + sd["status"] if sd.get("status") else "已下架"
+    gone_msg = (f"這筆物件依透明房訊開標結果，已於 {sd.get('date', '')} {sd['status']}，實際結果以法院公告為準。" if sd.get("status")
+                else "這筆物件已從列表下架，可能已拍定、停拍或撤回，實際結果請以法院公告為準。")
+    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {tag}物件</nav>'
+            f'<section class="box"><h1>{e(addr)}（{tag}）</h1><p>{e(gone_msg)}下面可以看同社區與附近其他現有物件，歡迎 LINE@ 或電話詢問。</p>{rows}'
             f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 詢問</a> <a class="btn" href="tel:0918313888">電話洽詢</a> <a class="btn" href="/area/{slug(area)}">看{e(area)}現有物件</a></p></section>'
             + related_box(x, _comm(x), area))
     comm = _comm(x)
@@ -931,7 +938,7 @@ def gone_page(k, v):
         m = re.search(r"【([^】]{2,12})】", addr)
         if m and not re.search(r"樓|頂|加蓋|增建|捷運|站|店|車位|透天|邊間|電梯|公園|學區|近|坪|景觀|兇|凶|法拍|點交|持分|別墅|土地|廠|整棟|全棟", m.group(1)): comm = m.group(1)
     if comm:
-        return page(f"{comm}法拍屋｜{addr}（已下架）｜{NAME}", f"{comm}（{addr}）法拍物件已下架，可能已拍定、停拍或撤回，結果以法院公告為準；可查看{comm}與{area}其他現有法拍屋。", f"/h/{k}", body)
+        return page(f"{comm}法拍屋｜{addr}（{tag}）｜{NAME}", f"{comm}（{addr}）法拍物件已下架，可能已拍定、停拍或撤回，結果以法院公告為準；可查看{comm}與{area}其他現有法拍屋。", f"/h/{k}", body)
     return page(f"{addr}（已下架）｜{area}法拍屋｜{NAME}", f"{addr}已從法拍物件列表下架，結果以法院公告為準；可查看{area}其他現有法拍屋。", f"/h/{k}", body).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
 
 GONE_URLS = []

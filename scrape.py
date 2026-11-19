@@ -119,7 +119,12 @@ if __name__ == "__main__":
         import scrape_public
         rows = scrape_public.collect()
         data["104"], st = scrape_public.apply(data["104"], rows)
-        print("公開資料校正：", {k: v for k, v in st.items() if k != "ids"})
+        print("公開資料校正：", {k: (len(v) if k == "sold" else v) for k, v in st.items() if k != "ids"})
+        if st.get("sold"):   # 透明房訊顯示拍定／承受／撤回的物件：記下來，下架頁顯示「已拍定」
+            try: sold = json.load(open("data/sold.json", encoding="utf-8"))
+            except Exception: sold = {}
+            sold.update(st["sold"]); json.dump(sold, open("data/sold.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            print("本次透明房訊拍定／承受／撤回下架：", len(st["sold"]), "件")
         today = datetime.date.today(); res = []
         for r in rows:
             if r["date"] > today or r["date"] < today - datetime.timedelta(days=8) or not r["status"] or r["status"] == "待標": continue
