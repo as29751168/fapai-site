@@ -12,7 +12,11 @@ LINKS = {
     "YouTube": "https://youtube.com/@anna-n9999?si=laOYfE2Bm2VMPYDa",
     "LINE 社群": "https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default",
 }
-ADDR = ["新北市土城區金城路二段396號11樓", "桃園市桃園區莊敬路一段346號4樓"]
+# 2026-11-19 Anna「全部照改」：對外統一 Pitt & Anna｜104法拍網團隊、財欣全名；不放公司總機、土城地址（統一對外資料_20261119.md）
+TEAM = "Pitt & Anna｜104法拍網團隊"
+COMPANY = "財欣不動產管理顧問有限公司"
+SLOGAN = "你的法拍購屋夥伴"
+INTRO = "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴。透明房訊品牌深耕法拍逾 40 年，全台都有服務：投標諮詢、全程代標、點交協助，從看懂公告、評估總成本，到得標後續一路陪你。"
 PHOTO_BASE = "https://www.104woo.com.tw/"
 
 D = json.load(open("site/data.json", encoding="utf-8"))
@@ -196,14 +200,12 @@ header.top a.lg{font-size:14px;font-weight:650;letter-spacing:.03em}
 
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
-    "name": NAME, "alternateName": ["104法拍網", "透明房訊", "一零四法拍網股份有限公司"], "url": SITE + "/",
-    "telephone": ["+886-918-313-888", "+886-986-678-928", "+886-2-2270-0888", "+886-3-338-8220"],
-    "address": [{"@type": "PostalAddress", "streetAddress": "金城路二段396號11樓", "addressLocality": "土城區", "addressRegion": "新北市", "addressCountry": "TW"},
-                {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
+    "name": NAME, "alternateName": [TEAM, "104法拍網團隊"], "legalName": COMPANY, "slogan": SLOGAN, "url": SITE + "/",
+    "telephone": ["+886-918-313-888", "+886-986-678-928"],
     "areaServed": "TW", "sameAs": list(LINKS.values())[1:],
     "employee": [{"@type": "Person", "name": "黃先生 Pitt", "jobTitle": "法拍代標顧問", "telephone": "+886-918-313-888"}, {"@type": "Person", "name": "林小姐 Anna", "jobTitle": "法拍代標顧問", "telephone": "+886-986-678-928"}],
     "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "2% 到 5%，300 萬元以下固定 10 萬元，超過 300 萬元至 600 萬元最低 12 萬元"}],
-    "knowsAbout": ["法拍屋", "法拍屋代標", "不點交物件處理", "撤封代償", "產權調查", "法拍屋貸款"],
+    "knowsAbout": ["法拍屋", "法拍屋代標", "投標諮詢", "聲請點交", "包辦點交"],
 }
 
 FAB = (f'<div class="fab"><a href="tel:0918313888" aria-label="電話諮詢"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></a>'
@@ -213,8 +215,8 @@ def contact_box():
     btn = "".join(f'<a class="btn{" line" if k=="LINE" else ""}" href="{e(v)}" target="_blank" rel="noopener">{e(k)}</a>' for k, v in LINKS.items())
     return f'''<section class="box" id="contact"><h2>聯絡我們</h2>
 <p><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a><br><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a></p>
-<p>透明房訊雜誌社／一零四法拍網股份有限公司<br>台北 <a href="tel:0222700888">(02)2270-0888</a>　桃園 <a href="tel:033388220">(03)338-8220</a>　傳真 (02)2274-0884</p>
-<p>{e(ADDR[0])}<br>{e(ADDR[1])}</p><p>服務：法拍屋評估、代標、不點交物件處理、撤封代償、產權疑難雜症排除</p><div>{btn}</div></section>'''
+<p>LINE@ <a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a>（傳「案名」或地址就能問）</p>
+<p><b>{e(TEAM)}</b>｜{e(SLOGAN)}<br>全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交<br>{e(COMPANY)}</p><div>{btn}</div></section>'''
 
 def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True):
     url = SITE + path
@@ -229,7 +231,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <style>{CSS}</style>{ld}</head><body>
 <header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
-<footer>© {e(NAME)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
+<footer>© {e(TEAM)}｜{e(COMPANY)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
           '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
@@ -372,7 +374,7 @@ def community_page(key, g):
     up = [x for x in cur if today <= date_key(x) < 99999999]
     ps = sorted(p for p in (price_num(x["價格"]) for x in cur) if p > 0)
     if cur:
-        title = f"{name}法拍屋｜{a0}{len(cur)}件" + (f"・最近{md(up[0])}開標" if up else "") + f"・凶宅點交查證｜{NAME}"
+        title = f"{name}法拍屋｜{a0}{len(cur)}件" + (f"・最近{md(up[0])}開標" if up else "") + f"｜{NAME}"
         intro = (f"{name}（{a0}）目前有 {len(cur)} 件法拍物件" + (f"，底價 {wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"，最近一場 {md(up[0])} 開標" if up else "")
                  + (f"；近半年另有 {len(past)} 件已下架（拍定、停拍或撤回）" if past else "") + f"。資料每日更新（{UPDATED}），拍次與底價以法院最新公告為準。")
     else:
@@ -449,11 +451,11 @@ def detail_page(x):
     area = area_of(x)
     addr = inf.get("完整地址") or x["地址"]
     comm = community_of(x)
-    # 2026-11-17 Search Console：有曝光的查詢多是「社區名／路名＋凶宅」，標題要有「凶宅點交查證」才對得上
+    # 2026-11-19：拿掉每頁都一樣的「凶宅點交查證」（770 頁同一句像套版關鍵字）；標題只放社區名＋法拍屋＋地址
     # 2026-11-17 Anna：免費曝光先做。標題、H1、內文都要有「社區名＋法拍屋＋區＋路名」，搜社區名才找得到
     dist, rd = (area[2:] or area), _road(x)
     loc = addr if dist in addr else f"{dist}{rd}｜{addr}"
-    full_title = (f'{comm}法拍屋｜{loc}｜凶宅點交查證｜{NAME}' if comm else f'{loc}法拍屋｜{x["類型"]}・凶宅點交查證｜{NAME}')
+    full_title = (f'{comm}法拍屋｜{loc}｜{NAME}' if comm else f'{loc}法拍屋｜{x["類型"]}｜{NAME}')
     h1 = (f"{comm}法拍屋｜{dist}{rd}" if rd else f"{comm}法拍屋｜{addr}") if comm else f"{addr}法拍屋"
     lead = ((f"{comm}法拍屋，位於{dist}{rd}" if comm else f"{dist}{rd}法拍屋") + f"，門牌 {addr}，{x['類型']}"
             + (f"，第{inf['拍次']}拍" if inf.get("拍次") else "") + (f"，開標日期 {inf['開標日期']}" if inf.get("開標日期") else "")
@@ -510,7 +512,7 @@ def detail_page(x):
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
     ("法拍屋的「拍次」是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以各物件「拍賣紀錄」及法院公告為準。"),
-    ("可以委託代標嗎？需要準備什麼？", "可以。透明房訊104法拍網提供法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢，請透過電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
+    ("可以委託代標嗎？需要準備什麼？", "可以。Pitt & Anna｜104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交，請透過電話或 LINE@ 聯絡黃先生 Pitt 或林小姐 Anna。"),
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
     ("代標服務費怎麼算？", "全程代標收取 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；只需聲請點交為 50,000 元，包辦點交為 120,000 元。服務項目與附註請見「服務與收費」頁。"),
     ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
@@ -873,35 +875,43 @@ def know_box():
     return '<section class="box areas"><h2>法拍知識與服務</h2>' + "".join(f'<a href="/learn/{s}">{e(t)}</a>' for s, t in items) + '<a href="/process">購屋流程</a><a href="/fees">服務與收費</a><a href="/about">關於我們</a>' + ('<a href="/promo">年前上車｜2 萬代標券</a>' if _today() <= PROMO_END else '') + '</section>'
 
 ABOUT_FAQ = [
-    ("透明房訊／104法拍網是什麼？", "透明房訊／104法拍網（一零四法拍網股份有限公司）是提供法拍屋查詢與代標服務的公司，網站每日更新物件的拍次、開標日期、底標價與法院筆錄。"),
+    ("這個網站是誰在經營？", "由 Pitt & Anna｜104法拍網團隊經營（財欣不動產管理顧問有限公司），網站每日更新法拍物件的拍次、開標日期、底標價與法院筆錄，實際內容以法院公告為準。"),
     ("誰負責代標服務？", "由黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問負責，提供產權調查、現場勘查、標價評估、點交與交屋協助。"),
-    ("怎麼聯絡？", f"黃先生 Pitt {PHONE_P}、林小姐 Anna {PHONE_A}，或透過 LINE 聯絡。據點在新北市土城區與桃園市桃園區。"),
+    ("怎麼聯絡？服務哪些地區？", f"黃先生 Pitt {PHONE_P}、林小姐 Anna {PHONE_A}，或傳「案名」或地址到 LINE@ https://lin.ee/Y2bGSIB。全台都有服務。"),
 ]
 
 def about_page():
     fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in ABOUT_FAQ)
-    body = ('<nav class="bc"><a href="/">首頁</a> › 關於我們</nav><h1>關於透明房訊／104法拍網</h1>'
-            '<p>透明房訊／104法拍網（一零四法拍網股份有限公司）提供法拍屋物件查詢與代標服務。物件資料每日更新，實際內容以法院拍賣公告為準。</p>'
+    body = ('<nav class="bc"><a href="/">首頁</a> › 關於我們</nav><h1>關於 Pitt & Anna｜104法拍網團隊</h1>'
+            f'<p>{e(INTRO)}</p><p>本站每天更新法拍物件，實際內容以法院拍賣公告為準。</p>'
             '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p></section>'
             '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
-            f'<section class="box"><h2>據點與聯絡</h2><ul><li>{e(ADDR[0])}</li><li>{e(ADDR[1])}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>林小姐 Anna：{e(PHONE_A)}</li></ul></section>'
+            f'<section class="box"><h2>聯絡我們</h2><ul><li>林小姐 Anna：{e(PHONE_A)}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>LINE@：<a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a></li><li>服務範圍：全台都有服務</li><li>{e(COMPANY)}</li></ul></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
-    ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於透明房訊／104法拍網", "url": SITE + "/about", "inLanguage": "zh-TW"},
+    ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於 Pitt & Anna｜104法拍網團隊", "url": SITE + "/about", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]
-    return page(f"關於我們｜透明房訊／104法拍網法拍代標團隊｜{NAME}", "透明房訊／104法拍網：黃先生 Pitt 與林小姐 Anna 夫妻雙人法拍代標顧問，提供法拍屋查詢、產權調查、點交與代標服務。", "/about", body, ld, SITE + "/og.jpg")
+    return page(f"關於我們｜Pitt & Anna 104法拍網團隊｜{SLOGAN}", "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴：全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。財欣不動產管理顧問有限公司。", "/about", body, ld, SITE + "/og.jpg")
 
 def gone_page(k, v):
-    """已從列表消失的物件：保留網址（不讓 Google、FB 舊連結變 404），標示已下架並導到同區現有物件；不放進 sitemap、不收錄"""
+    """已從列表消失的物件：保留網址（不讓 Google、FB 舊連結變 404），標示已下架並導到同社區／同區現有物件。
+    2026-11-19：有社區名的下架頁保留收錄並放進 sitemap（社區名＋凶宅／法拍的查詢拍完還是有人搜）；沒社區名的才 noindex"""
     addr, area = v.get("addr", ""), (v.get("area", "").split("-")[0])
     x = {"編號": k, "地址": addr, "區域": v.get("area", ""), "類型": v.get("type", ""), "資訊": {"社區/大樓": v.get("comm") or next((g["name"] for g in community_groups().values() if (k, v) in g["past"]), "")}}
     rows = kv([("案名／地址", addr), ("地區", area), ("最後拍次", ("第%s拍" % v["rd"]) if v.get("rd") else ""), ("最後開標日期", v.get("date", "")),
                ("最後底價", re.sub(r"^售", "", v.get("ptxt", ""))), ("下架日期", v.get("gone", ""))])
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/area/{slug(area)}">{e(area)}法拍屋</a> › 已下架物件</nav>'
-            f'<section class="box"><h1>{e(addr)}（已下架）</h1><p>這筆物件已從列表下架，可能是拍定、停拍或撤回，實際結果請以法院公告為準。想知道結果或找類似物件，歡迎 LINE 或電話詢問。</p>{rows}'
+            f'<section class="box"><h1>{e(addr)}（已下架）</h1><p>這筆物件已從列表下架，可能已拍定、停拍或撤回，實際結果請以法院公告為準。下面可以看同社區與附近其他現有物件；想知道這件的結果，歡迎 LINE@ 或電話詢問。</p>{rows}'
             f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 詢問</a> <a class="btn" href="tel:0918313888">電話洽詢</a> <a class="btn" href="/area/{slug(area)}">看{e(area)}現有物件</a></p></section>'
             + related_box(x, _comm(x), area))
+    comm = _comm(x)
+    if not comm:   # 下架頁來源欄常沒有社區名，改從案名的【】取；排除「頂加」「捷運」「店面」這類不是社區名的字
+        m = re.search(r"【([^】]{2,12})】", addr)
+        if m and not re.search(r"樓|頂|加蓋|增建|捷運|站|店|車位|透天|邊間|電梯|公園|學區|近|坪|景觀|兇|凶|法拍|點交|持分|別墅|土地|廠|整棟|全棟", m.group(1)): comm = m.group(1)
+    if comm:
+        return page(f"{comm}法拍屋｜{addr}（已下架）｜{NAME}", f"{comm}（{addr}）法拍物件已下架，可能已拍定、停拍或撤回，結果以法院公告為準；可查看{comm}與{area}其他現有法拍屋。", f"/h/{k}", body)
     return page(f"{addr}（已下架）｜{area}法拍屋｜{NAME}", f"{addr}已從法拍物件列表下架，結果以法院公告為準；可查看{area}其他現有法拍屋。", f"/h/{k}", body).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
 
+GONE_URLS = []
 def write_gone(cur_ids, keep_days=180):
     """下架物件：有透明房訊同一物件（HO 停用後）就 301 轉址過去，其餘產生已下架頁；回傳 (已下架頁數, 轉址數)"""
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
@@ -915,7 +925,8 @@ def write_gone(cur_ids, keep_days=180):
         try:
             if (_today() - datetime.date.fromisoformat(v["gone"])).days > keep_days: continue
         except ValueError: continue
-        write(f"site/h/{k}.html", gone_page(k, v)); n += 1
+        html = gone_page(k, v); write(f"site/h/{k}.html", html); n += 1
+        if "noindex" not in html[:3000]: GONE_URLS.append((f"/h/{k}", 0.4, v.get("gone", "")))
     write("site/_redirects", "# 自動產生：House-Info 舊物件網址轉到透明房訊同一物件\n" + "".join(r + "\n" for r in red[:1900]))
     return n, len(red)
 
@@ -1091,15 +1102,12 @@ def promo_page():
             f'<p class="pm-sign">{e(PROMO_SIGN)}</p></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{faq}</section>'
             f'<section class="box pm-contact" id="contact"><h2>主辦與聯絡</h2><p class="pm-sign">{e(PROMO_COMPANY)}</p>'
-            f'<p>{e(ADDR[0])}<br>{e(ADDR[1])}</p>'
             f'<p><a href="tel:0918313888">黃先生 Pitt {PHONE_P}</a><a href="tel:0986678928">林小姐 Anna {PHONE_A}</a><a href="{line}" target="_blank" rel="noopener">LINE@ @635nftwk（lin.ee/Y2bGSIB）</a></p>'
             + ("" if ended else cta) + '</section>'
             '<section class="box areas"><h2>延伸閱讀</h2><a href="/fees">服務與收費</a><a href="/process">購屋流程</a><a href="/learn/proxy-bid-process">委託代標怎麼進行</a><a href="/about">關於我們</a></section></div>')
     desc = "年前上車｜2 萬代標券：委託全程代標，得標並收取服務費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）。加 LINE@ @635nftwk 領券。主辦：" + PROMO_COMPANY
     org = {"@context": "https://schema.org", "@type": "Organization", "@id": url + "#org", "name": PROMO_COMPANY, "alternateName": "104法拍網", "url": SITE + "/",
            "telephone": ["+886-918-313-888", "+886-986-678-928"],
-           "address": [{"@type": "PostalAddress", "streetAddress": "金城路二段396號11樓", "addressLocality": "土城區", "addressRegion": "新北市", "addressCountry": "TW"},
-                       {"@type": "PostalAddress", "streetAddress": "莊敬路一段346號4樓", "addressLocality": "桃園區", "addressRegion": "桃園市", "addressCountry": "TW"}],
            "sameAs": [PROMO_LINE]}
     svc = {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋全程代標服務", "serviceType": "法拍屋代標", "areaServed": "TW", "provider": {"@id": url + "#org"},
            "offers": {"@type": "Offer", "name": "年前上車｜2 萬代標券", "url": url,
@@ -1129,14 +1137,16 @@ if __name__ == "__main__":
     urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8, lastmod(x)))
-    ng, nr = write_gone({x["編號"] for x in ITEMS})
+    ng, nr = write_gone({x["編號"] for x in ITEMS}); urls += GONE_URLS
     areas = {}
     for x in ITEMS: areas.setdefault(area_of(x), []).append(x)
     shutil.rmtree("site/c", ignore_errors=True)
     for ck, cg in community_groups().items():
-        write(f"site/c/{ck}.html", community_page(ck, cg)); urls.append((f"/c/{slug(ck)}", 0.8))
+        write(f"site/c/{ck}.html", community_page(ck, cg))
+        if cg["cur"]: urls.append((f"/c/{slug(ck)}", 0.8))   # 2026-11-19 沒有待拍物件的社區頁先不送 sitemap
     for a, xs in areas.items():
-        write(f"site/area/{a}.html", area_page(a, xs)[1]); urls.append((f"/area/{slug(a)}", 0.7))
+        write(f"site/area/{a}.html", area_page(a, xs)[1])
+        if len(xs) >= 3: urls.append((f"/area/{slug(a)}", 0.7))   # 2026-11-19 不到 3 件的區域頁內容太少，先不送 sitemap
     for c in CITIES:
         write(f"site/{c[0]}.html", city_page(*c)); urls.append((f"/{c[0]}", 0.9))
         if c[0] != "greater-taipei":
@@ -1154,12 +1164,12 @@ if __name__ == "__main__":
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
           "".join(f"<url><loc>{e(SITE + u[0])}</loc>" + (f"<lastmod>{u[2] if len(u) > 2 else day}</lastmod>" if len(u) < 3 or u[2] else "") + f"<priority>{u[1]}</priority></url>\n" for u in urls) + "</urlset>\n")
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
-    write("site/llms.txt", f"# {NAME}\n\n> 透明房訊／一零四法拍網股份有限公司的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄，以及法拍屋代標、產權調查、不點交物件處理、撤封代償與貸款諮詢。資料每日更新（{UPDATED}）。\n\n"
+    write("site/llms.txt", f"# {NAME}\n\n> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
           f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n- [年前上車｜2 萬代標券]({SITE}/promo): 財欣不動產管理顧問有限公司活動，委託全程代標、得標收費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）23:59，加 LINE@ @635nftwk 領券\n"
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
-          + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- 台北 (02)2270-0888／桃園 (03)338-8220\n- 地址：{ADDR[0]}；{ADDR[1]}\n")
+          + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- LINE@：https://lin.ee/Y2bGSIB\n- 服務範圍：全台都有服務\n- {COMPANY}\n")
     write_home()
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
