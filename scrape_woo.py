@@ -114,6 +114,7 @@ def to_item(c):
     ann = c.get("houseSize")
     info = {"拍次": str(rnd) if rnd else "", "開標日期": roc, "銷售狀態": c.get("NOW_STATUS") or "待標", "法拍件": "是"}
     if total: info["總登記坪數"] = total + "坪"
+    if ann: info["建坪（不含公設）"] = f"{ann}坪"
     if total and pv: info["每坪單價"] = f"{pv / float(total):.2f}萬/坪"
     if age: info["屋齡"] = age + "年"
     if fl: info["所在樓層"] = fl
@@ -130,7 +131,8 @@ def to_item(c):
     if bm and rnd and pv: info["拍賣紀錄"] = f"第{rnd}拍 {int(bm[2]):02d}/{int(bm[3]):02d} 底標價：{pv:g} 萬"
     typ = c.get("TYPE") or ""
     return {"來源": "透明房訊", "編號": f"HW{c['NO']}", "地址": t, "區域": f"{city}{dist}-{typ}", "類型": typ,
-            "格局坪數": f"{ann}坪" if ann else "", "原價": "", "價格": f"售{ptxt}" if ptxt else "",
+            # 2026-11-19：卡片坪數用總坪數（含公設，與買屋網、HO 一致）；houseSize 是建坪（主建＋附屬，不含公設），另存「建坪」
+            "格局坪數": f"{total}坪" if total else (f"建坪{ann}坪" if ann else ""), "原價": "", "價格": f"售{ptxt}" if ptxt else "",
             "狀態": "待標中", "圖片": "", "資訊": info}
 
 def sync(items):
@@ -140,7 +142,7 @@ def sync(items):
     P = {}
     try: P = json.load(open("site/photos.json", encoding="utf-8"))
     except Exception: pass
-    pics = added = extra = 0
+    pics = added = extra = replaced = 0
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
     except Exception: seen = {}
     cur = {x["編號"] for x in items}
@@ -154,7 +156,11 @@ def sync(items):
         hit = next((x for x in items if x["區域"][:2].replace("臺", "台") == cty and ((len(s) >= 5 and s in norm(x["地址"])) or (len(ft) >= 5 and ft == addr_tail((x.get("資訊") or {}).get("完整地址"))))), None) if s or ft else None
         if hit:
             key = hit["編號"][2:]
-            if hit["編號"].startswith("HH"): hit["twin"] = f"HW{c['NO']}"   # 記下同一物件在透明房訊的編號：HO 停用後舊網址轉過去
+            if hit["編號"].startswith("HH"):   # 2026-11-19：舊 House-Info 快照有透明房訊同一件 → 整筆換成透明房訊資料，舊網址轉過去
+                x = to_item(c); x["inherit"] = hit["編號"]; items[items.index(hit)] = x; key = x["編號"][2:]; replaced += 1; time.sleep(0.3)
+                pl = photo_list(c)
+                if pl and P.get(key) != pl: P[key] = pl; pics += 1
+                continue
             if hit["編號"].startswith("HW"):   # 自家物件：每次重抓完整筆錄
                 try:
                     fn = full_notes(get_text(f"/Sales/{MOBILE}/{c['NO']}"))
