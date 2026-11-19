@@ -113,28 +113,41 @@ if __name__ == "__main__":
         print("法院現場照新增", scrape_woo.court_sync(data["104"]), "件")
     except Exception as e:
         print("透明房訊同步失敗（略過）：", e)
-    try:  # 每週拍定・停拍・撤回：法院開標結果文字資料（toro591，不取照片與連結）
-        import scrape_results
-        rs = scrape_results.fetch()
-        if rs:
-            json.dump({"更新時間": data["更新時間"], "items": rs}, open("data/results.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-            print("開標結果", len(rs), "筆")
-    except Exception as e:
-        print("開標結果同步失敗（略過）：", e)
-    try:  # 桃園開標結果：透明房訊公開頁（不需登入）
-        import scrape_results
-        ty = [x for x in scrape_results.fetch_court() if x["status"] != "待標" and not x["land"]]
-        if ty:
-            json.dump({"更新時間": data["更新時間"], "items": ty}, open("data/results_tyd.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-            print("桃園開標結果", len(ty), "筆")
-    except Exception as e:
-        print("桃園開標結果同步失敗（略過）：", e)
-    try:  # 用透明房訊公開的每日開標清單校正拍次、日期、底價與狀態
+    try:  # 2026-11-19：停用 toro591（CLAUDE.md 禁用）。校正與開標結果都只用透明房訊公開的每日開標清單
         import scrape_public
-        data["104"], st = scrape_public.apply(data["104"])
+        rows = scrape_public.collect()
+        data["104"], st = scrape_public.apply(data["104"], rows)
         print("公開資料校正：", {k: v for k, v in st.items() if k != "ids"})
+        today = datetime.date.today(); res = []
+        for r in rows:
+            if r["date"] > today or r["date"] < today - datetime.timedelta(days=8) or not r["status"] or r["status"] == "待標": continue
+            stt = {"得標": "拍定", "承受": "承受"}.get(r["status"], r["status"])
+            res.append({"date": f"{r['date'].year - 1911}/{r['date'].month:02d}/{r['date'].day:02d}", "status": stt, "round": r["round"],
+                        "deliver": r["deliver"], "type": r["type"], "addr": r["addr"], "base": r["base"], "win": r["win"], "land": r["type"] == "土地"})
+        res = [x for x in res if not x["land"]]
+        if len(rows) >= 2000:
+            json.dump({"更新時間": data["更新時間"], "來源": "透明房訊公開開標清單", "items": res}, open("data/results.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+            if os.path.exists("data/results_tyd.json"): os.remove("data/results_tyd.json")   # 已併入 results.json
+            print("開標結果（透明房訊）", len(res), "筆")
     except Exception as e:
         print("公開資料校正失敗（略過）：", e)
+    # 2026-11-19：11/15 以前從 House-Info 抓的 HH 舊資料，逐欄換成透明房訊資料；透明房訊沒有的欄位留白，不沿用 House-Info
+    KEEP = {"拍次", "開標日期", "銷售狀態", "法拍件", "完整地址"}   # 這幾欄由透明房訊公開開標清單每天校正
+    hh_fix = 0
+    for x in data["104"]:
+        tw = x.pop("_tw", None)
+        if not x["編號"].startswith("HH"): continue
+        inf = x.setdefault("資訊", {})
+        if inf.get("_透明房訊") and not tw: continue   # 之前已換過、這次沒比對到：保持留白
+        new_inf = {k: v for k, v in inf.items() if k in KEEP}
+        if tw:
+            new_inf["案號"] = f'{tw["court"]} {tw["case"]}'.strip()
+            if tw.get("deliver"): new_inf["筆錄"] = f'●點交情形→{tw["deliver"]}●（依透明房訊開標清單，實際以法院公告為準）'
+        new_inf["_透明房訊"] = "1"
+        x["資訊"] = new_inf; x["格局坪數"] = ""
+        if new_inf.get("完整地址"): x["地址"] = new_inf["完整地址"]   # 拿掉 House-Info 案名裡的【社區名】等字
+        hh_fix += 1
+    print("HH 舊資料換成透明房訊欄位：", hh_fix, "件")
     try:  # 人工更正（data/overrides.json）：{編號: {欄位: 值}}，避免每日抓取又被蓋回
         ov = json.load(open("data/overrides.json", encoding="utf-8"))
         for x in data["104"]:

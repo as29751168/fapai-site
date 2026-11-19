@@ -92,6 +92,7 @@ def apply(items, rows=None, today=None):
                 x["狀態"] = "開標日期已過・待確認"; inf["銷售狀態"] = "待確認"; stat["stale"] = stat.get("stale", 0) + 1
             kept.append(x); continue
         cands.sort(key=lambda r: r["date"]); last = cands[-1]
+        x["_tw"] = {"case": last["name"], "court": last["court"], "deliver": last["deliver"]}   # 2026-11-19 透明房訊場次資料（HH 換欄位用，寫檔前移除）
         st = last["status"]; fut = [r for r in cands if r["date"] >= today and not CLOSED.search(r["status"])]
         if fut:   # 還有仍有效的未開標場次：以最近一場為準；已停拍或撤回的未來場次不算
             r = fut[0]
