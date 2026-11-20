@@ -252,12 +252,12 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(TEAM)}｜{e(COMPANY)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
+          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
@@ -1154,10 +1154,34 @@ def promo_banner():
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
 
+def map_files():
+    """法拍地圖（/map）：site/map.json 精簡資料＋由 tpl/map.html 產生頁面。座標來自 geocode.py 的 data/geo.json"""
+    import geocode
+    try: geo = json.load(open("data/geo.json", encoding="utf-8"))
+    except Exception: geo = {}
+    rows, miss = [], 0
+    for x in ITEMS:
+        g = geo.get(geocode.query_addr(x))
+        if not g or g[2] < 0: miss += 1; continue
+        inf = x.get("資訊") or {}
+        ph = photos(x)
+        sz = re.match(r"[\d.]+", x.get("格局坪數") or "")
+        up = re.match(r"[\d.]+", inf.get("每坪單價") or "")
+        rows.append({"i": x["編號"], "a": re.sub(r"[❶-❿①-⑳？?]", "", inf.get("完整地址") or x["地址"]), "c": area_of(x)[:2], "d": area_of(x)[2:], "t": x["類型"].split("_")[0],
+                     "p": round(price_num(x["價格"]) / 10000), "f": round(first_price(x) / 10000), "r": "Y" if is_ying(x) else round_of(x),
+                     "o": _open_date(x), "s": x.get("狀態", ""), "j": deliver_of(x), "z": float(sz[0]) if sz else 0, "u": float(up[0]) if up else 0,
+                     "y": _age(x), "m": community_of(x), "g": ph[0] if ph else "", "n": 1 if _within(x.get("新增日", "")) else 0,
+                     "k": 1 if (_within(x.get("異動日", "")) and x.get("降價前", 0)) else 0, "x": g[0], "q": g[1], "e": g[2]})
+    json.dump({"更新時間": UPDATED, "items": rows}, open("site/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    t = open("tpl/map.html", encoding="utf-8").read().replace("{{UPDATED}}", e(UPDATED)).replace("{{COUNT}}", str(len(rows))).replace("{{LINE}}", LINKS["LINE"]).replace("{{V}}", re.sub(r"\D", "", UPDATED))
+    write("site/map.html", t)
+    print("法拍地圖：", len(rows), "件上圖（無座標", miss, "件）")
+
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/list.html", index_page(True))
-    urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
+    urls = [("/", 1.0), ("/list", 0.9), ("/map", 0.9), ("/member", 0.5)]
+    map_files()
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8, lastmod(x)))
     ng, nr = write_gone({x["編號"] for x in ITEMS}); urls += GONE_URLS

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>法拍地圖｜台北・新北・桃園法拍屋地圖找屋（每日更新）｜透明房訊104法拍網</title>
+<meta name="description" content="在地圖上找法拍屋：門牌精準定位、拍次顏色一眼看懂、開標倒數、底價與每坪單價、附近捷運學校市場、3D 立體建物與航照。目前 1037 件，資料每日更新（2026-11-20 18:26）。">
+<link rel="canonical" href="https://tomin104.com/map">
+<meta property="og:type" content="website"><meta property="og:site_name" content="透明房訊｜104法拍網">
+<meta property="og:title" content="法拍地圖｜看地圖找法拍屋"><meta property="og:description" content="門牌精準定位、拍次顏色、開標倒數、附近生活機能，資料每日更新。">
+<meta property="og:url" content="https://tomin104.com/map"><meta property="og:image" content="https://tomin104.com/og.jpg"><meta property="og:locale" content="zh_TW">
+<meta name="theme-color" content="#18354b">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"透明房訊法拍地圖","url":"https://tomin104.com/map","applicationCategory":"RealEstate","operatingSystem":"Web","inLanguage":"zh-Hant","offers":{"@type":"Offer","price":"0","priceCurrency":"TWD"},"provider":{"@type":"Organization","name":"Pitt & Anna｜104法拍網團隊","url":"https://tomin104.com"}}</script>
+<style>
+:root{--navy:#18354b;--ink:#233e50;--muted:#66767f;--gold:#a78b5c;--gold-l:#d9c39c;--paper:#f8f7f3;--line:#dce3e5;--r1:#18354b;--r2:#a78b5c;--r3:#b5502f;--ry:#2f7d5b;--r0:#8a96a0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:#fff;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+/* 上方 */
+#top{flex:none;background:#fff;border-bottom:1px solid var(--line);padding:8px 10px 0;padding-top:max(8px,env(safe-area-inset-top));z-index:5}
+.row1{display:flex;align-items:center;gap:8px}
+.logo{font-family:"Noto Serif TC","Songti TC",serif;color:var(--navy);font-size:15px;letter-spacing:.08em;white-space:nowrap}
+.logo i{font-style:normal;color:var(--gold)}
+.logo b{display:block;font-size:11px;font-weight:400;letter-spacing:.04em;color:var(--muted);font-family:inherit}
+.sbox{flex:1;min-width:0;position:relative}
+.sbox input{width:100%;height:38px;border:1px solid #c9d4d9;border-radius:3px;padding:0 10px 0 32px;font-size:15px;color:var(--ink);background:#fff;-webkit-appearance:none}
+.sbox input:focus{outline:none;border-color:var(--navy)}
+.sbox svg{position:absolute;left:9px;top:11px;width:16px;height:16px;stroke:var(--muted)}
+.fbtn{height:38px;padding:0 12px;border:1px solid var(--navy);border-radius:3px;color:var(--navy);white-space:nowrap;font-size:14px;position:relative}
+.fbtn em{font-style:normal;background:var(--navy);color:#fff;border-radius:9px;font-size:11px;padding:1px 6px;margin-left:4px;display:none}
+.fbtn.on em{display:inline}
+.quick{display:flex;gap:6px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding:0 12px;border:1px solid #c9d4d9;border-radius:16px;font-size:13px;color:var(--ink);white-space:nowrap;background:#fff}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+/* 主體 */
+#main{flex:1;position:relative;min-height:0}
+#map{position:absolute;inset:0}
+.ctl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}
+.seg{display:flex;flex-direction:column;background:#fff;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.18);overflow:hidden}
+.seg button{width:46px;height:36px;font-size:12px;border-bottom:1px solid var(--line);color:var(--ink)}
+.seg button:last-child{border:0}
+.seg button.on{background:var(--navy);color:#fff}
+.legend{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.95);border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.15);font-size:12px;padding:6px 9px;z-index:3;line-height:1.75}
+.legend summary{cursor:pointer;color:var(--navy);list-style:none}
+.legend summary::-webkit-details-marker{display:none}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.dot.h{background:#fff!important;border:2px solid var(--r0)}
+.upd{position:absolute;left:10px;top:50px;max-width:62%;font-size:10.5px;line-height:1.5;color:#55636b;background:rgba(255,255,255,.85);padding:2px 6px;border-radius:3px;z-index:2}
+/* 列表 */
+#list{position:absolute;left:0;right:0;bottom:0;z-index:4;background:linear-gradient(rgba(255,255,255,0),#fff 22px);padding:14px 0 max(8px,env(safe-area-inset-bottom))}
+.lh{display:flex;align-items:center;justify-content:space-between;padding:0 12px 6px;font-size:13px}
+.lh b{color:var(--navy);font-size:15px}
+.lh button{color:var(--muted);font-size:13px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 10px}
+.cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 12px 4px;scrollbar-width:none}
+.cards::-webkit-scrollbar{display:none}
+.cd{flex:0 0 82%;max-width:330px;scroll-snap-align:center;display:flex;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(24,53,75,.10);text-align:left;cursor:pointer}
+.cd.sel{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy)}
+.cd .ph{flex:0 0 96px;background:#eef1f2 center/cover no-repeat;position:relative}
+.cd .ph span{position:absolute;left:0;top:0;color:#fff;font-size:11px;padding:2px 6px}
+.cd .bd{flex:1;min-width:0;padding:8px 10px}
+.cd .ad{font-size:13.5px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .mt{font-size:12px;color:var(--muted);margin:3px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd .pr{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.cd .pr b{white-space:nowrap;font-size:17px;color:var(--navy);font-family:"Noto Serif TC","Songti TC",serif}
+.cd .pr small{font-size:12px;color:var(--r3);white-space:nowrap}
+.empty{padding:8px 14px 12px;color:var(--muted);font-size:13px}
+#list.min .cards,#list.min .empty{display:none}
+/* 物件卡 */
+#sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#fff;border-radius:12px 12px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.18);max-height:64%;overflow-y:auto;transform:translateY(105%);transition:transform .22s ease;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+#sheet.on{transform:none}
+.sx{position:sticky;top:0;display:flex;justify-content:center;padding:7px 0 3px;background:#fff;z-index:1}
+.sx i{width:38px;height:4px;border-radius:2px;background:#cfd6da}
+.sx button{position:absolute;right:8px;top:2px;width:36px;height:36px;font-size:22px;color:var(--muted)}
+.sp{position:relative;aspect-ratio:16/9;background:#eef1f2 center/cover no-repeat;margin:0 12px;border-radius:6px}
+.sp.no{display:none}
+@media(max-width:899px){.sp{aspect-ratio:auto;height:150px;background-size:contain;background-color:#f3f1ec}}
+.sc{padding:10px 14px 4px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px}
+.tg{font-size:12px;padding:2px 8px;border-radius:2px;color:#fff;background:var(--navy)}
+.tg.o{background:#fff;color:var(--navy);border:1px solid #b9c6cd}
+.sc h2{font-family:"Noto Serif TC","Songti TC",serif;font-size:18px;color:var(--navy);line-height:1.4;letter-spacing:.02em}
+.sc .mt{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.pbox{display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;gap:10px}
+.pbox .l small{display:block;font-size:12px;color:var(--gold)}
+.pbox .l b{font-size:26px;color:var(--navy);font-family:"Noto Serif TC","Songti TC",serif}
+.pbox .r{text-align:right;font-size:12.5px;color:var(--muted);line-height:1.6}
+.pbox .r strong{color:var(--r3);font-weight:600}
+.cdn{margin:10px 0 0;font-size:14px;color:var(--ink)}
+.cdn b{color:var(--r3)}
+.note{font-size:12px;color:var(--muted);margin-top:6px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 4px}
+.acts a,.acts button{height:44px;display:flex;align-items:center;justify-content:center;border:1px solid #b9c6cd;border-radius:3px;font-size:14px;color:var(--navy);background:#fff}
+.acts .pri{grid-column:1/-1;background:var(--navy);border-color:var(--navy);color:#fff}
+.acts .ln{background:var(--gold-l);border-color:var(--gold-l);color:var(--navy);font-weight:600}
+.nb{margin:10px 14px 6px;border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.nb h3{font-size:13px;color:var(--navy);margin-bottom:6px;font-weight:600}
+.nb ul{list-style:none;font-size:13px;line-height:1.85}
+.nb li span{color:var(--muted);float:right}
+.nb .q{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.nb .q a{font-size:12px;color:var(--navy);border:1px solid var(--line);border-radius:12px;padding:3px 9px}
+.cta{margin:10px 14px 4px;font-size:12.5px;color:var(--muted);text-align:center}
+/* 篩選 */
+#filt{position:fixed;inset:0;z-index:20;display:none}
+#filt.on{display:block}
+#filt .bk{position:absolute;inset:0;background:rgba(17,42,62,.45)}
+#filt .pn{position:absolute;left:0;right:0;bottom:0;max-height:88%;background:#fff;border-radius:12px 12px 0 0;display:flex;flex-direction:column}
+.fh{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.fh b{font-size:16px;color:var(--navy)}
+.fh button{color:var(--muted);font-size:14px}
+.fb{overflow-y:auto;padding:4px 16px 10px}
+.fs{padding:12px 0 4px}
+.fs h4{font-size:13px;color:var(--muted);font-weight:400;margin-bottom:8px}
+.fs .cg{display:flex;flex-wrap:wrap;gap:7px}
+.fs .chip{height:36px;border-radius:3px}
+.fs .chip small{color:inherit;opacity:.65;margin-left:3px}
+.ff{display:flex;gap:10px;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.ff button{flex:1;height:46px;border-radius:3px;font-size:15px}
+.ff .clr{border:1px solid #b9c6cd;color:var(--navy);flex:0 0 34%}
+.ff .go{background:var(--navy);color:#fff}
+.toast{position:fixed;left:50%;bottom:30%;transform:translateX(-50%);background:rgba(17,42,62,.92);color:#fff;font-size:14px;padding:9px 16px;border-radius:4px;z-index:30;display:none}
+.maplibregl-ctrl-bottom-right{display:none}
+/* 桌機：左側列表 */
+@media(min-width:900px){
+ #top{padding:10px 16px 0}
+ .logo{font-size:18px}
+ .sbox{max-width:460px}
+ #list{top:0;right:auto;width:380px;background:#fff;border-right:1px solid var(--line);padding:10px 0;display:flex;flex-direction:column}
+ .cards{flex-direction:column;overflow-x:hidden;overflow-y:auto;scroll-snap-type:none;flex:1;padding:0 12px 12px}
+ .cd{flex:none;max-width:none}
+ .cd .ph{flex-basis:120px;min-height:96px}
+ #list.min .cards{display:flex}
+ .lh button{display:none}
+ #map{left:380px}
+ .legend{left:392px}
+ .upd{left:390px;top:auto;bottom:8px;max-width:none}
+ .maplibregl-ctrl-bottom-right{display:block}
+ #sheet{left:auto;right:12px;top:12px;bottom:12px;width:400px;max-height:none;border-radius:8px;transform:translateX(115%)}
+ .so .ctl{right:424px}.so .maplibregl-ctrl-bottom-right{right:414px}
+ #filt .pn{left:50%;top:50%;bottom:auto;width:560px;transform:translate(-50%,-50%);border-radius:8px;max-height:84%}
+}
+</style></head>
+<body>
+<div id="app">
+ <header id="top">
+  <div class="row1">
+   <a class="logo" href="/">透明房訊<i>｜</i>104法拍網<b>法拍地圖・每日更新</b></a>
+   <label class="sbox"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="搜尋地址或社區" enterkeyhint="search" autocomplete="off"></label>
+   <button class="fbtn" id="fopen" type="button">篩選<em id="fcnt">0</em></button>
+  </div>
+  <div class="quick" id="quick">
+   <button class="chip" data-k="r3">三拍以上</button>
+   <button class="chip" data-k="ry">公告應買</button>
+   <button class="chip" data-k="w7">7 天內開標</button>
+   <button class="chip" data-k="dv">點交</button>
+   <button class="chip" data-k="nw">本週新上架</button>
+   <button class="chip" data-k="dn">降價降拍</button>
+   <button class="chip" data-k="a10">10 年內新屋</button>
+   <button class="chip" data-k="p1">1,000 萬以下</button>
+  </div>
+ </header>
+ <div id="main">
+  <div id="map" aria-label="法拍屋地圖"></div>
+  <details class="legend" id="legend"><summary>圖例 ▾</summary>
+   <div><span class="dot" style="background:var(--r1)"></span>一拍</div>
+   <div><span class="dot" style="background:var(--r2)"></span>二拍</div>
+   <div><span class="dot" style="background:var(--r3)"></span>三拍以上</div>
+   <div><span class="dot" style="background:var(--ry)"></span>公告應買</div>
+   <div><span class="dot h"></span>位置為路段推估</div>
+  </details>
+  <div class="ctl">
+   <div class="seg" id="base"><button data-b="map" class="on">地圖</button><button data-b="photo">航照</button><button data-b="3d">3D</button></div>
+   <div class="seg"><button id="loc" title="我的位置">定位</button></div>
+  </div>
+  <div class="upd">更新 2026-11-20 18:26・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
+  <section id="list">
+   <div class="lh"><span>此範圍 <b id="lc">0</b> 件</span><button id="lt" type="button">收合</button></div>
+   <div class="cards" id="cards"></div>
+  </section>
+  <section id="sheet" aria-live="polite"><div class="sx"><i></i><button id="sclose" type="button" aria-label="關閉">×</button></div><div id="sbody"></div></section>
+ </div>
+</div>
+<div id="filt"><div class="bk"></div><div class="pn">
+ <div class="fh"><b>篩選條件</b><button id="fclose" type="button">關閉</button></div>
+ <div class="fb" id="fbody"></div>
+ <div class="ff"><button class="clr" id="fclr" type="button">清除</button><button class="go" id="fgo" type="button">顯示 0 件</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<noscript><p style="padding:20px">法拍地圖需要開啟 JavaScript。也可以到 <a href="/list">物件列表</a> 查看全部物件。</p></noscript>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+var LINE="https://lin.ee/Y2bGSIB", ALL=[], VIEW=[], F={c:[],r:[],t:[],p:[],z:[],dv:0,w:0,nw:0,dn:0,a10:0,q:""}, SEL=null, MAP, base="map";
+var COL={1:"#18354b",2:"#a78b5c",3:"#b5502f",Y:"#2f7d5b",0:"#8a96a0"};
+var CITY=["台北","新北","桃園","基隆","新竹","苗栗","宜蘭","台中","彰化","南投","雲林","嘉義","台南","高雄","屏東","花蓮","台東"];
+var TYPES=["公寓","大樓","華廈","透天","店面","一樓"];
+var PR=[[0,500,"500 萬以下"],[500,1000,"500–1,000 萬"],[1000,1500,"1,000–1,500 萬"],[1500,2000,"1,500–2,000 萬"],[2000,3000,"2,000–3,000 萬"],[3000,1e9,"3,000 萬以上"]];
+var SZ=[[0,20,"20 坪以下"],[20,35,"20–35 坪"],[35,50,"35–50 坪"],[50,1e9,"50 坪以上"]];
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function rk(x){return x.r==="Y"?"Y":x.r>=3?3:x.r||0}
+function rname(x){return x.r==="Y"?"公告應買":x.r?"第"+x.r+"拍":"拍次洽詢"}
+function money(p){return p>=10000?(p/10000).toFixed(2).replace(/\.?0+$/,"")+" 億":p.toLocaleString()+" 萬"}
+function days(x){if(!x.o)return null;return Math.ceil((new Date(x.o+"T00:00:00+08:00")-Date.now())/864e5)}
+function cdtext(x){if(x.r==="Y")return "先買先贏";var n=days(x);if(n===null)return "";var d=x.o.slice(5).replace("-","/");return n>1?"還有 "+n+" 天開標（"+d+"）":n===1?"明天開標（"+d+"）":n===0?"今天開標":d+" 已開標・待確認"}
+function toast(t){var e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(e._t);e._t=setTimeout(function(){e.style.display="none"},1800)}
+function inR(v,rs,arr){if(!arr.length)return true;return arr.some(function(i){return v>=rs[i][0]&&v<rs[i][1]})}
+function pass(x,skip){
+ if(F.c.length&&F.c.indexOf(x.c)<0&&skip!=="c")return false;
+ if(F.r.length&&F.r.indexOf(String(rk(x)))<0&&skip!=="r")return false;
+ if(F.t.length&&F.t.indexOf(x.t)<0&&skip!=="t")return false;
+ if(!inR(x.p,PR,F.p))return false;
+ if(!inR(x.z,SZ,F.z))return false;
+ if(F.dv&&x.j!=="點交")return false;
+ if(F.w){var n=days(x);if(n===null||n<0||n>F.w)return false}
+ if(F.nw&&!x.n)return false;
+ if(F.dn&&!x.k)return false;
+ if(F.a10&&!(x.y!==null&&x.y<=10))return false;
+ if(F.q){var t=(x.a+" "+x.m+" "+x.c+x.d+" "+x.i+" "+x.t).toLowerCase();if(F.q.split(/\s+/).some(function(w){return t.indexOf(w)<0}))return false}
+ return true}
+function nf(){return F.c.length+F.r.length+F.t.length+F.p.length+F.z.length+F.dv+(F.w?1:0)+F.nw+F.dn+F.a10}
+function geo(){return{type:"FeatureCollection",features:VIEW.map(function(x,i){return{type:"Feature",id:i,geometry:{type:"Point",coordinates:[x.x,x.q]},properties:{i:x.i,k:String(rk(x)),e:x.e,l:money(x.p),o:past(x)?1:0}}})}}
+function apply(){
+ VIEW=ALL.filter(function(x){return pass(x)});
+ if(MAP&&MAP.getSource("pts"))MAP.getSource("pts").setData(geo());
+ var n=nf();$("#fopen").classList.toggle("on",n>0);$("#fcnt").textContent=n;
+ syncQuick();list();
+}
+function past(x){var n=days(x);return x.r!=="Y"&&n!==null&&n<0}
+function order(a,b){var pa=past(a)?1:0,pb=past(b)?1:0;if(pa!==pb)return pa-pb;var ra=a.r==="Y"?2.5:a.r||0,rb=b.r==="Y"?2.5:b.r||0;var g=(rb>=3?1:0)-(ra>=3?1:0);if(g)return g;var da=a.o||"9",db=b.o||"9";return da<db?-1:da>db?1:0}
+function list(){
+ if(!MAP)return;var b=MAP.getBounds();
+ var xs=VIEW.filter(function(x){return b.contains([x.x,x.q])}).sort(order);
+ $("#lc").textContent=xs.length;
+ var h=xs.slice(0,80).map(function(x){var c=COL[rk(x)];return '<div class="cd'+(SEL&&SEL.i===x.i?" sel":"")+'" data-i="'+x.i+'"><div class="ph" style="'+(x.g?"background-image:url(\'"+esc(x.g)+"\')":"")+'"><span style="background:'+c+'">'+rname(x)+'</span></div><div class="bd"><div class="ad">'+esc(x.a)+'</div><div class="mt">'+esc([x.t,x.z?x.z+"坪":"",x.y!==null&&x.y!==undefined?x.y+"年":"",x.j==="其他"?"":x.j].filter(Boolean).join("｜"))+'</div><div class="pr"><b>'+money(x.p)+'</b><small>'+esc(cdtext(x))+'</small></div></div></div>'}).join("");
+ $("#cards").innerHTML=h||'<div class="empty">這個範圍沒有符合條件的物件，移動地圖或放寬篩選看看。</div>';
+}
+/* 物件卡 */
+function open(x,fly){
+ SEL=x;var c=COL[rk(x)];
+ MAP.getSource("sel").setData({type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[x.x,x.q]},properties:{}}]});
+ var tags='<span class="tg" style="background:'+c+'">'+rname(x)+'</span>'+(x.j==='點交'||x.j==='不點交'?'<span class="tg o">'+esc(x.j)+'</span>':"")+(x.n?'<span class="tg o">新上架</span>':"")+(x.k?'<span class="tg o">降價降拍</span>':"")+'<span class="tg o">'+esc(x.c+x.d)+'</span>';
+ var disc=x.f&&x.f>x.p?'比一拍底價少 <strong>'+Math.round((1-x.p/x.f)*100)+'%</strong><br>':"";
+ var ll=x.q+","+x.x, cd=cdtext(x);
+ $("#sbody").innerHTML=(x.g?'<div class="sp" style="background-image:url(\''+esc(x.g)+'\')"></div>':"")+
+  '<div class="sc"><div class="tags">'+tags+'</div><h2>'+esc(x.a)+'</h2><div class="mt">'+esc([x.m,x.t,x.z?x.z+" 坪":"",x.y!==null&&x.y!==undefined?"屋齡 "+x.y+" 年":""].filter(Boolean).join("｜"))+'</div>'+
+  '<div class="pbox"><div class="l"><small>底價</small><b>'+money(x.p)+'</b></div><div class="r">'+disc+(x.u?"每坪 "+x.u+" 萬<br>":"")+'編號 '+esc(x.i)+'</div></div>'+
+  (cd?'<p class="cdn"><b>'+esc(cd)+'</b>'+(x.r!=="Y"&&days(x)>0?'・保證金約 '+money(Math.round(x.p*0.2))+'，請提早準備':"")+'</p>':"")+
+  (x.e<2?'<p class="note">地圖位置為路段推估，實際門牌以物件頁為準。</p>':"")+'</div>'+
+  '<div class="acts"><a class="pri" href="/h/'+esc(x.i)+'">看物件詳情・法院筆錄</a><button class="ln" id="aline" type="button">LINE 問這間</button><a href="https://www.google.com/maps/dir/?api=1&destination='+ll+'" target="_blank" rel="noopener">導航過去</a><a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+ll+'" target="_blank" rel="noopener">Google 街景</a><button id="ashare" type="button">分享物件</button></div>'+
+  '<div class="nb" id="nb"><h3>附近生活機能（步行約略時間）</h3><ul id="nbl"><li>查詢中…</li></ul><div class="q">'+["捷運站","國小","市場","超市","公園"].map(function(k){return '<a href="https://www.google.com/maps/search/'+encodeURIComponent(k)+'/@'+ll+',16z" target="_blank" rel="noopener">'+k+'</a>'}).join("")+'</div></div>'+
+  '<p class="cta">想知道這間值不值得標？LINE 傳編號給 Pitt & Anna，幫你看行情與點交風險。</p>';
+ $("#sheet").classList.add("on");$("#main").classList.add("so");$("#sheet").scrollTop=0;
+ $("#aline").onclick=function(){var t="我想詢問法拍物件 "+x.i+"｜"+x.a;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast("已複製物件編號，貼到 LINE 傳給我們")},function(){}).finally(function(){setTimeout(function(){location.href=LINE},500)})};
+ $("#ashare").onclick=function(){var u="https://tomin104.com/map?id="+x.i;if(navigator.share)navigator.share({title:x.a+" 法拍屋",text:rname(x)+"・底價 "+money(x.p),url:u}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(u).then(function(){toast("連結已複製")})};
+ try{history.replaceState(null,"","/map?id="+x.i)}catch(e){}
+ document.querySelectorAll(".cd").forEach(function(e){e.classList.toggle("sel",e.dataset.i===x.i)});
+ if(fly!==false){var mob=innerWidth<900;MAP.flyTo({center:[x.x,x.q],zoom:Math.max(MAP.getZoom(),16),offset:mob?[0,-innerHeight*0.2]:[-200,0],duration:700})}
+ MAP.once("idle",function(){near(x)});
+}
+function closeSheet(){$("#sheet").classList.remove("on");$("#main").classList.remove("so");SEL=null;MAP.getSource("sel").setData({type:"FeatureCollection",features:[]});document.querySelectorAll(".cd.sel").forEach(function(e){e.classList.remove("sel")});try{history.replaceState(null,"","/map")}catch(e){}}
+/* 附近生活機能：讀 3D 圖資裡的 POI，免另外呼叫 API */
+function dist(a,b,c,d){var R=6371000,r=Math.PI/180,x=(c-a)*r*Math.cos((b+d)/2*r),y=(d-b)*r;return Math.sqrt(x*x+y*y)*R}
+function near(x){
+ if(!SEL||SEL.i!==x.i)return;var ul=$("#nbl");if(!ul)return;
+ var fs=[];try{fs=MAP.querySourceFeatures("omt",{sourceLayer:"poi"})}catch(e){}
+ var G=[["捷運・火車站",function(p,n){return p.class==="railway"&&/站$/.test(n)}],["學校",function(p){return p.class==="school"||p.class==="college"}],["市場・超市",function(p){return p.class==="grocery"||/supermarket|marketplace/.test(p.subclass||"")}],["公園",function(p){return p.class==="park"}],["醫院・診所",function(p){return p.class==="hospital"}]];
+ var out=G.map(function(g){var best=null;fs.forEach(function(f){var p=f.properties;var nm=p["name:zh-Hant"]||p["name:zh"]||p.name;if(!nm||!g[1](p,nm))return;var c=f.geometry.coordinates;var d=dist(x.x,x.q,c[0],c[1]);if(d<1500&&(!best||d<best.d))best={n:nm,d:d}});return best?'<li>'+g[0]+'：'+esc(best.n)+'<span>'+(best.d<1000?Math.round(best.d/10)*10+" 公尺":(best.d/1000).toFixed(1)+" 公里")+'・走路 '+Math.max(1,Math.round(best.d/75))+' 分</span></li>':""}).join("");
+ ul.innerHTML=out||'<li style="color:var(--muted)">附近資料載入中或不足，可點下方按鈕用 Google 地圖查。</li>';
+}
+/* 篩選面板 */
+function cnt(k,v){return ALL.filter(function(x){return pass(x,k)&&(k==="c"?x.c===v:k==="r"?String(rk(x))===v:x.t===v)}).length}
+function fbody(){
+ var cs=CITY.filter(function(c){return ALL.some(function(x){return x.c===c})});
+ function grp(t,k,vals,lab){return '<div class="fs"><h4>'+t+'</h4><div class="cg">'+vals.map(function(v,i){var val=typeof v==="object"?String(i):v;var on=F[k].indexOf(val)>-1;var n=(k==="c"||k==="r"||k==="t")?'<small>'+cnt(k,val)+'</small>':"";return '<button class="chip'+(on?" on":"")+'" data-g="'+k+'" data-v="'+esc(val)+'">'+esc(lab?lab(v):v)+n+'</button>'}).join("")+'</div></div>'}
+ $("#fbody").innerHTML=grp("縣市","c",cs)+grp("拍次","r",["1","2","3","Y"],function(v){return{1:"一拍",2:"二拍",3:"三拍以上",Y:"公告應買"}[v]})+grp("類型","t",TYPES)+grp("底價","p",PR,function(v){return v[2]})+grp("坪數","z",SZ,function(v){return v[2]})+
+  '<div class="fs"><h4>其他</h4><div class="cg"><button class="chip'+(F.dv?" on":"")+'" data-o="dv">只看點交</button><button class="chip'+(F.w===7?" on":"")+'" data-o="w7">7 天內開標</button><button class="chip'+(F.w===14?" on":"")+'" data-o="w14">14 天內開標</button><button class="chip'+(F.w===30?" on":"")+'" data-o="w30">30 天內開標</button><button class="chip'+(F.nw?" on":"")+'" data-o="nw">本週新上架</button><button class="chip'+(F.dn?" on":"")+'" data-o="dn">降價降拍</button><button class="chip'+(F.a10?" on":"")+'" data-o="a10">10 年內新屋</button></div></div>';
+ $("#fgo").textContent="顯示 "+ALL.filter(function(x){return pass(x)}).length+" 件";
+}
+$("#fbody").addEventListener("click",function(ev){var b=ev.target.closest("button");if(!b)return;
+ if(b.dataset.g){var a=F[b.dataset.g],v=b.dataset.v,i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v)}
+ else{var o=b.dataset.o;if(o[0]==="w"&&o!=="w"){var w=+o.slice(1);F.w=F.w===w?0:w}else F[o]=F[o]?0:1}
+ fbody()});
+function fit(){var xs=VIEW;if(!xs.length||xs.length>600)return;var b=new maplibregl.LngLatBounds();xs.forEach(function(x){b.extend([x.x,x.q])});MAP.fitBounds(b,{padding:{top:60,bottom:innerWidth<900?190:60,left:innerWidth<900?40:420,right:60},maxZoom:15,duration:600})}
+$("#fopen").onclick=function(){fbody();$("#filt").classList.add("on")};
+$("#fclose").onclick=$("#filt .bk").onclick=function(){$("#filt").classList.remove("on")};
+$("#fgo").onclick=function(){$("#filt").classList.remove("on");apply();fit()};
+$("#fclr").onclick=function(){F.c=[];F.r=[];F.t=[];F.p=[];F.z=[];F.dv=F.w=F.nw=F.dn=F.a10=0;fbody()};
+/* 快速篩選 */
+function syncQuick(){document.querySelectorAll("#quick .chip").forEach(function(b){var k=b.dataset.k,on;
+ on=k==="r3"?F.r.length===1&&F.r[0]==="3":k==="ry"?F.r.length===1&&F.r[0]==="Y":k==="w7"?F.w===7:k==="p1"?F.p.length===2&&F.p.indexOf("0")>-1&&F.p.indexOf("1")>-1:!!F[k];b.classList.toggle("on",on)})}
+$("#quick").addEventListener("click",function(ev){var b=ev.target.closest(".chip");if(!b)return;var k=b.dataset.k,on=b.classList.contains("on");
+ if(k==="r3")F.r=on?[]:["3"];else if(k==="ry")F.r=on?[]:["Y"];else if(k==="w7")F.w=on?0:7;else if(k==="p1")F.p=on?[]:["0","1"];else F[k]=on?0:1;apply()});
+var qt;$("#q").addEventListener("input",function(){clearTimeout(qt);qt=setTimeout(function(){F.q=$("#q").value.trim().toLowerCase();apply()},250)});
+$("#q").addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();this.blur();F.q=this.value.trim().toLowerCase();apply();if(VIEW.length===1)open(VIEW[0]);else fit()}});
+$("#cards").addEventListener("click",function(ev){var c=ev.target.closest(".cd");if(!c)return;var x=ALL.find(function(y){return y.i===c.dataset.i});if(x)open(x)});
+$("#lt").onclick=function(){var l=$("#list");l.classList.toggle("min");this.textContent=l.classList.contains("min")?"展開":"收合"};
+$("#sclose").onclick=closeSheet;
+/* 地圖 */
+var NL="https://wmts.nlsc.gov.tw/wmts/";
+var style={version:8,glyphs:"https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+ sources:{emap:{type:"raster",tiles:[NL+"EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}"],tileSize:256,maxzoom:19,attribution:"© 內政部國土測繪中心"},
+  photo:{type:"raster",tiles:[NL+"PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}"],tileSize:256,maxzoom:19,attribution:"© 內政部國土測繪中心"},
+  omt:{type:"vector",url:"https://tiles.openfreemap.org/planet",attribution:"© OpenFreeMap © OpenStreetMap"}},
+ layers:[{id:"emap",type:"raster",source:"emap"},{id:"photo",type:"raster",source:"photo",layout:{visibility:"none"}},
+  {id:"bld",type:"fill-extrusion",source:"omt","source-layer":"building",minzoom:14,layout:{visibility:"none"},paint:{"fill-extrusion-color":"#e6e1d6","fill-extrusion-height":["coalesce",["get","render_height"],9],"fill-extrusion-base":["coalesce",["get","render_min_height"],0],"fill-extrusion-opacity":.82}},
+  {id:"poiq",type:"circle",source:"omt","source-layer":"poi",minzoom:14,paint:{"circle-radius":1,"circle-opacity":0}}]};
+MAP=new maplibregl.Map({container:"map",style:style,center:[121.47,25.02],zoom:10.3,maxZoom:18.5,minZoom:6,dragRotate:true,pitchWithRotate:true,attributionControl:false,localIdeographFontFamily:"'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif"});
+MAP.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
+MAP.touchZoomRotate.disableRotation();
+MAP.on("load",function(){
+ MAP.addSource("pts",{type:"geojson",data:geo(),cluster:true,clusterMaxZoom:13,clusterRadius:46});
+ MAP.addSource("sel",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
+ MAP.addLayer({id:"cl",type:"circle",source:"pts",filter:["has","point_count"],paint:{"circle-color":"#18354b","circle-opacity":.9,"circle-stroke-color":"#d9c39c","circle-stroke-width":2,"circle-radius":["step",["get","point_count"],15,10,19,50,24,150,30]}});
+ MAP.addLayer({id:"cln",type:"symbol",source:"pts",filter:["has","point_count"],layout:{"text-field":["get","point_count_abbreviated"],"text-font":["Noto Sans Bold"],"text-size":13,"text-allow-overlap":true},paint:{"text-color":"#fff"}});
+ var col=["match",["get","k"],"1",COL[1],"2",COL[2],"3",COL[3],"Y",COL.Y,COL[0]];
+ MAP.addLayer({id:"selr",type:"circle",source:"sel",paint:{"circle-radius":17,"circle-color":"rgba(181,80,47,.18)","circle-stroke-color":"#b5502f","circle-stroke-width":2}});
+ MAP.addLayer({id:"pt",type:"circle",source:"pts",filter:["!",["has","point_count"]],paint:{"circle-radius":["interpolate",["linear"],["zoom"],10,6,16,9],"circle-color":["case",["<",["get","e"],2],"#fff",col],"circle-stroke-color":["case",["<",["get","e"],2],col,"#fff"],"circle-stroke-width":["case",["<",["get","e"],2],3,2],"circle-opacity":["case",["==",["get","o"],1],.45,1],"circle-stroke-opacity":["case",["==",["get","o"],1],.6,1]}});
+ MAP.addLayer({id:"lb",type:"symbol",source:"pts",filter:["!",["has","point_count"]],minzoom:14,layout:{"text-field":["get","l"],"text-font":["Noto Sans Bold"],"text-size":12,"text-offset":[0,-1.5],"text-anchor":"bottom","text-optional":true},paint:{"text-color":col,"text-halo-color":"#fff","text-halo-width":2}});
+ MAP.on("click","cl",function(e){var f=e.features[0];MAP.getSource("pts").getClusterExpansionZoom(f.properties.cluster_id).then(function(z){MAP.easeTo({center:f.geometry.coordinates,zoom:z+0.3})})});
+ MAP.on("click","pt",function(e){var id=e.features[0].properties.i;var x=ALL.find(function(y){return y.i===id});if(x){open(x,false);var c=document.querySelector('.cd[data-i="'+id+'"]');if(c)c.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"})}});
+ ["cl","pt"].forEach(function(l){MAP.on("mouseenter",l,function(){MAP.getCanvas().style.cursor="pointer"});MAP.on("mouseleave",l,function(){MAP.getCanvas().style.cursor=""})});
+ MAP.on("moveend",list);
+ load();
+});
+document.querySelectorAll("#base button").forEach(function(b){b.onclick=function(){base=b.dataset.b;document.querySelectorAll("#base button").forEach(function(o){o.classList.toggle("on",o===b)});
+ MAP.setLayoutProperty("emap","visibility",base==="photo"?"none":"visible");MAP.setLayoutProperty("photo","visibility",base==="photo"?"visible":"none");
+ MAP.setLayoutProperty("bld","visibility",base==="3d"?"visible":"none");
+ if(base==="3d"){MAP.easeTo({pitch:60,bearing:-17,zoom:Math.max(MAP.getZoom(),16),duration:900});if(MAP.getZoom()<15)toast("放大地圖就能看到立體建物")}else if(MAP.getPitch()>0)MAP.easeTo({pitch:0,bearing:0,duration:600})}});
+$("#loc").onclick=function(){if(!navigator.geolocation){toast("這個瀏覽器不支援定位");return}toast("定位中…");navigator.geolocation.getCurrentPosition(function(p){var c=[p.coords.longitude,p.coords.latitude];if(!MAP._me)MAP._me=new maplibregl.Marker({color:"#2a7de1"});MAP._me.setLngLat(c).addTo(MAP);MAP.flyTo({center:c,zoom:14.5})},function(){toast("無法取得位置，請允許定位權限")},{enableHighAccuracy:true,timeout:10000})};
+function load(){
+ fetch("/map.json?v=202611201826").then(function(r){return r.json()}).then(function(d){
+  ALL=d.items;apply();
+  var id=new URLSearchParams(location.search).get("id");var x=id&&ALL.find(function(y){return y.i===id});
+  if(x){MAP.jumpTo({center:[x.x,x.q],zoom:15});open(x)}
+ }).catch(function(){toast("資料載入失敗，請重新整理")});
+}
+})();
+</script>
+</body></html>

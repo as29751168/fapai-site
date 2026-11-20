@@ -10,3 +10,11 @@
 /api/*
   Cache-Control: no-store
   X-Robots-Tag: noindex, nofollow
+
+/map
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()
+
+/map.html
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()
