@@ -18,3 +18,8 @@
 /map.html
   ! Permissions-Policy
   Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()
+
+/i/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()

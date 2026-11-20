@@ -1154,11 +1154,15 @@ def promo_banner():
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
 
+MAP_PASS_HASH = 2008841021   # 內部版密碼 djb2（密碼：Tomin104nei；要改密碼改這個 hash）
+
 def map_files():
-    """法拍地圖（/map）：site/map.json 精簡資料＋由 tpl/map.html 產生頁面。座標來自 geocode.py 的 data/geo.json"""
+    """法拍地圖：公開版 /map 與內部版 /i/map（加密碼、不被搜尋、每間可跳 Google Earth、含行情／點交風險／筆記備註）。座標來自 geocode.py。"""
     import geocode
     try: geo = json.load(open("data/geo.json", encoding="utf-8"))
     except Exception: geo = {}
+    try: notes = json.load(open("data/internal_notes.json", encoding="utf-8"))
+    except Exception: notes = {}
     rows, miss = [], 0
     for x in ITEMS:
         g = geo.get(geocode.query_addr(x))
@@ -1172,10 +1176,24 @@ def map_files():
                      "o": _open_date(x), "s": x.get("狀態", ""), "j": deliver_of(x), "z": float(sz[0]) if sz else 0, "u": float(up[0]) if up else 0,
                      "y": _age(x), "m": community_of(x), "g": ph[0] if ph else "", "n": 1 if _within(x.get("新增日", "")) else 0,
                      "k": 1 if (_within(x.get("異動日", "")) and x.get("降價前", 0)) else 0, "x": g[0], "q": g[1], "e": g[2]})
+    tpl = open("tpl/map.html", encoding="utf-8").read()
+    def render(mode, jsonpath, head):
+        return (tpl.replace("{{UPDATED}}", e(UPDATED)).replace("{{COUNT}}", str(len(rows))).replace("{{LINE}}", LINKS["LINE"])
+                .replace("{{V}}", re.sub(r"\D", "", UPDATED)).replace("{{MODE}}", mode).replace("{{JSON}}", jsonpath).replace("{{HEAD}}", head))
+    # 公開版
     json.dump({"更新時間": UPDATED, "items": rows}, open("site/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    t = open("tpl/map.html", encoding="utf-8").read().replace("{{UPDATED}}", e(UPDATED)).replace("{{COUNT}}", str(len(rows))).replace("{{LINE}}", LINKS["LINE"]).replace("{{V}}", re.sub(r"\D", "", UPDATED))
-    write("site/map.html", t)
-    print("法拍地圖：", len(rows), "件上圖（無座標", miss, "件）")
+    write("site/map.html", render("public", "/map.json", ""))
+    # 內部版（/i/map）：每間帶入內部備註
+    irows = [dict(r, n1=notes.get(r["i"], {}).get("行情", ""), n2=notes.get(r["i"], {}).get("風險", ""), n3=notes.get(r["i"], {}).get("筆記", "")) for r in rows]
+    os.makedirs("site/i", exist_ok=True)
+    json.dump({"更新時間": UPDATED, "items": irows}, open("site/i/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    gate = ('<meta name="robots" content="noindex,nofollow"><script>(function(){try{if(localStorage.getItem("i1")==="1")return;'
+            'var h=function(s){var n=5381,i;for(i=0;i<s.length;i++)n=((n*33)+s.charCodeAt(i))>>>0;return n};'
+            'var t=prompt("104法拍網 內部地圖・請輸入密碼");'
+            'if(t&&h(t)===' + str(MAP_PASS_HASH) + '){localStorage.setItem("i1","1")}'
+            'else{document.documentElement.innerHTML="<body style=\\"font-family:sans-serif;padding:40px;text-align:center;color:#334\\">密碼錯誤或已取消，請重新整理再試。</body>"}}catch(e){}})();</script>')
+    write("site/i/map.html", render("internal", "/i/map.json", gate))
+    print("法拍地圖：公開", len(rows), "件；內部版 /i/map（含備註，無座標", miss, "件）")
 
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
