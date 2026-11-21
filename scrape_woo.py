@@ -120,7 +120,7 @@ def to_item(c):
     if fl: info["所在樓層"] = fl
     if c.get("COMMUMITY"): info["社區/大樓"] = c["COMMUMITY"]
     if "號" in full: info["完整地址"] = full
-    cn = g(r"案號：\s*([^\s｜|]+)")
+    cn = g(r"案號：\s*([^\s｜|]+)") or g(r"([一-鿿]{1,3}地院\s*\d{2,3}\s*[一-鿿]{1,4}\d{3,7}(?:（[^）]{1,6}）)?)")   # 11/19：文案沒寫「案號：」時，抓「新北地院 114司執148052（金股）」這種寫法
     if cn: info["案號"] = cn
     for k, pat in (("主建物", r"主建物\s*([\d.]+)\s*坪"), ("附屬建物", r"附屬\s*([\d.]+)\s*坪"), ("公共設施", r"公設\s*([\d.]+)\s*坪"), ("土地登記總坪數", r"土地：合計約\s*([\d.]+)\s*坪")):
         v = g(pat)
@@ -142,7 +142,7 @@ def sync(items):
     P = {}
     try: P = json.load(open("site/photos.json", encoding="utf-8"))
     except Exception: pass
-    pics = added = extra = 0
+    pics = added = extra = replaced = 0
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
     except Exception: seen = {}
     cur = {x["編號"] for x in items}
@@ -156,7 +156,11 @@ def sync(items):
         hit = next((x for x in items if x["區域"][:2].replace("臺", "台") == cty and ((len(s) >= 5 and s in norm(x["地址"])) or (len(ft) >= 5 and ft == addr_tail((x.get("資訊") or {}).get("完整地址"))))), None) if s or ft else None
         if hit:
             key = hit["編號"][2:]
-            if hit["編號"].startswith("HH"): hit["twin"] = f"HW{c['NO']}"   # 記下同一物件在透明房訊的編號：HO 停用後舊網址轉過去
+            if hit["編號"].startswith("HH"):   # 2026-11-19：舊 House-Info 快照有透明房訊同一件 → 整筆換成透明房訊資料，舊網址轉過去
+                x = to_item(c); x["inherit"] = hit["編號"]; items[items.index(hit)] = x; key = x["編號"][2:]; replaced += 1; time.sleep(0.3)
+                pl = photo_list(c)
+                if pl and P.get(key) != pl: P[key] = pl; pics += 1
+                continue
             if hit["編號"].startswith("HW"):   # 自家物件：每次重抓完整筆錄
                 try:
                     fn = full_notes(get_text(f"/Sales/{MOBILE}/{c['NO']}"))

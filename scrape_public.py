@@ -92,6 +92,7 @@ def apply(items, rows=None, today=None):
                 x["狀態"] = "開標日期已過・待確認"; inf["銷售狀態"] = "待確認"; stat["stale"] = stat.get("stale", 0) + 1
             kept.append(x); continue
         cands.sort(key=lambda r: r["date"]); last = cands[-1]
+        x["_tw"] = {"case": last["name"], "court": last["court"], "deliver": last["deliver"]}   # 2026-11-19 透明房訊場次資料（HH 換欄位用，寫檔前移除）
         st = last["status"]; fut = [r for r in cands if r["date"] >= today and not CLOSED.search(r["status"])]
         if fut:   # 還有仍有效的未開標場次：以最近一場為準；已停拍或撤回的未來場次不算
             r = fut[0]
@@ -100,7 +101,9 @@ def apply(items, rows=None, today=None):
                 x["價格"] = "售" + r["base"]; inf["銷售狀態"] = "待標中"
             x["狀態"] = "待標中"; stat["updated"] += 1; kept.append(x); continue
         if st in ("得標", "拍定", "承受") or st.startswith("撤"):
-            stat["removed"] += 1; continue          # 已拍定或撤回：不再顯示
+            stat["removed"] += 1   # 已拍定或撤回：不再顯示（11/19 Anna：拍定直接下架）
+            stat.setdefault("sold", {})[x["編號"]] = {"status": "撤回" if st.startswith("撤") else ("承受" if st == "承受" else "拍定"), "date": f"{last['date'].year - 1911}/{last['date'].month}/{last['date'].day}", "win": last.get("win", "")}
+            continue
         if st.startswith("停拍"):
             x["狀態"] = "停拍（可能再拍）"; inf["銷售狀態"] = "停拍"; stat["stopped"] += 1; kept.append(x); continue
         if st == "流標":
