@@ -305,6 +305,25 @@ def _haunt_lines(notes):
             out.append(s[:160] + ("…" if len(s) > 160 else ""))
     return out[:2]
 
+# 2026-11-24：否定句、制式提醒不算有記載。只有「曾有人自殺身亡」「疑似凶宅」這種明確肯定的句子才算
+_HAUNT_NEG = re.compile(r"並無|查無|未查|未發生|未有|無發生|未曾發生|未發現|未曾|沒有|不曾|非屬|是否|有無|尚無|均無|否認|未表示|未查報|並不清楚|無從|如有|請投標人|應自行查明|自行查明|已儘量|使用情形欄|無上開|無上列|非凶宅|非兇宅|(?<![非])無[^，；]{0,40}(非自然死亡|凶宅|兇宅|自殺|他殺|命案)")
+_HAUNT_POS = re.compile(r"(曾|發生|疑似|確有|係|屬|為)[^，；]{0,10}(凶宅|兇宅|自殺|他殺|命案|非自然死亡)|自殺身亡|死亡事故")
+
+def _haunt_positive(notes):
+    """筆錄裡「肯定」提到非自然死亡等事件的句子；全是否定句或制式提醒就回傳空清單"""
+    out = []
+    for s in _haunt_lines_all(notes):
+        for c in re.split(r"[，；]", s):   # 逐小句判斷：小句有明確肯定字眼、且同一小句沒有否定或制式提醒，才算
+            if _HAUNT_W.search(c) and _HAUNT_POS.search(c) and not _HAUNT_NEG.search(c): out.append(s); break
+    return out
+
+def _haunt_lines_all(notes):
+    out = []
+    for s in re.split(r"[。●\n]", notes or ""):
+        s = s.strip()
+        if _HAUNT_W.search(s) and s not in out: out.append(s)
+    return out
+
 def verify_box(addr, notes):
     """凶宅與點交查證：只寫筆錄裡有的字，查不到就照實說查不到。"""
     m = re.search(r"點交情形→([^●\n]+)", notes or "")
@@ -485,7 +504,7 @@ def detail_page(x):
             + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
     vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
-             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。") if notes else ""))
+             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ("法院筆錄載明無非自然死亡相關資料（查不到不等於沒有）。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。")) if notes else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
