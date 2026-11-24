@@ -19,6 +19,9 @@ jobs:
           python-version: "3.12"
       - run: pip install requests >/dev/null
       - run: python scrape.py
+      - name: 法拍地圖門牌定位（只查新地址）
+        run: python geocode.py
+        continue-on-error: true
       - run: python build.py
       - name: 提交到預覽分支
         run: |
