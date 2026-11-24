@@ -64,7 +64,9 @@ def _order(x):
     if x.get("資訊", {}).get("銷售狀態") == "待確認": return (2, 0, 0)   # 開標日期已過、待確認者排最後
     a = _age(x)
     return (0, a, 0) if a is not None and a <= 10 else (1, 0, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
-ITEMS = sorted(D["104"], key=_order)
+EXCL_CITY = ("金門", "澎湖", "連江")   # 2026-11-25 Anna：金門、澎湖都不用放
+EXCL_IDS = {x["編號"] for x in D["104"] if x.get("區域", "")[:2] in EXCL_CITY}
+ITEMS = sorted([x for x in D["104"] if x["編號"] not in EXCL_IDS], key=_order)
 UPDATED = D["更新時間"]
 try:
     P = json.load(open("site/photos.json", encoding="utf-8"))
@@ -374,7 +376,7 @@ TOPICS = [
      ["co-owned-share-auction"], []),
     ("haunted", "凶宅怎麼查", "法拍屋是不是凶宅，先看法院筆錄，再向管委會確認。",
      [("法拍屋會不會是凶宅？", "我們會看法院公告與筆錄有沒有記載，也會查公開資料。但要說清楚，查不到不代表一定沒有。"),
-      ("本站的凶宅查證怎麼寫？", "每件物件頁只照法院筆錄原文整理：筆錄有記載就附原文，載明沒有或沒提到也照寫。查不到不等於沒有，投標前請向管委會確認。")],
+      ("物件頁哪裡看得到這些資訊？", "每件物件頁都附法院筆錄全文，點交、使用情形與相關記載一律以筆錄原文為準。")],
      [], []),
     ("proxy", "代標流程與費用", "從看懂公告、評估總成本、投標到點交，可以全程委託，也可以只委託點交。",
      [("可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。"),
@@ -655,8 +657,7 @@ def community_page(key, g):
         m = re.search(r"點交情形→([^●\n]+)", notes); h = _haunt_lines(notes)
         vrows += (f'<tr><td><a href="/h/{e(x["編號"])}">{e(inf.get("完整地址") or x["地址"])}</a></td><td>{e(("第%d拍" % round_of(x)) if round_of(x) else "")} {e(inf.get("開標日期", ""))}</td>'
                   f'<td>{e(re.sub(r"^售", "", x["價格"]))}</td><td>{e(m.group(1).strip()[:60] if m else "筆錄未載明")}</td><td>{e(("筆錄原文：" + "／".join(h)) if h else ("法院筆錄未提到非自然死亡" if notes else "沒有筆錄資料"))}</td></tr>')
-    vsec = (f'<section class="box" id="verify"><h2>{e(name)}凶宅與點交查證</h2><div style="overflow-x:auto"><table class="tbl"><tr><th>地址</th><th>拍次／開標</th><th>底價</th><th>點交（法院筆錄）</th><th>非自然死亡（法院筆錄）</th></tr>{vrows}</table></div>'
-            '<p>以上只照法院筆錄原文整理。查不到不等於沒有，投標前請向管委會確認。</p></section>') if cur else ""
+    vsec = ""   # 2026-11-25 Anna：不另外整理凶宅、點交判斷，以物件頁的法院筆錄全文為準
     prow = "".join(f'<tr><td>{e(v.get("gone", ""))}</td><td><a href="/h/{e(k)}">{e(v.get("addr", ""))}</a></td><td>{e(("第%s拍" % v["rd"]) if v.get("rd") else "")}</td><td>{e(re.sub(r"^售", "", v.get("ptxt", "")))}</td></tr>'
                    for k, v in sorted(past, key=lambda t: t[1].get("gone", ""), reverse=True))
     psec = (f'<section class="box"><h2>{e(name)}近半年已下架的法拍物件</h2><table class="tbl"><tr><th>下架日期</th><th>物件</th><th>最後拍次</th><th>最後底價</th></tr>{prow}</table>'
@@ -734,8 +735,7 @@ def detail_page(x):
             + (f"，第{inf['拍次']}拍" if inf.get("拍次") else "") + (f"，開標日期 {inf['開標日期']}" if inf.get("開標日期") else "")
             + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
-    vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
-             + ("凶宅查證：法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ""))
+    vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
@@ -753,7 +753,6 @@ def detail_page(x):
             rows.append(f"<tr><td>{e(m.group(1))}</td><td>{e(m.group(2) or '')}</td><td>{e(m.group(3))}</td></tr>" if m else f'<tr><td colspan="3">{e(ln)}</td></tr>')
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
     nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
-    nsec += verify_box((comm + " " if comm else "") + addr, notes)
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
@@ -1214,7 +1213,10 @@ def write_gone(cur_ids, keep_days=365):   # 2026-11-21 Google 建議轉址與舊
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
     except Exception: return 0, 0
     red, n = [], 0
+    for k in EXCL_IDS - set(seen): red.append(f'/h/{k} / 301')
     for k, v in seen.items():
+        if k in EXCL_IDS or str(v.get("area", ""))[:2] in EXCL_CITY:
+            red.append(f'/h/{k} / 301'); continue   # 金門、澎湖、連江：轉首頁，不留 404
         if k in cur_ids or not v.get("addr"): continue
         if v.get("twin") in cur_ids:
             red.append(f'/h/{k} /h/{v["twin"]} 301'); continue
