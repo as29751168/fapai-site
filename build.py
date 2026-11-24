@@ -108,7 +108,9 @@ def deliver_of(x):
     return "不點交" if v.startswith("不點交") else "點交" if v.startswith("點交") else ("其他" if v else "")
 
 def first_price(x):
-    m = re.search(r"底標價[：:]\s*([\d.,]+)\s*(億|萬)?", x.get("資訊", {}).get("拍賣紀錄", "").split("\n")[0])
+    ln = x.get("資訊", {}).get("拍賣紀錄", "").split("\n")[0]
+    if not re.match(r"第\s*(1|一)\s*拍", ln): return 0   # 2026-11-25 Anna：降幅算不出來就不顯示（只有本次拍次時會誤算成 0%）
+    m = re.search(r"底標價[：:]\s*([\d.,]+)\s*(億|萬)?", ln)
     return price_num(m.group(1) + (m.group(2) or "")) if m else 0
 
 def upcoming(days=7):
@@ -553,11 +555,11 @@ def verify_box(addr, notes):
     """凶宅與點交查證：只寫筆錄裡有的字，查不到就照實說查不到。"""
     m = re.search(r"點交情形→([^●\n]+)", notes or "")
     dv = m.group(1).strip()[:120] if m else ""
-    h = _haunt_lines(notes)
-    rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。"),
-            ("非自然死亡", ("筆錄原文：" + "／".join(h) + "。查不到不等於沒有，投標前請向管委會確認。") if h else "法院筆錄未提到非自然死亡。查不到不等於沒有，投標前請向管委會確認。"),
-            ("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。")]
-    return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
+    pos = _haunt_positive(notes)   # 2026-11-25 Anna：只有筆錄肯定記載才顯示這一列；否定句（載明無）不算
+    rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。")]
+    if pos: rows.append(("非自然死亡", "筆錄原文：" + "／".join(s[:160] for s in pos[:2])))
+    rows.append(("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。"))
+    return (f'<section class="box" id="verify"><h2>{e(addr)}{"凶宅與點交查證" if pos else "點交查證"}</h2>' + kv(rows)
             + '</section>')   # 11/24 Anna：拿掉台灣凶宅網等外站連結
 
 def map_query(x):
@@ -733,7 +735,7 @@ def detail_page(x):
             + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
     vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
-             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ("法院筆錄載明無非自然死亡相關資料（查不到不等於沒有）。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。")) if notes else ""))
+             + ("凶宅查證：法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
