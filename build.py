@@ -252,12 +252,12 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
+          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
@@ -1180,10 +1180,52 @@ def promo_banner():
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
 
+MAP_PASS_HASH = 2008841021   # 內部版密碼的 djb2 雜湊（密碼不寫在程式裡，請向 Anna 索取）
+
+def map_files():
+    """法拍地圖：公開版 /map 與內部版 /i/map（加密碼、不被搜尋、每間可跳 Google Earth、含行情／點交風險／筆記備註）。座標來自 geocode.py。"""
+    import geocode
+    try: geo = json.load(open("data/geo.json", encoding="utf-8"))
+    except Exception: geo = {}
+    try: notes = json.load(open("data/internal_notes.json", encoding="utf-8"))
+    except Exception: notes = {}
+    rows, miss = [], 0
+    for x in ITEMS:
+        g = geo.get(geocode.query_addr(x))
+        if not g or g[2] < 0: miss += 1; continue
+        inf = x.get("資訊") or {}
+        ph = photos(x)
+        sz = re.match(r"[\d.]+", x.get("格局坪數") or "")
+        up = re.match(r"[\d.]+", inf.get("每坪單價") or "")
+        rows.append({"i": x["編號"], "a": re.sub(r"[❶-❿①-⑳？?]", "", inf.get("完整地址") or x["地址"]), "c": area_of(x)[:2], "d": area_of(x)[2:], "t": x["類型"].split("_")[0],
+                     "p": round(price_num(x["價格"]) / 10000), "f": round(first_price(x) / 10000), "r": "Y" if is_ying(x) else round_of(x),
+                     "o": _open_date(x), "s": x.get("狀態", ""), "j": deliver_of(x), "z": float(sz[0]) if sz else 0, "u": float(up[0]) if up else 0,
+                     "y": _age(x), "m": community_of(x), "g": ph[0] if ph else "", "n": 1 if _within(x.get("新增日", "")) else 0,
+                     "k": 1 if (_within(x.get("異動日", "")) and x.get("降價前", 0)) else 0, "x": g[0], "q": g[1], "e": g[2]})
+    tpl = open("tpl/map.html", encoding="utf-8").read()
+    def render(mode, jsonpath, head):
+        return (tpl.replace("{{UPDATED}}", e(UPDATED)).replace("{{COUNT}}", str(len(rows))).replace("{{LINE}}", LINKS["LINE"])
+                .replace("{{V}}", re.sub(r"\D", "", UPDATED)).replace("{{MODE}}", mode).replace("{{JSON}}", jsonpath).replace("{{HEAD}}", head))
+    # 公開版
+    json.dump({"更新時間": UPDATED, "items": rows}, open("site/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    write("site/map.html", render("public", "/map.json", ""))
+    # 內部版（/i/map）：每間帶入內部備註
+    irows = [dict(r, n1=notes.get(r["i"], {}).get("行情", ""), n2=notes.get(r["i"], {}).get("風險", ""), n3=notes.get(r["i"], {}).get("筆記", "")) for r in rows]
+    os.makedirs("site/i", exist_ok=True)
+    json.dump({"更新時間": UPDATED, "items": irows}, open("site/i/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    gate = ('<meta name="robots" content="noindex,nofollow"><script>(function(){try{if(localStorage.getItem("i1")==="1")return;'
+            'var h=function(s){var n=5381,i;for(i=0;i<s.length;i++)n=((n*33)+s.charCodeAt(i))>>>0;return n};'
+            'var t=prompt("104法拍網 內部地圖・請輸入密碼");'
+            'if(t&&h(t)===' + str(MAP_PASS_HASH) + '){localStorage.setItem("i1","1")}'
+            'else{document.documentElement.innerHTML="<body style=\\"font-family:sans-serif;padding:40px;text-align:center;color:#334\\">密碼錯誤或已取消，請重新整理再試。</body>"}}catch(e){}})();</script>')
+    write("site/i/map.html", render("internal", "/i/map.json", gate))
+    print("法拍地圖：公開", len(rows), "件；內部版 /i/map（含備註，無座標", miss, "件）")
+
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/list.html", index_page(True))
-    urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
+    urls = [("/", 1.0), ("/list", 0.9), ("/map", 0.9), ("/member", 0.5)]
+    map_files()
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8, lastmod(x)))
     ng, nr = write_gone({x["編號"] for x in ITEMS}); urls += GONE_URLS
