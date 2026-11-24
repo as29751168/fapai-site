@@ -6,6 +6,11 @@ export async function sign(secret, payload) {
   const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return b64u(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(payload))).slice(0, 32);
 }
+// 2026-11-25 Anna：LINE 登入停用，改成加 LINE@；舊網址一律轉到 LINE@（KV leads 既有資料保留不刪）
+export async function onRequestGet() {
+  return Response.redirect("https://lin.ee/Y2bGSIB", 302);
+}
+/* 原登入流程（停用保留）
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   let next = url.searchParams.get("next") || "/";
@@ -22,3 +27,5 @@ export async function onRequestGet({ request, env }) {
     headers: { Location: "https://access.line.me/oauth2/v2.1/authorize?" + q, "Cache-Control": "no-store" },
   });
 }
+
+*/
