@@ -1,0 +1,30 @@
+name: 預覽分支建置
+# 只在 preview-* 分支推送時跑：抓透明房訊資料＋用分支上的 build.py 重建，推回同一分支給 Cloudflare 預覽網址用；不碰 main
+on:
+  push:
+    branches: ["preview-*"]
+    paths-ignore: ["site/**", "data/**"]
+concurrency:
+  group: preview-${{ github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests >/dev/null
+      - run: python scrape.py
+      - run: python build.py
+      - name: 提交到預覽分支
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A site data
+          git diff --cached --quiet && exit 0
+          git commit -m "預覽建置"
+          git push origin HEAD:${{ github.ref_name }}
