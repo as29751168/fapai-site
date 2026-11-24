@@ -4,7 +4,7 @@
 import html, json, os, re, shutil, urllib.parse, datetime
 
 SITE = "https://tomin104.com"          # 網站正式網址
-NAME = "透明房訊｜104法拍網"
+NAME = "Pitt & Anna 104法拍網團隊"   # 2026-11-24 Anna 定案品牌名稱（個人名稱＋104法拍網團隊）
 PHONE_A, PHONE_P = "0986-678-928", "0918-313-888"
 LINKS = {
     "LINE": "https://lin.ee/Y2bGSIB",
@@ -13,7 +13,7 @@ LINKS = {
     "LINE 社群": "https://line.me/ti/g2/6-QeB1Co7tP6e-Qhln_j0swFD4q0ZIFqdSmUDQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default",
 }
 # 2026-11-19 Anna「全部照改」：對外統一 Pitt & Anna｜104法拍網團隊、財欣全名；不放公司總機、土城地址（統一對外資料_20261119.md）
-TEAM = "Pitt & Anna｜104法拍網團隊"
+TEAM = NAME
 COMPANY = "財欣不動產管理顧問有限公司"
 SLOGAN = "你的法拍購屋夥伴"
 INTRO = "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴。透明房訊品牌深耕法拍逾 40 年，全台都有服務：投標諮詢、全程代標、點交協助，從看懂公告、評估總成本，到得標後續一路陪你。"
@@ -252,9 +252,9 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">透明房訊<i>｜</i>104法拍網</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
-<footer>© {e(TEAM)}｜{e(COMPANY)}　資料每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
+<footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
           '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
@@ -304,6 +304,25 @@ def _haunt_lines(notes):
         if _HAUNT_W.search(s) and s not in out:
             out.append(s[:160] + ("…" if len(s) > 160 else ""))
     return out[:2]
+
+# 2026-11-24：否定句、制式提醒不算有記載。只有「曾有人自殺身亡」「疑似凶宅」這種明確肯定的句子才算
+_HAUNT_NEG = re.compile(r"並無|查無|未查|未發生|未有|無發生|未曾發生|未發現|未曾|沒有|不曾|非屬|是否|有無|尚無|均無|否認|未表示|未查報|並不清楚|無從|如有|請投標人|應自行查明|自行查明|已儘量|使用情形欄|無上開|無上列|非凶宅|非兇宅|(?<![非])無[^，；]{0,40}(非自然死亡|凶宅|兇宅|自殺|他殺|命案)")
+_HAUNT_POS = re.compile(r"(曾|發生|疑似|確有|係|屬|為)[^，；]{0,10}(凶宅|兇宅|自殺|他殺|命案|非自然死亡)|自殺身亡|死亡事故")
+
+def _haunt_positive(notes):
+    """筆錄裡「肯定」提到非自然死亡等事件的句子；全是否定句或制式提醒就回傳空清單"""
+    out = []
+    for s in _haunt_lines_all(notes):
+        for c in re.split(r"[，；]", s):   # 逐小句判斷：小句有明確肯定字眼、且同一小句沒有否定或制式提醒，才算
+            if _HAUNT_W.search(c) and _HAUNT_POS.search(c) and not _HAUNT_NEG.search(c): out.append(s); break
+    return out
+
+def _haunt_lines_all(notes):
+    out = []
+    for s in re.split(r"[。●\n]", notes or ""):
+        s = s.strip()
+        if _HAUNT_W.search(s) and s not in out: out.append(s)
+    return out
 
 def verify_box(addr, notes):
     """凶宅與點交查證：只寫筆錄裡有的字，查不到就照實說查不到。"""
@@ -485,7 +504,7 @@ def detail_page(x):
             + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
     vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
-             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。") if notes else ""))
+             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ("法院筆錄載明無非自然死亡相關資料（查不到不等於沒有）。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。")) if notes else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
@@ -712,7 +731,7 @@ var go=$('go');function done(){if(document.activeElement)document.activeElement.
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();if(i==='pr')OVR=null;if(i==='y'){TY=[];TL=''}f()})});
 $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();f()})();</script>"""
     lead = (f'<h1 class="lh">全部法拍屋物件</h1><p class="ls">共 {len(ITEMS)} 筆，含拍次、開標日期、底標價與法院筆錄，每日更新。</p><div id="list"></div>' if list_mode else
-            f'<p>透明房訊／104法拍網提供全台法拍屋、金拍屋物件資訊，含拍次、開標日期、底標價與法院筆錄，並提供代標、產權調查、不點交物件處理與貸款諮詢。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
+            f'<p>Pitt &amp; Anna 104法拍網團隊整理全台法拍屋、金拍屋物件資訊（資料來源：透明房訊），含拍次、開標日期、底標價與法院筆錄，並提供投標諮詢、全程代標、聲請點交／包辦點交。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
     body = (lead +
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
             f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
@@ -799,7 +818,7 @@ CITIES = [c for c in CITIES if any(x["區域"][:2] in c[2] for x in ITEMS)]   # 
 def city_faq(kw, scope):
     return [
         (f"{kw}怎麼查詢？", f"在本頁可直接瀏覽{scope}目前的法拍屋物件，每筆都有拍次、開標日期、底標價與法院筆錄，資料每日更新。想縮小範圍可點下方各行政區。"),
-        (f"{kw}可以委託代標嗎？", "可以。透明房訊104法拍網提供代標、產權調查、現場勘查、不點交物件處理與貸款諮詢，請電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
+        (f"{kw}可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交，請電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
         (f"{kw}第三拍以上的物件為什麼值得注意？", "第一拍流標後，法院通常會降價再拍。第三拍以上價格往往較低，但仍須先查清產權、占用與點交情形，再評估合理出價。"),
         ("點交與不點交差在哪裡？", "點交是拍定後由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件請看「法院筆錄」中的點交情形。"),
         ("法拍屋可以看屋嗎？", "一般查封後無法入內，可依建物平面圖推斷格局，或參考同棟其他樓層。能看屋的物件會另行註明。"),
@@ -817,7 +836,7 @@ def city_page(slug_, short, prefixes, kw, scope):
     others = "".join(f'<a href="/{c[0]}">{e(c[3])}</a>' for c in CITIES if c[0] != slug_)
     faq = city_faq(kw, scope)
     fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in faq)
-    intro = (f'<p>{e(kw)}專區：透明房訊／104法拍網整理{e(scope)}目前共 {len(xs)} 筆法拍屋，其中第三拍以上 {n3} 筆，資料{e(UPDATED[:10])}更新。'
+    intro = (f'<p>{e(kw)}專區：Pitt &amp; Anna 104法拍網團隊整理{e(scope)}目前共 {len(xs)} 筆法拍屋，其中第三拍以上 {n3} 筆，資料{e(UPDATED[:10])}更新。'
              f'每筆物件都列出拍次、開標日期、底標價與法院筆錄，並由黃先生 Pitt、林小姐 Anna 提供代標與產權調查。</p>')
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(kw)}</nav><h1>{e(kw)}｜{e(scope)}最新法拍物件（{len(xs)}筆）</h1>{intro}'
             f'<section class="box areas"><h2>{e(short)}各區法拍屋</h2>{al}</section>'
@@ -886,10 +905,10 @@ def fees_page():
     notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契稅、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
     body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
-            f'<section class="box" style="text-align:center"><img src="/img/fees-chart.jpg" alt="104透明房訊服務費用與收費標準：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2–5%" width="1200" height="1870" loading="eager" style="width:100%;max-width:900px;height:auto;border-radius:8px"></section>'
+            f'<section class="box" style="text-align:center"><img src="/img/fees-chart.jpg" alt="Pitt &amp; Anna 104法拍網團隊服務費用與收費標準：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2–5%" width="1200" height="1870" loading="eager" style="width:100%;max-width:900px;height:auto;border-radius:8px"></section>'
             f'<section class="box"><details><summary>文字版服務項目</summary><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></details></section>'
             f'<section class="box"><h2>費用附註</h2>{nh}</section>' + know_box() + contact_box())
-    desc = "透明房訊／104法拍網代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元），並列出各方案服務項目與費用附註。"
+    desc = "Pitt & Anna 104法拍網團隊代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元），並列出各方案服務項目與費用附註。"
     ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
     return page(f"服務與收費｜法拍屋代標費用｜{NAME}", desc, "/fees", body, ld, SITE + "/og.jpg")
 
@@ -942,7 +961,7 @@ def gone_page(k, v):
     return page(f"{addr}（已下架）｜{area}法拍屋｜{NAME}", f"{addr}已從法拍物件列表下架，結果以法院公告為準；可查看{area}其他現有法拍屋。", f"/h/{k}", body).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
 
 GONE_URLS = []
-def write_gone(cur_ids, keep_days=180):
+def write_gone(cur_ids, keep_days=365):   # 2026-11-21 Google 建議轉址與舊網址至少保留 1 年
     """下架物件：有透明房訊同一物件（HO 停用後）就 301 轉址過去，其餘產生已下架頁；回傳 (已下架頁數, 轉址數)"""
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
     except Exception: return 0, 0
