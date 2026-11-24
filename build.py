@@ -481,21 +481,21 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script>{CLICK_JS}</body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/new">本週新增</a><a href="/round3">第三拍・最後底價</a><a href="/delivery">點交物件</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a><a href="/topic">法拍知識問答</a><a href="/cases">成交案例</a>'
+          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/new">本週新增</a><a href="/round3">第三拍・最後底價</a><a href="/delivery">點交物件</a><a href="/list#areas">各區法拍屋</a><a href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a><a href="/topic">法拍知識問答</a><a href="/cases">成交案例</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
-GATE_JS = """<script>(function(){try{if(document.cookie.indexOf('tl=1')>-1)return;var g=document.getElementById('g');if(!g||g.children.length<=12)return;g.classList.add('gate');var d=document.createElement('div');d.className='gb';d.innerHTML='<b>登入 LINE，看全部物件</b><span>免費，約 10 秒完成。請先加入官方帳號。目前顯示前 12 筆。</span><a class="btn line" href="/api/line-login?next=/%23list">LINE 登入</a><a class="btn line" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">加入官方帳號</a>';g.parentNode.insertBefore(d,g);function lock(){var n=0;[].forEach.call(g.children,function(c){if(c.style.display==='none'){c.classList.remove('lk');return}n++;if(n>12)c.classList.add('lk');else c.classList.remove('lk')})}lock();['input','click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(lock,50)},true)});setTimeout(lock,300)}catch(e){}})()</script>"""
+GATE_JS = ""   # 2026-11-25 LINE 登入停用，列表不再遮住第 13 筆以後
 
 def member_page():
     body = ('<h1>會員專區・委託代標留言</h1>'
             '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。請用 LINE 加入官方好友，我們為您建立會員資料，並用 LINE 推送新案與降價提醒。</p>'
-            f'<p><a class="btn line" href="/api/line-login?next=/member">LINE 登入</a><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">加入 LINE 官方好友</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
+            f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE@加入</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
             '<section class="box" id="ask"><h2>委託代標・物件諮詢留言</h2><p>留下需求，我們會盡快與您聯絡。</p><form class="mf" id="mf">'
             '<label>姓名</label><input id="mn" required autocomplete="name"><label>聯絡電話</label><input id="mp" type="tel" required autocomplete="tel">'
             '<label>想了解的物件（案號／地址，可留空）</label><input id="mo"><label>需求</label><select id="mt"><option>委託代標</option><option>產權調查／不點交處理</option><option>貸款諮詢</option><option>其他</option></select>'
@@ -1059,6 +1059,7 @@ CITIES = [
     ("kinmen", "金門", ["金門"], "金門法拍屋", "金門縣"),
     ("greater-taipei", "大台北", ["台北", "新北", "基隆"], "大台北法拍屋", "台北、新北、基隆"),
 ]
+ALL_CITY_SLUGS = [c[0] for c in CITIES]
 CITIES = [c for c in CITIES if any(x["區域"][:2] in c[2] for x in ITEMS)]   # 沒有物件的縣市不產生空頁
 
 def city_faq(kw, scope):
@@ -1234,7 +1235,9 @@ def lastmod(x):
     d = max(x.get("新增日") or "", x.get("異動日") or "")
     return d if re.fullmatch(r"\d{4}-\d{2}-\d{2}", d) else ""
 
+WRITTEN = set()
 def write(path, s):
+    WRITTEN.add(os.path.normpath(path))
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
 
@@ -1532,5 +1535,14 @@ if __name__ == "__main__":
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
     write("site/member.html", member_page())
+    # 2026-11-25 舊的縣市／類型頁（這次沒產生的）刪掉，301 到該縣市頁或首頁，避免留著舊品牌、舊按鈕
+    live_c = {c[0] for c in CITIES}; red = []
+    for fn in sorted(os.listdir("site")):
+        stem = fn[:-5] if fn.endswith(".html") else ""
+        base = next((c for c in sorted(ALL_CITY_SLUGS, key=len, reverse=True) if stem == c or stem.startswith(c + "-")), None)
+        if not base or os.path.normpath("site/" + fn) in WRITTEN: continue
+        os.remove("site/" + fn); red.append(f"/{stem} " + (f"/{base}" if base in live_c else "/") + " 301")
+    if red: open("site/_redirects", "a", encoding="utf-8").write("".join(r + "\n" for r in red))
+    print("舊縣市／類型頁轉址:", len(red))
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/list">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls), "已下架頁:", ng, "轉址:", nr)
