@@ -330,10 +330,10 @@ def verify_box(addr, notes):
     dv = m.group(1).strip()[:120] if m else ""
     h = _haunt_lines(notes)
     rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。"),
-            ("非自然死亡", ("筆錄原文：" + "／".join(h) + "。查不到不等於沒有，投標前仍請查台灣凶宅網並向管委會確認。") if h else "法院筆錄未提到非自然死亡。查不到不等於沒有，投標前請用完整門牌查台灣凶宅網，並向管委會或鄰里確認。"),
+            ("非自然死亡", ("筆錄原文：" + "／".join(h) + "。查不到不等於沒有，投標前請向管委會確認。") if h else "法院筆錄未提到非自然死亡。查不到不等於沒有，投標前請向管委會確認。"),
             ("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。")]
     return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
-            + '<p><a href="https://www.unluckyhouse.com/" target="_blank" rel="noopener nofollow">台灣凶宅網</a>｜<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>')
+            + '</section>')   # 11/24 Anna：拿掉台灣凶宅網等外站連結
 
 def map_query(x):
     """給 Google 地圖的乾淨地址：縣市＋行政區＋路名門牌（到「號」為止）。案名裡的「法拍屋｜坪數｜底價」、社區名都不送，避免比對到同名商家"""
@@ -429,7 +429,7 @@ def community_page(key, g):
         vrows += (f'<tr><td><a href="/h/{e(x["編號"])}">{e(inf.get("完整地址") or x["地址"])}</a></td><td>{e(("第%d拍" % round_of(x)) if round_of(x) else "")} {e(inf.get("開標日期", ""))}</td>'
                   f'<td>{e(re.sub(r"^售", "", x["價格"]))}</td><td>{e(m.group(1).strip()[:60] if m else "筆錄未載明")}</td><td>{e(("筆錄原文：" + "／".join(h)) if h else ("法院筆錄未提到非自然死亡" if notes else "沒有筆錄資料"))}</td></tr>')
     vsec = (f'<section class="box" id="verify"><h2>{e(name)}凶宅與點交查證</h2><div style="overflow-x:auto"><table class="tbl"><tr><th>地址</th><th>拍次／開標</th><th>底價</th><th>點交（法院筆錄）</th><th>非自然死亡（法院筆錄）</th></tr>{vrows}</table></div>'
-            '<p>以上只照法院筆錄原文整理。查不到不等於沒有，投標前請用完整門牌查台灣凶宅網，並向管委會或鄰里確認。<a href="/learn/haunted-house-check">法拍屋凶宅怎麼查？</a></p></section>') if cur else ""
+            '<p>以上只照法院筆錄原文整理。查不到不等於沒有，投標前請向管委會確認。</p></section>') if cur else ""
     prow = "".join(f'<tr><td>{e(v.get("gone", ""))}</td><td><a href="/h/{e(k)}">{e(v.get("addr", ""))}</a></td><td>{e(("第%s拍" % v["rd"]) if v.get("rd") else "")}</td><td>{e(re.sub(r"^售", "", v.get("ptxt", "")))}</td></tr>'
                    for k, v in sorted(past, key=lambda t: t[1].get("gone", ""), reverse=True))
     psec = (f'<section class="box"><h2>{e(name)}近半年已下架的法拍物件</h2><table class="tbl"><tr><th>下架日期</th><th>物件</th><th>最後拍次</th><th>最後底價</th></tr>{prow}</table>'
