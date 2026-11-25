@@ -27,6 +27,9 @@ jobs:
           playwright install --with-deps chromium >/dev/null
           python og.py
 
+      - name: 法拍地圖門牌定位（只查新地址）
+        run: python geocode.py
+        continue-on-error: true
       - run: python build.py
       - name: 有變動才提交
         run: |
