@@ -309,42 +309,82 @@ def live(x):
     dk = date_key(x)
     return is_ying(x) or dk == 99999999 or dk >= tk
 
-PRICE_BANDS = [("u1000", "1000萬以下", 0, 10000000), ("1000-2000", "1000～2000萬", 10000000, 20000000), ("2000-3000", "2000～3000萬", 20000000, 30000000), ("o3000", "3000萬以上", 30000000, 10 ** 12)]
+# 2026-11-26 第 2 段：總價帶細分（法拍多在千萬以下）、拍次逐拍、三拍點交、熱門精選
+PRICE_BANDS = [("u500", "500萬以下", 0, 5000000), ("500-1000", "500～1000萬", 5000000, 10000000), ("1000-2000", "1000～2000萬", 10000000, 20000000), ("2000-3000", "2000～3000萬", 20000000, 30000000), ("o3000", "3000萬以上", 30000000, 10 ** 12)]
 def item_tags(x):
-    """回傳 [(標籤代碼, 標籤名稱)]：類型、總價帶、第三拍、點交、屋齡15年內"""
+    """回傳 [(標籤代碼, 標籤名稱)]：類型、總價帶、拍次、點交、三拍點交、屋齡15年內、熱門精選"""
     tg = []
     for ts, tn, tk in TYPES:
         if tk in (x.get("類型") or ""): tg.append((ts, tn)); break
     p = price_num(x["價格"])
     for code, name, lo, hi in PRICE_BANDS:
         if p and lo <= p < hi: tg.append((code, name)); break
-    if round_of(x) >= 3 and not is_ying(x): tg.append(("round3", "第三拍"))
+    r = 0 if is_ying(x) else round_of(x)
+    if r == 1: tg.append(("round1", "第一拍"))
+    if r == 2: tg.append(("round2", "第二拍"))
+    if r >= 3: tg.append(("round3", "第三拍以上"))
     if deliver_of(x) == "點交": tg.append(("delivery", "點交"))
+    if r >= 3 and deliver_of(x) == "點交": tg.append(("round3-delivery", "第三拍點交"))
     a = _age(x)
     if a is not None and a <= 15: tg.append(("age15", "屋齡15年內"))
+    if x["編號"] in FEATURED_IDS(): tg.append(("hot", "熱門精選"))
     return tg
+
+_FEAT_CACHE = []
+def FEATURED_IDS():
+    """熱門精選＝首頁與地圖「本週精選」同一套規則（10 年內新屋、開標日未過、未撤回）"""
+    if not _FEAT_CACHE: _FEAT_CACHE.append({x["編號"] for x in featured_items()})
+    return _FEAT_CACHE[0]
+
+TAG_ORDER = ["hot", "round3-delivery", "round3", "delivery", "round2", "round1", "age15", "u500", "500-1000", "1000-2000", "2000-3000", "o3000"]
+_TAG_CACHE = {}
+def tag_groups():
+    """{(地點, 代碼, 名稱): [物件]}，地點＝行政區或縣市全名"""
+    if not _TAG_CACHE:
+        for x in ITEMS:
+            if not live(x): continue
+            for code, name in item_tags(x):
+                _TAG_CACHE.setdefault((area_of(x), code, name), []).append(x)
+                _TAG_CACHE.setdefault((_CITY_FULL.get(x["區域"][:2], x["區域"][:2]), code, name), []).append(x)
+    return _TAG_CACHE
+
+def tag_links(place, title=None):
+    """區域頁／縣市頁的「依條件找」入口：只列 3 件以上（有收錄）的標籤頁"""
+    ks = [(k, len(v)) for k, v in tag_groups().items() if k[0] == place and len(v) >= 3]
+    rank = {c: i for i, c in enumerate(TAG_ORDER)}
+    ks.sort(key=lambda t: (rank.get(t[0][1], 50), t[0][1]))
+    if not ks: return ""
+    return (f'<section class="box areas"><h2>{e(title or "依條件找" + place + "法拍屋")}</h2>'
+            + "".join(f'<a href="/tag/{slug(place)}/{k[1]}">{e(place + k[2])}（{n}）</a>' for k, n in ks) + "</section>")
 
 def tag_pages():
     """行政區×標籤、縣市×標籤 兩層。回傳 [(路徑, 件數)]，3 件以下 noindex、不進 sitemap"""
     shutil.rmtree("site/tag", ignore_errors=True)
-    groups = {}
-    for x in ITEMS:
-        if not live(x): continue
-        for code, name in item_tags(x):
-            groups.setdefault((area_of(x), code, name), []).append(x)
-            groups.setdefault((_CITY_FULL.get(x["區域"][:2], x["區域"][:2]), code, name), []).append(x)
+    groups = tag_groups()
     out = []
     for (place, code, name), xs in sorted(groups.items()):
         xs = sorted(xs, key=lambda x: (-min(round_of(x), 4), date_key(x)))
         h1 = f"{place}{name}法拍屋"
         path = f"/tag/{slug(place)}/{code}"
-        intro = f"{place}目前符合「{name}」的待標法拍物件共 {len(xs)} 件，依拍次與開標日排序。每天依透明房訊資料自動更新（{UPDATED}），開標日過、拍定或撤回的物件當天移除；底價與日期以法院公告為準。"
+        rule = {"hot": "熱門精選是 10 年內新屋、開標日未過的物件，和首頁本週精選同一套規則。", "round3-delivery": "第三拍以上而且法院筆錄記載點交。", "age15": "屋齡以建物登記資料推算。"}.get(code, "")
+        intro = f"{place}目前符合「{name}」的待標法拍物件共 {len(xs)} 件，依拍次與開標日排序。每天依透明房訊資料自動更新（{UPDATED}），開標日過、拍定或撤回的物件當天移除；底價與日期以法院公告為準。{rule}"
         h = collection_page(path, h1, intro, xs, crumb=h1)
+        sib = tag_links(place, "其他條件的" + place + "法拍屋")
+        h = h.replace('<section class="box" id="contact">', sib + '<section class="box" id="contact">', 1) if sib else h
         if len(xs) < 3:
             h = h.replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
         write(f"site/tag/{place}/{code}.html", h)
         out.append((path, len(xs), place, name))
+    write("site/tag.html", tag_index(out))
     return out
+
+def tag_index(out):
+    """/tag 總索引：縣市層的標籤頁（3 件以上）"""
+    cities = [c for c in _CITY_FULL.values() if any(t[2] == c and t[1] >= 3 for t in out)]
+    body = ('<nav class="bc"><a href="/">首頁</a> › 依條件找法拍屋</nav><h1>依條件找法拍屋</h1>'
+            f'<p>依縣市、類型、總價帶、拍次、點交、屋齡與熱門精選整理的待標法拍物件，每天依透明房訊資料自動更新（{UPDATED}）；3 件以上才單獨成頁，底價與日期以法院公告為準。</p>'
+            + "".join(tag_links(c, c) for c in cities) + contact_box())
+    return page(f"依條件找法拍屋｜縣市・類型・總價・拍次・點交｜{NAME}", "依縣市、類型、總價帶、拍次、點交、屋齡15年內與熱門精選整理的待標法拍屋，每日更新。", "/tag", body, [ORG], SITE + "/og.jpg")
 
 
 # ---------- 2026-11-25 法拍知識主題群（91APP 模組 2）----------
@@ -1033,7 +1073,7 @@ def area_page(a, xs):
     title = f"{head}｜{NAME}"
     desc = intro[:150]
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
-            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + faq_html(list_faq(a + "法拍屋", xs)) + contact_box())
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + faq_html(list_faq(a + "法拍屋", xs)) + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{a}法拍屋", "url": f"{SITE}/area/{slug(a)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
           {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}, faq_ld(list_faq(a + "法拍屋", xs))]
     return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
@@ -1088,6 +1128,7 @@ def city_page(slug_, short, prefixes, kw, scope):
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(kw)}</nav><h1>{e(kw)}｜{e(scope)}最新法拍物件（{len(xs)}筆）</h1>{intro}'
             f'<section class="box areas"><h2>{e(short)}各區法拍屋</h2>{al}</section>'
             + comm_links(lambda g: g["city"] in prefixes, short + "熱門社區法拍屋")
+            + (tag_links(_CITY_FULL.get(prefixes[0], prefixes[0])) if len(prefixes) == 1 else "")
             + (lambda cc: f'<section class="box areas"><h2>依類型找{e(short)}法拍屋</h2>' + "".join(f'<a href="/{cc[0]}-{t[0]}">{e(short + t[1])}法拍屋（{len(type_items(cc, t[2]))}）</a>' for t in TYPES if len(type_items(cc, t[2])) >= 3) + '</section>')(next(c for c in CITIES if c[0] == slug_))
             +
             f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
@@ -1505,7 +1546,7 @@ if __name__ == "__main__":
     write("site/new.html", week_new_page()); urls.append(("/new", 0.8))
     write("site/round3.html", round3_page()); urls.append(("/round3", 0.8))
     write("site/delivery.html", delivery_page()); urls.append(("/delivery", 0.8))
-    TAGS = tag_pages(); urls += [(t[0], 0.6) for t in TAGS if t[1] >= 3]
+    TAGS = tag_pages(); urls += [(t[0], 0.6) for t in TAGS if t[1] >= 3] + [("/tag", 0.7)]
     shutil.rmtree("site/topic", ignore_errors=True)
     write("site/topic.html", topic_index()); urls.append(("/topic", 0.7))
     for t in TOPICS:
