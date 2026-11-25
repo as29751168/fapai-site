@@ -233,7 +233,272 @@ ORG = {
     "employee": [{"@type": "Person", "name": "黃先生 Pitt", "jobTitle": "法拍代標顧問", "telephone": "+886-918-313-888"}, {"@type": "Person", "name": "林小姐 Anna", "jobTitle": "法拍代標顧問", "telephone": "+886-986-678-928"}],
     "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "2% 到 5%，300 萬元以下固定 10 萬元，超過 300 萬元至 600 萬元最低 12 萬元"}],
     "knowsAbout": ["法拍屋", "法拍屋代標", "投標諮詢", "聲請點交", "包辦點交"],
+    # 2026-11-25 AI SEO：聯絡方式與公司全名給 AI 讀得到
+    "contactPoint": [{"@type": "ContactPoint", "contactType": "customer service", "name": "LINE@", "url": LINKS["LINE"], "availableLanguage": "zh-TW", "areaServed": "TW"},
+                     {"@type": "ContactPoint", "contactType": "sales", "name": "黃先生 Pitt", "telephone": "+886-918-313-888", "availableLanguage": "zh-TW"},
+                     {"@type": "ContactPoint", "contactType": "sales", "name": "林小姐 Anna", "telephone": "+886-986-678-928", "availableLanguage": "zh-TW"}],
+    "parentOrganization": {"@type": "Organization", "name": COMPANY},
 }
+
+# ---------- 2026-11-25 自動 FAQ：題目只從公告欄位帶出，查不到的題目不出 ----------
+def faq_html(faq, title="常見問題"):
+    return (f'<section class="box" id="faq"><h2>{e(title)}</h2>' + "".join(f"<details open><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in faq) + "</section>") if faq else ""
+
+def faq_ld(faq):
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}
+
+def item_faq(x):
+    inf = x.get("資訊", {}); notes = inf.get("筆錄", "")
+    name = community_of(x) or inf.get("完整地址") or x["地址"]
+    price = re.sub(r"^售", "", x.get("價格", ""))
+    q = []
+    m = re.search(r"點交情形→([^●\n]+)", notes)
+    if m:
+        q.append((f"{name}法拍屋點交嗎？", f"法院筆錄記載點交情形：{m.group(1).strip()[:80]}。實際以法院公告為準，投標前建議再確認。"))
+    if inf.get("拍次") and price:
+        q.append((f"{name}是第幾拍？底價多少？", f"目前是第{inf['拍次']}拍，底價 {price}" + (f"，開標日期 {inf['開標日期']}" if inf.get("開標日期") else "") + "。"))
+    elif price and not is_ying(x):
+        q.append((f"{name}底價多少？", f"目前底價 {price}。"))
+    if inf.get("每坪單價"):
+        q.append((f"{name}每坪多少？", f"以底價換算約每坪 {inf['每坪單價']}" + (f"（總登記坪數 {inf['總登記坪數']}）" if inf.get("總登記坪數") else "") + "。"))
+    if inf.get("開標日期"):
+        q.append((f"{name}什麼時候開標？", f"開標日期是 {inf['開標日期']}（民國年）" + (f"，由{inf['案號'].split()[0]}拍賣" if inf.get("案號") and "院" in inf["案號"].split()[0] else "") + "。日期可能因停拍或延期變動，以法院公告為準。"))
+    if inf.get("屋齡"):
+        q.append((f"{name}屋齡幾年？", f"屋齡約 {inf['屋齡']}。"))
+    if inf.get("案號"):
+        q.append((f"{name}的案號是多少？", f"案號 {inf['案號']}，詳細內容以法院公告為準。"))
+    if q:
+        q.append(("可以委託代標嗎？", f"可以。{NAME}提供投標諮詢、全程代標、聲請點交／包辦點交，LINE@ {LINKS['LINE']} 或電話 {PHONE_P}（Pitt）、{PHONE_A}（Anna）。"))
+    return q
+
+def list_faq(label, xs):
+    """集合頁 FAQ：件數、底價範圍、拍次、點交、最近開標，全部由資料算出"""
+    if not xs: return []
+    t = _today(); today = (t.year - 1911) * 10000 + t.month * 100 + t.day
+    ps = sorted(p for p in (price_num(x["價格"]) for x in xs) if p > 0)
+    up = sorted((x for x in xs if today <= date_key(x) < 99999999), key=date_key)
+    r3 = sum(1 for x in xs if round_of(x) >= 3); dv = sum(1 for x in xs if deliver_of(x) == "點交")
+    q = [(f"{label}目前有幾件？", f"目前有 {len(xs)} 件待標法拍物件（資料更新 {UPDATED}）。")]
+    if ps: q.append((f"{label}底價大概多少？", f"底價從 {wan(ps[0])} 到 {wan(ps[-1])}，中間值約 {wan(ps[len(ps)//2])}。"))
+    if up: q.append((f"{label}最近什麼時候開標？", f"最近一場是 {up[0]['資訊']['開標日期']}（{up[0]['地址']}）。"))
+    if r3: q.append((f"{label}有第三拍以上的物件嗎？", f"有 {r3} 件第三拍以上，底價通常比第一拍低，但仍要先查清點交與占用。"))
+    if dv: q.append((f"{label}有點交的物件嗎？", f"法院筆錄記載點交的有 {dv} 件，各件點交情形請看物件頁的法院筆錄。"))
+    q.append(("可以委託代標嗎？", f"可以。{NAME}全台都有服務，LINE@ {LINKS['LINE']} 或電話 {PHONE_P}（Pitt）、{PHONE_A}（Anna）。"))
+    return q
+
+def collection_page(path, h1, intro, xs, groups=None, crumb=None):
+    """自動集合頁：導言、物件卡、FAQ、CollectionPage／ItemList／FAQPage 結構化資料"""
+    faq = list_faq(h1, xs)
+    if groups:
+        cards = "".join(f'<h2>{e(g)}（{len(gx)}件）</h2><div class="grid">{"".join(card(x) for x in gx)}</div>' for g, gx in groups if gx)
+    else:
+        cards = f'<div class="grid">{"".join(card(x) for x in xs)}</div>'
+    mp = {"/new": "new", "/round3": "round3", "/delivery": "delivery"}.get(path)
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(crumb or h1)}</nav><h1>{e(h1)}（{len(xs)}件）</h1><p>{e(intro)}</p>' + (f'<p><a class="btn" href="/map#{mp}">在地圖上看這些物件</a></p>' if mp else "") + cards + faq_html(faq) + contact_box())
+    ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": h1, "url": SITE + path, "description": intro[:150], "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
+          {"@context": "https://schema.org", "@type": "ItemList", "name": h1, "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs[:100])]},
+          {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": crumb or h1, "item": SITE + path}]}]
+    if faq: ld.append(faq_ld(faq))
+    return page(f"{h1}｜{len(xs)}件｜{NAME}", intro[:150], path, body, ld, SITE + "/og.jpg")
+
+
+# ---------- 2026-11-25 標籤集合頁（91APP 模組 1）：從欄位自動貼標，3 件以上才收錄 ----------
+def live(x):
+    """時效：開標日已過的不放進集合頁、FAQ、推薦（公告應買沒有開標日，保留）"""
+    t = _today(); tk = (t.year - 1911) * 10000 + t.month * 100 + t.day
+    dk = date_key(x)
+    return is_ying(x) or dk == 99999999 or dk >= tk
+
+# 2026-11-26 第 2 段：總價帶細分（法拍多在千萬以下）、拍次逐拍、三拍點交、熱門精選
+PRICE_BANDS = [("u500", "500萬以下", 0, 5000000), ("500-1000", "500～1000萬", 5000000, 10000000), ("1000-2000", "1000～2000萬", 10000000, 20000000), ("2000-3000", "2000～3000萬", 20000000, 30000000), ("o3000", "3000萬以上", 30000000, 10 ** 12)]
+def item_tags(x):
+    """回傳 [(標籤代碼, 標籤名稱)]：類型、總價帶、拍次、點交、三拍點交、屋齡15年內、熱門精選"""
+    tg = []
+    for ts, tn, tk in TYPES:
+        if tk in (x.get("類型") or ""): tg.append((ts, tn)); break
+    p = price_num(x["價格"])
+    for code, name, lo, hi in PRICE_BANDS:
+        if p and lo <= p < hi: tg.append((code, name)); break
+    r = 0 if is_ying(x) else round_of(x)
+    if r == 1: tg.append(("round1", "第一拍"))
+    if r == 2: tg.append(("round2", "第二拍"))
+    if r >= 3: tg.append(("round3", "第三拍以上"))
+    if deliver_of(x) == "點交": tg.append(("delivery", "點交"))
+    if r >= 3 and deliver_of(x) == "點交": tg.append(("round3-delivery", "第三拍點交"))
+    a = _age(x)
+    if a is not None and a <= 15: tg.append(("age15", "屋齡15年內"))
+    if x["編號"] in FEATURED_IDS(): tg.append(("hot", "熱門精選"))
+    return tg
+
+_FEAT_CACHE = []
+def FEATURED_IDS():
+    """熱門精選＝首頁與地圖「本週精選」同一套規則（10 年內新屋、開標日未過、未撤回）"""
+    if not _FEAT_CACHE: _FEAT_CACHE.append({x["編號"] for x in featured_items()})
+    return _FEAT_CACHE[0]
+
+TAG_ORDER = ["hot", "round3-delivery", "round3", "delivery", "round2", "round1", "age15", "u500", "500-1000", "1000-2000", "2000-3000", "o3000"]
+_TAG_CACHE = {}
+def tag_groups():
+    """{(地點, 代碼, 名稱): [物件]}，地點＝行政區或縣市全名"""
+    if not _TAG_CACHE:
+        for x in ITEMS:
+            if not live(x): continue
+            for code, name in item_tags(x):
+                _TAG_CACHE.setdefault((area_of(x), code, name), []).append(x)
+                _TAG_CACHE.setdefault((_CITY_FULL.get(x["區域"][:2], x["區域"][:2]), code, name), []).append(x)
+    return _TAG_CACHE
+
+def tag_links(place, title=None):
+    """區域頁／縣市頁的「依條件找」入口：只列 3 件以上（有收錄）的標籤頁"""
+    ks = [(k, len(v)) for k, v in tag_groups().items() if k[0] == place and len(v) >= 3]
+    rank = {c: i for i, c in enumerate(TAG_ORDER)}
+    ks.sort(key=lambda t: (rank.get(t[0][1], 50), t[0][1]))
+    if not ks: return ""
+    return (f'<section class="box areas"><h2>{e(title or "依條件找" + place + "法拍屋")}</h2>'
+            + "".join(f'<a href="/tag/{slug(place)}/{k[1]}">{e(place + k[2])}（{n}）</a>' for k, n in ks) + "</section>")
+
+def tag_pages():
+    """行政區×標籤、縣市×標籤 兩層。回傳 [(路徑, 件數)]，3 件以下 noindex、不進 sitemap"""
+    shutil.rmtree("site/tag", ignore_errors=True)
+    groups = tag_groups()
+    out = []
+    for (place, code, name), xs in sorted(groups.items()):
+        xs = sorted(xs, key=lambda x: (-min(round_of(x), 4), date_key(x)))
+        h1 = f"{place}{name}法拍屋"
+        path = f"/tag/{slug(place)}/{code}"
+        rule = {"hot": "熱門精選是 10 年內新屋、開標日未過的物件，和首頁本週精選同一套規則。", "round3-delivery": "第三拍以上而且法院筆錄記載點交。", "age15": "屋齡以建物登記資料推算。"}.get(code, "")
+        intro = f"{place}目前符合「{name}」的待標法拍物件共 {len(xs)} 件，依拍次與開標日排序。每天依透明房訊資料自動更新（{UPDATED}），開標日過、拍定或撤回的物件當天移除；底價與日期以法院公告為準。{rule}"
+        h = collection_page(path, h1, intro, xs, crumb=h1)
+        sib = tag_links(place, "其他條件的" + place + "法拍屋")
+        h = h.replace('<section class="box" id="contact">', sib + '<section class="box" id="contact">', 1) if sib else h
+        if len(xs) < 3:
+            h = h.replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
+        write(f"site/tag/{place}/{code}.html", h)
+        out.append((path, len(xs), place, name))
+    write("site/tag.html", tag_index(out))
+    return out
+
+def tag_index(out):
+    """/tag 總索引：縣市層的標籤頁（3 件以上）"""
+    cities = [c for c in _CITY_FULL.values() if any(t[2] == c and t[1] >= 3 for t in out)]
+    body = ('<nav class="bc"><a href="/">首頁</a> › 依條件找法拍屋</nav><h1>依條件找法拍屋</h1>'
+            f'<p>依縣市、類型、總價帶、拍次、點交、屋齡與熱門精選整理的待標法拍物件，每天依透明房訊資料自動更新（{UPDATED}）；3 件以上才單獨成頁，底價與日期以法院公告為準。</p>'
+            + "".join(tag_links(c, c) for c in cities) + contact_box())
+    return page(f"依條件找法拍屋｜縣市・類型・總價・拍次・點交｜{NAME}", "依縣市、類型、總價帶、拍次、點交、屋齡15年內與熱門精選整理的待標法拍屋，每日更新。", "/tag", body, [ORG], SITE + "/og.jpg")
+
+
+# ---------- 2026-11-25 法拍知識主題群（91APP 模組 2）----------
+# 答案只用：上架助手\tools\拍檔常見問答.md（11/09 使用者確認的回答方向、Anna 定稿）與本站已上線 FAQ。
+# 沒定過的題目放在 部門建議\tomin104_知識主題群_草稿給Anna審_20261125.md，Anna 審過才加進來。
+TOPICS = [
+    ("delivery", "點交與不點交", "點交是法拍屋最先要看的一項：法院會不會協助交屋，決定得標後要多花多少時間與心力。",
+     [("什麼是法拍屋的點交與不點交？", "點交是法院會協助把房屋交給得標人；不點交就要自己處理交屋和現住人的問題。每一件都要看法院公告與筆錄。"),
+      ("不點交的法拍屋可以買嗎？", "不能一概而論。不點交要自行處理占用與交屋，風險與時間都比較難估，投標前要先看清楚公告與筆錄，再評估要不要標、標多少。"),
+      ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
+      ("點交要找誰協助？費用多少？", "得標後可委託聲請點交（每件 5 萬元）或包辦點交（每件 12 萬元）；不點交、部分點交及持分案件費用另議。")],
+     ["delivery-or-not", "why-not-delivered", "how-long-to-move-in"], [("/delivery", "點交法拍屋")]),
+    ("deposit", "保證金與要準備的錢", "投標前要先準備保證金，得標後尾款期限很短，還有稅費與修繕要一起算。",
+     [("投標要準備多少保證金？", "保證金約為法院底價的兩成，實際金額以法院公告為準，通常以銀行本票開立。"),
+      ("保證金不夠或忘記附本票會怎樣？", "保證金未繳足、未附本票，或本票、印章有瑕疵，投標會被判為無效。投標前請逐項核對拍賣公告。"),
+      ("得標後要在多久內繳尾款？", "得標後通常需在 7 天內繳清價金。需要貸款或代墊尾款，請在投標前先告知。"),
+      ("除了底價還要準備哪些錢？", "還有稅費、代書費與修繕等費用要一起算。把案號給我們，可以幫你列出要準備的錢。")],
+     ["how-to-bid", "deposit-invalid", "auction-costs-after-winning"], []),
+    ("rounds", "拍次、八折與公告應買", "法拍屋每流標一次，下一拍底價通常再降，第三拍之後是公告應買。",
+     [("法拍屋的拍次是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以法院公告為準。"),
+      ("下一拍底價是多少？", "下一拍還沒公告前，只能用八折估算，而且是「預估，非法院公告」；法院公告出來後，以公告底價為準。"),
+      ("第三拍沒人標，會有第四拍嗎？", "第三拍流標會先進「公告應買」，不是直接第四拍。會不會走到那一步沒人能保證，好房也常在第三拍就被標走。"),
+      ("什麼是公告應買？", "第三拍如果沒有人出價，法院會公告三個月，這段期間內任何人都可以用第三拍的底價直接向法院申請購買，不用跟別人競標。三個月內都沒人應買，債權人可以再聲請重新鑑價後拍賣。")],
+     ["auction-rounds"], [("/round3", "第三拍法拍屋・最後底價")]),
+    ("priority", "優先購買權", "有優先購買權的人可以用得標價把房子買走，投標前要先知道這件誰有權利。",
+     [("什麼是優先購買權？", "有優先購買權的人，可以用得標價把房子買走，要等法院確認，所以資金要先備好。"),
+      ("被優先購買權人買走，保證金怎麼辦？", "如果被買走，保證金會退還，時間依法院通知。"),
+      ("怎麼知道誰有優先購買權？", "要看法院公告與筆錄。把地址或案號給我們，可以幫你核對。")],
+     ["co-owned-share-auction"], []),
+    ("haunted", "凶宅怎麼查", "法拍屋是不是凶宅，先看法院筆錄，再向管委會確認。",
+     [("法拍屋會不會是凶宅？", "我們會看法院公告與筆錄有沒有記載，也會查公開資料。但要說清楚，查不到不代表一定沒有。"),
+      ("物件頁哪裡看得到這些資訊？", "每件物件頁都附法院筆錄全文，點交、使用情形與相關記載一律以筆錄原文為準。")],
+     [], []),
+    ("proxy", "代標流程與費用", "從看懂公告、評估總成本、投標到點交，可以全程委託，也可以只委託點交。",
+     [("可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。"),
+      ("代標服務費怎麼算？", "全程代標收取 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；聲請點交 5 萬元、包辦點交 12 萬元。不含代書費、契稅、規費、貸款手續費；不點交、部分點交、持分案件費用另議。"),
+      ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。我們會用法院筆錄和公開資料幫你評估。"),
+      ("自己投標，可以只委託點交嗎？", "可以。聲請點交每件 5 萬元，包辦點交每件 12 萬元（另含代墊尾款、協調警員到場、鎖匠搬家、遷戶籍、恢復水電瓦斯等）。")],
+     ["proxy-bid-process", "what-is-foreclosure-auction"], [("/fees", "服務與收費")]),
+]
+
+def topic_page(t):
+    code, name, lead, faq, learns, cols = t
+    lt = {k: v for k, v, *_ in LEARN}
+    links = "".join(f'<a href="/learn/{k}">{e(lt.get(k, k))}</a>' for k in learns if k in lt) + "".join(f'<a href="{u}">{e(n)}</a>' for u, n in cols)
+    others = "".join(f'<a href="/topic/{o[0]}">{e(o[1])}</a>' for o in TOPICS if o[0] != code)
+    body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/topic">法拍知識</a> › {e(name)}</nav><h1>法拍屋{e(name)}｜常見問題</h1><p>{e(lead)}</p>'
+            + faq_html(faq, f"{name}常見問題") + (f'<section class="box areas"><h2>延伸閱讀</h2>{links}</section>' if links else "")
+            + f'<section class="box areas"><h2>其他法拍知識</h2>{others}</section>'
+            + f'<p class="note">{e(NAME)}整理。實際內容以法院公告為準。</p>' + contact_box())
+    ld = [ORG, faq_ld(faq), {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "法拍知識", "item": SITE + "/topic"},
+        {"@type": "ListItem", "position": 3, "name": name, "item": f"{SITE}/topic/{code}"}]}]
+    return page(f"法拍屋{name}常見問題｜{NAME}", lead, f"/topic/{code}", body, ld)
+
+def topic_index():
+    lis = "".join(f'<li><a href="/topic/{t[0]}">{e(t[1])}</a>：{e(t[2])}</li>' for t in TOPICS)
+    body = f'<nav class="bc"><a href="/">首頁</a> › 法拍知識</nav><h1>法拍知識主題｜常見問題整理</h1><ul class="soon">{lis}</ul>' + contact_box()
+    ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": "法拍知識主題", "url": SITE + "/topic", "inLanguage": "zh-TW"}]
+    return page(f"法拍知識主題｜{NAME}", "點交、保證金、拍次與公告應買、優先購買權、凶宅、代標費用等法拍屋常見問題整理。", "/topic", body, ld)
+
+
+# ---------- 2026-11-25 E-E-A-T（91APP 模組 6）：成交案例頁 ----------
+# 寫法照 Anna 11/12 確認：寫「樹林一間」「得標 590 萬」，不寫社區名、案號、得標人；818 萬是成交價，不是淨賺；不暗示保證獲利。
+CASES = [
+    {"title": "樹林一間：金服第三拍得標 590 萬", "area": "新北市樹林區", "rows": [
+        ("拍賣方式", "金融資產服務公司拍賣（金服案），第三拍"), ("投標人數", "6 人"), ("得標價", "590.1 萬元"),
+        ("總坪數", "15.33 坪（約每坪 38.5 萬元）"), ("點交情形", "查封筆錄記載拍賣後不點交"),
+        ("之後的實價登錄", "818 萬元（成交價，不是獲利）")],
+     "note": "每件法拍屋條件不同，過去成交不代表未來結果；投標前要先查清產權、占用與點交情形。"},
+]
+
+def cases_page():
+    secs = "".join(f'<section class="box"><h2>{e(c["title"])}</h2>' + kv(c["rows"]) + f'<p class="note">{e(c["note"])}</p></section>' for c in CASES)
+    body = ('<nav class="bc"><a href="/">首頁</a> › 代標成交案例</nav><h1>代標成交案例｜Pitt & Anna 104法拍網團隊</h1>'
+            f'<p>以下是 {e(NAME)} 協助客戶投標的真實案例，只寫拍賣紀錄與公開的實價登錄，不公開社區名、案號與客戶身分。</p>'
+            + secs + '<section class="box areas"><h2>延伸閱讀</h2><a href="/about">關於我們</a><a href="/fees">服務與收費</a><a href="/topic/proxy">代標流程與費用</a></section>' + contact_box())
+    ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": "代標成交案例", "url": SITE + "/cases", "inLanguage": "zh-TW", "publisher": {"@id": SITE + "/#org"}},
+          {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "代標成交案例", "item": SITE + "/cases"}]}]
+    return page(f"代標成交案例｜{NAME}", "Pitt & Anna 104法拍網團隊代標成交案例：樹林一間金服第三拍得標 590 萬，只寫拍賣紀錄與公開實價登錄。", "/cases", body, ld)
+
+def _twn_first(x):   # 雙北先，桃園次之，其他縣市接著
+    return {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3)
+
+def week_new_page():
+    xs = sorted([x for x in new_items() if live(x)], key=lambda x: (x.get("新增日", ""), ), reverse=True)
+    days = sorted({x.get("新增日", "") for x in xs}, reverse=True)
+    groups = []
+    for d in days:
+        dx = sorted([x for x in xs if x.get("新增日", "") == d], key=lambda x: (_twn_first(x), area_of(x), date_key(x)))
+        tw = [x for x in dx if _twn_first(x) <= 1]; ot = [x for x in dx if _twn_first(x) > 1]
+        groups += [(f"{d} 新增・雙北", tw), (f"{d} 新增・其他縣市", ot)]
+    xs = [x for _, gx in groups for x in gx]
+    tw_n = sum(1 for x in xs if _twn_first(x) <= 1)
+    intro = f"最近 7 天透明房訊新上架的法拍物件共 {len(xs)} 件，其中雙北 {tw_n} 件。依新增日期分區，雙北排前面，其他縣市接著列。每天自動更新（{UPDATED}），拍次與底價以法院公告為準。"
+    return collection_page("/new", "本週新增法拍屋", intro, xs, groups)
+
+def round3_page():
+    xs = sorted([x for x in ITEMS if round_of(x) >= 3 and not is_ying(x) and live(x)], key=lambda x: (_twn_first(x), date_key(x)))
+    intro = (f"第三拍以上的法拍物件共 {len(xs)} 件。第三拍通常是這次公告的最後一次底價機會，流標後可能進入應買公告或重新評估。"
+             f"依縣市與開標日排序，雙北在前（{UPDATED}）。底價與日期以法院公告為準。")
+    groups = [(c, [x for x in xs if x["區域"][:2] == c]) for c in dict.fromkeys(x["區域"][:2] for x in xs)]
+    return collection_page("/round3", "第三拍法拍屋・最後底價", intro, xs, [(f"{c}法拍屋第三拍", gx) for c, gx in groups])
+
+def delivery_page():
+    xs = sorted([x for x in ITEMS if deliver_of(x) == "點交" and live(x)], key=lambda x: (_twn_first(x), date_key(x)))
+    intro = f"法院筆錄記載「點交」的法拍物件共 {len(xs)} 件。點交是拍定後由法院協助交屋，比不點交單純，但仍要看筆錄有無例外。依縣市排序，雙北在前（{UPDATED}）。"
+    groups = [(c, [x for x in xs if x["區域"][:2] == c]) for c in dict.fromkeys(x["區域"][:2] for x in xs)]
+    return collection_page("/delivery", "點交法拍屋", intro, xs, [(f"{c}點交法拍屋", gx) for c, gx in groups])
+
+# 2026-11-25 站內轉換：LINE@ 按鈕點擊次數記到 /api/click（KV LEADS，c: 開頭）
+CLICK_JS = ('<script>(function(){function s(t){try{navigator.sendBeacon("/api/click",JSON.stringify({p:location.pathname,t:t}))}catch(e){}}'
+            'document.addEventListener("click",function(ev){var a=ev.target.closest&&ev.target.closest("a,button");if(!a)return;'
+            'var h=a.getAttribute("href")||"";if(h.indexOf("lin.ee")>-1)s("line@");else if(a.id==="ask")s("ask");else if(h.indexOf("line-login")>-1)s("login")},true)})()</script>')
 
 FAB = (f'<div class="fab"><a href="tel:0918313888" aria-label="電話諮詢"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></a>'
        f'<a class="l" href="{LINKS["LINE"]}" target="_blank" rel="noopener" aria-label="LINE 諮詢">LINE</a></div>')
@@ -256,12 +521,12 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
-<footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
+<footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script>{CLICK_JS}</body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
+          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/new">本週新增</a><a href="/round3">第三拍・最後底價</a><a href="/delivery">點交物件</a><a href="/list#areas">各區法拍屋</a><a href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a><a href="/topic">法拍知識問答</a><a href="/cases">成交案例</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
@@ -442,12 +707,13 @@ def community_page(key, g):
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'{e(name)}法拍屋</nav>'
             f'<h1>{e(name)}法拍屋｜{e(a0)}（{len(cur)}件）</h1><p>{e(intro)}</p>'
             + (f'<h2>{e(name)}法拍物件</h2><div class="grid">{"".join(card(x) for x in cur)}</div>' if cur else "") + vsec + psec
-            + f'<section class="box areas"><h2>附近法拍屋</h2>{links}</section>' + contact_box())
+            + faq_html(list_faq(name + "法拍屋", cur)) + f'<section class="box areas"><h2>附近法拍屋</h2>{links}</section>' + contact_box())
     desc = intro[:150]
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{name}法拍屋", "url": f"{SITE}/c/{slug(key)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
           {"@context": "https://schema.org", "@type": "ItemList", "name": f"{name}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(cur)]},
           {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": ([{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}]
               + ([{"@type": "ListItem", "position": 2, "name": cc[3], "item": f"{SITE}/{cc[0]}"}] if cc else []) + [{"@type": "ListItem", "position": 3 if cc else 2, "name": f"{name}法拍屋"}])}]
+    if cur: ld.append(faq_ld(list_faq(name + "法拍屋", cur)))
     return page(title, desc, f"/c/{slug(key)}", body, ld, SITE + "/og.jpg")
 def _road(x):
     a = re.sub(r"^.{2,3}?[市縣].{1,3}?[區鄉鎮市]", "", (x.get("資訊") or {}).get("完整地址") or "")
@@ -463,14 +729,17 @@ def related_box(x, comm, area):
             a = area_of(y)
             for key in (("c", a[:2], _comm(y)), ("r", a, _road(y)), ("t", a, y.get("類型")), ("a", a)):
                 if all(key): _IDX.setdefault(key, []).append(y)
+    band = lambda y: next((c for c, n, lo, hi in PRICE_BANDS if lo <= price_num(y.get("價格", "")) < hi), "")
+    same = [y for y in _IDX.get(("t", area, ty), []) if band(y) == band(x)]
     pools = [("同社區", _IDX.get(("c", area[:2], comm), []) if comm else []),
+             ("同區同價帶同類型", same),
              ("同路段", _IDX.get(("r", area, rd), []) if rd else []),
              ("同區同類型", _IDX.get(("t", area, ty), [])),
              ("同區", _IDX.get(("a", area), []))]
     out, why = [], {}
     for lab, ys in pools:
-        for y in ys:
-            if y is x or y in out or len(out) >= 6: continue
+        for y in sorted(ys, key=lambda y: (-(round_of(y) >= 3), deliver_of(y) != "點交", date_key(y))):
+            if y is x or y in out or len(out) >= 6 or not live(y): continue
             out.append(y); why[lab] = why.get(lab, 0) + 1
     cc = city_of(x)
     links = [f'<a href="/area/{slug(area)}">{e(area)}全部法拍屋</a>']
@@ -531,7 +800,7 @@ def detail_page(x):
             f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-map="{e(map_query(x))}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
-            + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + contact_box() + sim)
+            + (f'<section class="box"><h2>坪數說明</h2>{size}</section>' if size else "") + srows + nsec + (f'<section class="box"><h2>周邊環境</h2><p><a class="btn" href="/map?id={e(x["編號"])}">在地圖上看周邊</a>　附近的捷運、學校、市場與其他法拍物件</p></section>' if x["編號"] in MAP_IDS else "") + faq_html(item_faq(x)) + f'<p class="note">本頁由 {e(NAME)}整理，資料來源：透明房訊（{e(UPDATED)} 更新），實際內容以法院公告為準。</p>' + contact_box() + sim)
     ld = [ORG,
           {"@context": "https://schema.org", "@type": "RealEstateListing", "name": (f"{comm}法拍屋｜{addr}" if comm else f"{addr}法拍屋"), "url": f'{SITE}/h/{x["編號"]}', "description": desc,
            "image": ph[:6] or None, "dateModified": UPDATED.replace(" ", "T") + ":00+08:00",
@@ -545,6 +814,7 @@ def detail_page(x):
         bl = ld[-1]["itemListElement"]
         bl.insert(1, {"@type": "ListItem", "position": 2, "name": cc[3], "item": f"{SITE}/{cc[0]}"})
         for i, it in enumerate(bl, 1): it["position"] = i
+    if item_faq(x): ld.append(faq_ld(item_faq(x)))
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
@@ -725,19 +995,33 @@ function rk(k){return k.indexOf('台北')==0?0:k.indexOf('新北')==0?1:k.indexO
 function areas(){var c=$('c').value,seen={},o='<option value="">地區不拘</option>';cards.forEach(function(d){if((!c||d.dataset.c===c)&&!seen[d.dataset.a]){seen[d.dataset.a]=1}});Object.keys(seen).sort(function(a,b){return rk(a)-rk(b)||(a<b?-1:1)}).forEach(function(k){o+='<option>'+k+'</option>'});var cur=$('a').value;$('a').innerHTML=o;if(seen[cur])$('a').value=cur}
 function f(){var k=$('q').value.trim(),c=$('c').value,a=$('a').value,y=$('y').value,r=$('r').value,j=$('j').value,pr=$('pr').value,s=$('s').value,cnt=0,lo=0,hi=1e9;if(pr){var p=pr.split('-');lo=+p[0]*10000;hi=+p[1]*10000}else if(OVR){lo=OVR[0]*10000;hi=OVR[1]*10000}
 cards.forEach(function(d){var D=d.dataset,p=+D.p,rr=+D.r,ok=(!k||D.t.indexOf(k)>-1)&&(!c||D.c===c)&&(!a||D.a===a)&&(!y||D.y===y)&&(!r||(r==='4'?rr>=4:r==='3+'?rr>=3:rr===+r))&&(!j||D.j===j)&&((!pr&&!OVR)||(p>=lo&&p<hi))&&(!TY.length||TY.some(function(t){return D.y.indexOf(t)===0}));d.style.display=ok?'':'none';if(ok)cnt++});
-var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'+(TY.length?'（類型：'+TL+'）':'')}
+var arr=s?cards.slice().sort(function(x,y){var X=x.dataset,Y=y.dataset;return s==='pa'?X.p-Y.p:s==='pd'?Y.p-X.p:s==='da'?X.d-Y.d:Y.d-X.d}):orig;arr.forEach(function(d){g.appendChild(d)});n.textContent='共 '+cnt+' 筆'+(TY.length?'（類型：'+TL+'）':'')+(typeof NOTE==='string'?NOTE:'')}
 [].forEach.call(document.querySelectorAll('.qk button'),function(b){b.addEventListener('click',function(){if(b.dataset.c){$('c').value=b.dataset.c;areas()}if(b.dataset.r){$('r').value=b.dataset.r;chipsOn()}f();$('list').scrollIntoView({behavior:'smooth'})})});
 var rc=$('rc');function chipsOn(){[].forEach.call(rc.querySelectorAll('button'),function(b){b.className=b.dataset.v===$('r').value?'on':''})}rc.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('r').value=b.dataset.v;chipsOn();f()});
-var go=$('go');function done(){if(document.activeElement)document.activeElement.blur();f();$('n').scrollIntoView({behavior:'smooth',block:'start'})}go.addEventListener('click',done);$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();done()}});
+var NOTE='';function nl(){var t=$('q').value.trim();if(!t)return;NOTE='';t=t.replace(/臺/g,'台');var skip=[];
+var CY={'台北':'台北','北市':'台北','新北':'新北','桃園':'桃園','基隆':'基隆','新竹':'新竹','苗栗':'苗栗','台中':'台中','彰化':'彰化','南投':'南投','雲林':'雲林','嘉義':'嘉義','台南':'台南','高雄':'高雄','屏東':'屏東','宜蘭':'宜蘭','花蓮':'花蓮','台東':'台東'};
+var seen={};cards.forEach(function(d){seen[d.dataset.a]=1});var hit=null;Object.keys(seen).forEach(function(a){var d=a.slice(2),b=d.replace(/[區市鎮鄉]$/,'');if(b.length>=2&&t.indexOf(b)>-1&&(!hit||b.length>hit[1].length))hit=[a,b,d]});
+if(hit){$('c').value=hit[0].slice(0,2);areas();$('a').value=hit[0];t=t.replace(hit[2],' ').replace(hit[1],' ')}
+Object.keys(CY).forEach(function(k){if(t.indexOf(k)>-1){if(!hit){$('c').value=CY[k];areas()}t=t.replace(new RegExp(k+'[市縣]?'),' ')}});
+var m=t.match(/(\\d+(?:\\.\\d+)?)\\s*[~～\\-到至]\\s*(\\d+(?:\\.\\d+)?)\\s*萬/);if(m){OVR=[+m[1],+m[2]];t=t.replace(m[0],' ')}
+else if(m=t.match(/(\\d+(?:\\.\\d+)?)\\s*萬\\s*(以內|內|以下|之內|預算)?/)){var v=+m[1];OVR=/以上/.test(t.slice(t.indexOf(m[0])+m[0].length,t.indexOf(m[0])+m[0].length+2))?[v,1e6]:[0,v];t=t.replace(m[0],' ').replace('以上',' ')}
+if(/不點交/.test(t)){$('j').value='不點交';t=t.replace(/不點交/g,' ')}else if(/點交/.test(t)){$('j').value='點交';t=t.replace(/(可|能|有)?點交/g,' ')}
+if(/(第?三拍|最後底價|三拍以上)/.test(t)){$('r').value='3+';t=t.replace(/(第?三拍以上|第?三拍|最後底價)/g,' ')}else if(/第?二拍/.test(t)){$('r').value='2';t=t.replace(/第?二拍/g,' ')}else if(/第?一拍/.test(t)){$('r').value='1';t=t.replace(/第?一拍/g,' ')}
+var TT=['大樓','華廈','公寓','透天','店面','套房'];TT.forEach(function(k){if(t.indexOf(k)>-1){TY=[k];TL=k;t=t.replace(k,' ')}});if(/電梯/.test(t)&&!TY.length){TY=['大樓','華廈'];TL='電梯大樓、華廈';t=t.replace(/電梯/g,' ')}
+if(/[一二三四五六1-6]\\s*房/.test(t)){skip.push('房數');t=t.replace(/[一二三四五六1-6]\\s*房/g,' ')}
+if(/捷運|車站|站附近/.test(t)){skip.push('捷運');t=t.replace(/捷運\\S*|\\S*站附近|車站/g,' ')}
+t=t.replace(/法拍屋?|物件|附近|的|想找|我要|預算|內|以下|左右/g,' ').replace(/\\s+/g,' ').trim();$('q').value=t;
+if(skip.length)NOTE='（'+skip.join('、')+'目前沒有查證過的資料，先略過）';chipsOn()}
+var go=$('go');function done(){if(document.activeElement)document.activeElement.blur();nl();f();$('n').scrollIntoView({behavior:'smooth',block:'start'})}go.addEventListener('click',done);$('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();done()}});
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();if(i==='pr')OVR=null;if(i==='y'){TY=[];TL=''}f()})});
-$('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();f()})();</script>"""
+$('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();if(Q.get('q')){$('q').value=Q.get('q');nl()}f()})();</script>"""
     lead = (f'<h1 class="lh">全部法拍屋物件</h1><p class="ls">共 {len(ITEMS)} 筆，含拍次、開標日期、底標價與法院筆錄，每日更新。</p><div id="list"></div>' if list_mode else
             f'<p>Pitt &amp; Anna 104法拍網團隊整理全台法拍屋、金拍屋物件資訊（資料來源：透明房訊），含拍次、開標日期、底標價與法院筆錄，並提供投標諮詢、全程代標、聲請點交／包辦點交。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
     body = (lead +
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
             f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
             f'<button type="button" data-v="3">第3拍（{sum(1 for x in ITEMS if round_of(x)==3)}）</button><button type="button" data-v="4">第4拍以上（{sum(1 for x in ITEMS if round_of(x)>=4)}）</button></div>'
-            f'<div class="bar"><input id="q" type="search" enterkeyhint="search" placeholder="搜尋地址、社區、案號…" aria-label="搜尋"><button id="go" type="button">搜尋</button><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
+            f'<div class="bar"><input id="q" type="search" enterkeyhint="search" placeholder="可直接打：新北 2000萬內 點交、三重 第三拍…" aria-label="搜尋"><button id="go" type="button">搜尋</button><select id="c" aria-label="縣市"><option value="">縣市不拘</option>{opts(cities)}</select><select id="a" aria-label="地區"><option value="">地區不拘</option></select>'
             f'<select id="y" aria-label="類型"><option value="">類型不拘</option>{opts(types)}</select>'
             f'<input type="hidden" id="r">'
             f'<select id="j" aria-label="點交情形"><option value="">點交不拘</option><option>點交</option><option>不點交</option><option>其他</option></select>'
@@ -789,8 +1073,9 @@ def area_page(a, xs):
     title = f"{head}｜{NAME}"
     desc = intro[:150]
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
-            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
-    ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + faq_html(list_faq(a + "法拍屋", xs)) + contact_box())
+    ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{a}法拍屋", "url": f"{SITE}/area/{slug(a)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
+          {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}, faq_ld(list_faq(a + "法拍屋", xs))]
     return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
 
 CITIES = [
@@ -843,6 +1128,7 @@ def city_page(slug_, short, prefixes, kw, scope):
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(kw)}</nav><h1>{e(kw)}｜{e(scope)}最新法拍物件（{len(xs)}筆）</h1>{intro}'
             f'<section class="box areas"><h2>{e(short)}各區法拍屋</h2>{al}</section>'
             + comm_links(lambda g: g["city"] in prefixes, short + "熱門社區法拍屋")
+            + (tag_links(_CITY_FULL.get(prefixes[0], prefixes[0])) if len(prefixes) == 1 else "")
             + (lambda cc: f'<section class="box areas"><h2>依類型找{e(short)}法拍屋</h2>' + "".join(f'<a href="/{cc[0]}-{t[0]}">{e(short + t[1])}法拍屋（{len(type_items(cc, t[2]))}）</a>' for t in TYPES if len(type_items(cc, t[2])) >= 3) + '</section>')(next(c for c in CITIES if c[0] == slug_))
             +
             f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
@@ -928,7 +1214,8 @@ def about_page():
     fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in ABOUT_FAQ)
     body = ('<nav class="bc"><a href="/">首頁</a> › 關於我們</nav><h1>關於 Pitt & Anna｜104法拍網團隊</h1>'
             f'<p>{e(INTRO)}</p><p>本站每天更新法拍物件，實際內容以法院拍賣公告為準。</p>'
-            '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p></section>'
+            '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p>'
+            f'<p>經紀業：{e(COMPANY)}。<a href="/cases">看代標成交案例</a></p></section>'
             '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
             f'<section class="box"><h2>聯絡我們</h2><ul><li>林小姐 Anna：{e(PHONE_A)}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>LINE@：<a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a></li><li>服務範圍：全台都有服務</li><li>{e(COMPANY)}</li></ul></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
@@ -1088,6 +1375,7 @@ def write_home():
     t = t.replace('"./', '"/home/')
     t = re.sub(r"\s*<!--PROMO:start-->.*?<!--PROMO:end-->", "", t, flags=re.S)
     t = t.replace('<a class="skip-link" href="#main">跳至主要內容</a>', '<a class="skip-link" href="#main">跳至主要內容</a>' + promo_banner(), 1)
+    t = t.replace("</body>", CLICK_JS + "</body>", 1)
     write("site/index.html", t)
 
 # ---------- 活動頁：年前上車｜2 萬代標券（2026-11-18 Anna 同意上線；活動至 2027/2/5 除夕） ----------
@@ -1187,10 +1475,56 @@ def promo_banner():
 exec(compile(open("learn.py", encoding="utf-8").read(), "learn.py", "exec"))
 exec(compile(open("helper.py", encoding="utf-8").read(), "helper.py", "exec"))
 
+MAP_IDS, MAP_AREAS = set(), set()   # 2026-11-25 有座標的物件與行政區（詳情頁、區域頁才放地圖）
+MAP_PASS_HASH = 2008841021   # 內部版密碼的 djb2 雜湊（密碼不寫在程式裡，請向 Anna 索取）
+
+def map_files():
+    """法拍地圖：公開版 /map 與內部版 /i/map（加密碼、不被搜尋、每間可跳 Google Earth、含行情／點交風險／筆記備註）。座標來自 geocode.py。"""
+    import geocode
+    try: geo = json.load(open("data/geo.json", encoding="utf-8"))
+    except Exception: geo = {}
+    try: notes = json.load(open("data/internal_notes.json", encoding="utf-8"))
+    except Exception: notes = {}
+    rows, miss = [], 0
+    FEAT = {x["編號"] for x in featured_items()}
+    for x in ITEMS:
+        g = geo.get(geocode.query_addr(x))
+        if not g or g[2] < 0: miss += 1; continue
+        inf = x.get("資訊") or {}
+        ph = photos(x)
+        sz = re.match(r"[\d.]+", x.get("格局坪數") or "")
+        up = re.match(r"[\d.]+", inf.get("每坪單價") or "")
+        rows.append({"i": x["編號"], "a": re.sub(r"[❶-❿①-⑳？?]", "", inf.get("完整地址") or x["地址"]), "c": area_of(x)[:2], "d": area_of(x)[2:], "t": x["類型"].split("_")[0],
+                     "p": round(price_num(x["價格"]) / 10000), "f": round(first_price(x) / 10000), "r": "Y" if is_ying(x) else round_of(x),
+                     "o": _open_date(x), "s": x.get("狀態", ""), "j": deliver_of(x), "z": float(sz[0]) if sz else 0, "u": float(up[0]) if up else 0,
+                     "y": _age(x), "m": community_of(x), "g": ph[0] if ph else "", "n": 1 if _within(x.get("新增日", "")) else 0,
+                     "k": 1 if (_within(x.get("異動日", "")) and x.get("降價前", 0)) else 0, "h": 1 if x["編號"] in FEAT else 0, "x": g[0], "q": g[1], "e": g[2]})
+    MAP_IDS.update(r["i"] for r in rows)
+    MAP_AREAS.update(r["c"] + r["d"] for r in rows)
+    tpl = open("tpl/map.html", encoding="utf-8").read()
+    def render(mode, jsonpath, head):
+        return (tpl.replace("{{UPDATED}}", e(UPDATED)).replace("{{COUNT}}", str(len(rows))).replace("{{LINE}}", LINKS["LINE"])
+                .replace("{{V}}", re.sub(r"\D", "", UPDATED)).replace("{{MODE}}", mode).replace("{{JSON}}", jsonpath).replace("{{HEAD}}", head))
+    # 公開版
+    json.dump({"更新時間": UPDATED, "items": rows}, open("site/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    write("site/map.html", render("public", "/map.json", ""))
+    # 內部版（/i/map）：每間帶入內部備註
+    irows = [dict(r, n1=notes.get(r["i"], {}).get("行情", ""), n2=notes.get(r["i"], {}).get("風險", ""), n3=notes.get(r["i"], {}).get("筆記", "")) for r in rows]
+    os.makedirs("site/i", exist_ok=True)
+    json.dump({"更新時間": UPDATED, "items": irows}, open("site/i/map.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    gate = ('<meta name="robots" content="noindex,nofollow"><script>(function(){try{if(localStorage.getItem("i1")==="1")return;'
+            'var h=function(s){var n=5381,i;for(i=0;i<s.length;i++)n=((n*33)+s.charCodeAt(i))>>>0;return n};'
+            'var t=prompt("104法拍網 內部地圖・請輸入密碼");'
+            'if(t&&h(t)===' + str(MAP_PASS_HASH) + '){localStorage.setItem("i1","1")}'
+            'else{document.documentElement.innerHTML="<body style=\\"font-family:sans-serif;padding:40px;text-align:center;color:#334\\">密碼錯誤或已取消，請重新整理再試。</body>"}}catch(e){}})();</script>')
+    write("site/i/map.html", render("internal", "/i/map.json", gate))
+    print("法拍地圖：公開", len(rows), "件；內部版 /i/map（含備註，無座標", miss, "件）")
+
 if __name__ == "__main__":
     for d in ("site/h", "site/area"): shutil.rmtree(d, ignore_errors=True)
     write("site/list.html", index_page(True))
-    urls = [("/", 1.0), ("/list", 0.9), ("/member", 0.5)]
+    urls = [("/", 1.0), ("/list", 0.9), ("/map", 0.9), ("/member", 0.5)]
+    map_files()
     for x in ITEMS:
         write(f'site/h/{x["編號"]}.html', detail_page(x)); urls.append((f'/h/{x["編號"]}', 0.8, lastmod(x)))
     ng, nr = write_gone({x["編號"] for x in ITEMS}); urls += GONE_URLS
@@ -1209,11 +1543,19 @@ if __name__ == "__main__":
             for t in TYPES:
                 if len(type_items(c, t[2])) >= 3:
                     write(f"site/{c[0]}-{t[0]}.html", type_page(c, t)); urls.append((f"/{c[0]}-{t[0]}", 0.8))
-    write("site/new.html", list_page("/new", "本週新增法拍屋", "最近 7 天新上架的法拍屋，含拍次、開標日期與底標價。", new_items())); urls.append(("/new", 0.8))
+    write("site/new.html", week_new_page()); urls.append(("/new", 0.8))
+    write("site/round3.html", round3_page()); urls.append(("/round3", 0.8))
+    write("site/delivery.html", delivery_page()); urls.append(("/delivery", 0.8))
+    TAGS = tag_pages(); urls += [(t[0], 0.6) for t in TAGS if t[1] >= 3] + [("/tag", 0.7)]
+    shutil.rmtree("site/topic", ignore_errors=True)
+    write("site/topic.html", topic_index()); urls.append(("/topic", 0.7))
+    for t in TOPICS:
+        write(f"site/topic/{t[0]}.html", topic_page(t)); urls.append((f"/topic/{t[0]}", 0.7))
     write("site/changes.html", list_page("/changes", "降價・降拍更新法拍屋", "最近 7 天價格下降或拍次往後的法拍屋。", changed_items())); urls.append(("/changes", 0.8))
     write("site/new-house.html", list_page("/new-house", "10年內新屋法拍屋", "屋齡 10 年以內的法拍屋，由新到舊排列，含拍次、開標日期與底標價。", sorted([x for x in ITEMS if _age(x) is not None and _age(x) <= 10], key=lambda x: (_age(x), date_key(x))))); urls.append(("/new-house", 0.8))
     write("site/fees.html", fees_page()); urls.append(("/fees", 0.8))
     write("site/about.html", about_page()); urls.append(("/about", 0.7))
+    write("site/cases.html", cases_page()); urls.append(("/cases", 0.6))
     write("site/promo.html", promo_page())
     if _today() <= PROMO_END: urls.append(("/promo", 0.8))
     write_learn(urls)
@@ -1222,10 +1564,13 @@ if __name__ == "__main__":
           "".join(f"<url><loc>{e(SITE + u[0])}</loc>" + (f"<lastmod>{u[2] if len(u) > 2 else day}</lastmod>" if len(u) < 3 or u[2] else "") + f"<priority>{u[1]}</priority></url>\n" for u in urls) + "</urlset>\n")
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
     write("site/llms.txt", f"# {NAME}\n\n> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交。資料每日更新（{UPDATED}）。\n\n"
-          f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n- [年前上車｜2 萬代標券]({SITE}/promo): 財欣不動產管理顧問有限公司活動，委託全程代標、得標收費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）23:59，加 LINE@ @635nftwk 領券\n"
+          f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n- [本週新增法拍屋]({SITE}/new): 最近 7 天新上架，依日期分區、雙北在前\n- [第三拍法拍屋・最後底價]({SITE}/round3): 第三拍以上物件\n- [點交法拍屋]({SITE}/delivery): 法院筆錄記載點交的物件\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
+          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
+          + "\n## 法拍知識主題\n" + "".join(f"- [法拍屋{t[1]}]({SITE}/topic/{t[0]}): {t[2]}\n" for t in TOPICS)
+          + "\n## 標籤集合頁（縣市）\n" + "".join(f"- [{t[2]}{t[3]}法拍屋]({SITE}{t[0]}): {t[1]}件\n" for t in TAGS if t[1] >= 3 and t[2] in _CITY_FULL.values())
+          + "\n## 社區法拍屋\n" + "".join(f"- [{g['name']}法拍屋]({SITE}/c/{slug(k)}): {len(g['cur'])}件待標\n" for k, g in sorted(community_groups().items()) if g["cur"])
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- LINE@：https://lin.ee/Y2bGSIB\n- 服務範圍：全台都有服務\n- {COMPANY}\n")
     write_home()
     write("site/post.html", post_page())
