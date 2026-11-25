@@ -11,6 +11,11 @@ async function letIn(env, next, why) {
   return new Response(null, { status: 302, headers: h });
 }
 
+// 2026-11-25 LINE 登入停用：回呼直接回首頁，不再寫入 KV（既有資料保留）
+export async function onRequestGet({ request }) {
+  return Response.redirect(new URL("/", request.url).toString(), 302);
+}
+/* 原回呼流程（停用保留）
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -66,3 +71,5 @@ export async function onRequestGet({ request, env }) {
   h.append("Set-Cookie", "tl=1; Path=/; Max-Age=31536000; Secure; SameSite=Lax");
   return new Response(null, { status: 302, headers: h });
 }
+
+*/
