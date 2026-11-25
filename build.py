@@ -53,6 +53,20 @@ for _x in D["104"]:
     except ValueError: continue
     if _d < _TODAY:
         _i["銷售狀態"] = "待確認"; _x["狀態"] = "開標日期已過・待確認"
+# 2026-11-26 Anna：流標照樣宣傳，寫「下一拍預估八折＋實際依法院公告為準」，不寫開標日（只有拍定、停拍、撤回才是下架頁）
+def _est80(s):
+    m = re.search(r"([\d.,]+)\s*萬", str(s or ""))
+    return f"{float(m[1].replace(',', '')) * 0.8:,.1f}".rstrip("0").rstrip(".") + "萬" if m else ""
+for _x in D["104"]:
+    _i = _x.get("資訊") or {}
+    if _i.get("銷售狀態") != "流標" and not _x.get("狀態", "").startswith("流標"): continue
+    if _i.get("開標日期"): _i["上次開標日期"] = _i.pop("開標日期")
+    _i["銷售狀態"] = "流標"
+    if _i.get("拍次") == "3":   # 第三拍流標先進公告應買（以第三拍底價），不是直接八折
+        _x["狀態"] = "第三拍流標・可能公告應買"; _x["_flow"] = re.sub(r"^售", "", _x.get("價格", "")); _x["_ying3"] = 1
+    else:
+        _x["狀態"] = "流標・下一拍預估八折"; _x["_flow"] = _est80(_x.get("價格"))
+def is_flow(x): return bool(x.get("_flow"))
 def _age(x):
     """屋齡（年）；預售屋視為 0；查無則回傳 None"""
     v = (x.get("資訊") or {}).get("屋齡", "")
@@ -557,7 +571,9 @@ def card(x):
     return (f'<a class="card" href="/h/{e(x["編號"])}" data-t="{e(text)}" data-c="{e(area_of(x)[:2])}" data-a="{e(area_of(x))}" data-y="{e(x["類型"])}" data-p="{price_num(x["價格"])}" data-r="{r}" data-d="{date_key(x)}" data-j="{e(dv)}" data-f="{first_price(x)}">'
             f'<div class="ch">{e(top)}</div><div class="cv">{img}{badge}</div>'
             f'<div class="b"><div class="m">{e(x["類型"])}｜{e(x["格局坪數"])}</div><h3>{e(x["地址"] if "號" in x["地址"] else inf.get("完整地址") or x["地址"])}</h3>'
-            f'<div class="pr"><span>底價</span><b>{old}{e(price)}</b></div></div></a>')
+            + ((f'<div class="pr"><span>可能公告應買</span><b>{e(x["_flow"])}</b></div><div class="m">第三拍流標・實際依法院公告為準</div></div></a>' if x.get("_ying3") else
+                f'<div class="pr"><span>下一拍預估（八折）</span><b>{e(x["_flow"])}</b></div><div class="m">上一拍底價 {e(price)}・實際依法院公告為準</div></div></a>') if is_flow(x) else
+               f'<div class="pr"><span>底價</span><b>{old}{e(price)}</b></div></div></a>'))
 
 def kv(rows):
     rows = [(k, v) for k, v in rows if v]
@@ -781,6 +797,10 @@ def detail_page(x):
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
     gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}" onerror="this.remove()">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
+    if is_flow(x) and x.get("_ying3"):
+        pr = (f'第三拍流標，可能進入公告應買 {e(x["_flow"])}<small style="display:block;font-size:14px;font-weight:400;line-height:1.6">（第三拍流標後通常先公告應買，以第三拍底價承買；應買期間與條件尚未公告，實際依法院公告為準）</small>')
+    elif is_flow(x):
+        pr = (f'下一拍預估 {e(x["_flow"])}<small style="display:block;font-size:14px;font-weight:400;line-height:1.6">（第{e(inf.get("拍次", ""))}拍底價 {e(re.sub("^售", "", x["價格"]))} 流標，八折估算；下一拍日期與底價尚未公告，實際依法院公告為準）</small>')
     tags = f'<span class="tag">{e(x["狀態"])}</span>' + (f'<span class="tag">第{e(inf["拍次"])}拍</span>' if inf.get("拍次") else "") + (f'<span class="tag">開標 {e(inf["開標日期"])}</span>' if inf.get("開標日期") else "")
     top = kv([("案號", inf.get("案號")), ("類型", x["類型"]), ("總登記坪數", inf.get("總登記坪數")), ("每坪單價", inf.get("每坪單價")), ("地址", addr), ("案名", x["地址"] if x["地址"] != addr else ""), ("地區", re.sub(r"-0房$", "", x["區域"])), ("物件編號", x["編號"])])
     det = kv([(k, inf.get(k)) for k in DETAIL_KEYS])

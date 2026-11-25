@@ -81,7 +81,8 @@ def apply(items, rows=None, today=None):
             cands = [r for r in cs if (not dist) or dist in r["addr"]] or ([r for r in cs] if len({r["addr"] for r in cs}) == 1 else [])
             if raw not in by_suf: cands = [r for r in cands if (c := core(r["addr"])) and c in title]   # 去掉金／法才對上時，要同門牌，避免不同年度同編號
         if not cands and dist:
-            cands = [r for r in rows_by_dist.get(dist[:3], []) if r["addr"].startswith(dist) and (c := core(r["addr"])) and len(c) >= 5 and c in title]
+            pool = [r for k3, rs in rows_by_dist.items() if k3.startswith(dist[:3]) for r in rs]   # 2026-11-26「平鎮」「新市」這類區名只有兩字時也要對得到「平鎮區」
+            cands = [r for r in pool if r["addr"].startswith(dist) and (c := core(r["addr"])) and len(c) >= 5 and c in title]
         if cands and _floor(x["地址"]): cands = [r for r in cands if _floor(r["addr"]) is None or _floor(r["addr"]) == _floor(x["地址"])]   # 同門牌不同樓層是不同物件，不可互相套用價格
         if not cands:
             stat["unmatched"] += 1; stat.setdefault("ids", []).append(x["編號"])

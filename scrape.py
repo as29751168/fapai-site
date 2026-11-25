@@ -115,6 +115,14 @@ if __name__ == "__main__":
         print("法院現場照新增", scrape_woo.court_sync(data["104"]), "件")
     except Exception as e:
         print("透明房訊同步失敗（略過）：", e)
+    # 2026-11-26 Anna：流標要照樣宣傳（下一拍預估八折），只有拍定、停拍、撤回才是下架頁。
+    # 透明房訊「待標」列表在流標後會拿掉物件 → 從 data/carry.json 把上次的物件補回來，交給公開開標清單判定
+    try: CARRY = json.load(open("data/carry.json", encoding="utf-8"))
+    except Exception: CARRY = {}
+    _cur = {x["編號"] for x in data["104"]}
+    for k, c in CARRY.items():
+        if k.startswith("HW") and k not in _cur and c.get("item"):
+            x = json.loads(json.dumps(c["item"], ensure_ascii=False)); x["_carry"] = 1; data["104"].append(x)
     try:  # 2026-11-19：停用 toro591（CLAUDE.md 禁用）。校正與開標結果都只用透明房訊公開的每日開標清單
         import scrape_public
         rows = scrape_public.collect()
@@ -138,6 +146,27 @@ if __name__ == "__main__":
             print("開標結果（透明房訊）", len(res), "筆")
     except Exception as e:
         print("公開資料校正失敗（略過）：", e)
+    def _od(x):
+        m = re.fullmatch(r"(\d+)/(\d+)/(\d+)", (x.get("資訊") or {}).get("開標日期", "") or (x.get("資訊") or {}).get("上次開標日期", ""))
+        try: return datetime.date(int(m[1]) + 1911, int(m[2]), int(m[3])) if m else None
+        except ValueError: return None
+    today = datetime.date.today(); kept, n_flow = [], 0
+    for x in data["104"]:
+        if not x.pop("_carry", None): kept.append(x); continue
+        c = CARRY.get(x["編號"], {}); d = _od(x)
+        if x.get("狀態", "").startswith("流標"): c["flow"] = c.get("flow") or str(today)
+        elif c.get("flow") and d and (today - d).days <= 180 and not x.get("狀態", "").startswith(("待標", "停拍")):   # 已知流標、清單 8 天後查不到：繼續當流標宣傳
+            x["狀態"] = "流標・待下一拍公告"; x.setdefault("資訊", {})["銷售狀態"] = "流標"
+        if x.get("狀態", "").startswith("流標") or (x.get("狀態", "").startswith("待標") and d and d >= today): kept.append(x); n_flow += 1
+    data["104"] = kept
+    print("流標補回（不當下架）：", n_flow, "件")
+    newc = {}
+    for x in data["104"]:
+        d = _od(x)   # 只記開標日已到（之後可能從待標列表消失）或已流標的物件，檔案才不會太大
+        if not x["編號"].startswith("HW") or not (x.get("狀態", "").startswith("流標") or (d and d <= today + datetime.timedelta(days=3))): continue
+        y = {k: v for k, v in x.items() if not k.startswith("_")}
+        newc[x["編號"]] = {"item": y, **({"flow": CARRY.get(x["編號"], {}).get("flow") or str(today)} if x.get("狀態", "").startswith("流標") else {})}
+    json.dump(newc, open("data/carry.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     # 2026-11-19：11/15 以前從 House-Info 抓的 HH 舊資料，逐欄換成透明房訊資料；透明房訊沒有的欄位留白，不沿用 House-Info
     KEEP = {"拍次", "開標日期", "銷售狀態", "法拍件", "完整地址"}   # 這幾欄由透明房訊公開開標清單每天校正
     hh_fix = 0
