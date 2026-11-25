@@ -2,7 +2,7 @@
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>法拍地圖｜台北・新北・桃園法拍屋地圖找屋（每日更新）｜Pitt &amp; Anna 104法拍網團隊</title>
-<meta name="description" content="在地圖上找法拍屋：門牌精準定位、拍次顏色一眼看懂、開標倒數、底價與每坪單價、附近捷運學校市場、3D 立體建物與航照。目前 1090 件，資料每日更新（2026-11-26 02:34）。">
+<meta name="description" content="在地圖上找法拍屋：門牌精準定位、拍次顏色一眼看懂、開標倒數、底價與每坪單價、附近捷運學校市場、3D 立體建物與航照。目前 1090 件，資料每日更新（2026-11-26 05:04）。">
 <link rel="canonical" href="https://tomin104.com/map">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Pitt &amp; Anna 104法拍網團隊">
 <meta property="og:title" content="法拍地圖｜看地圖找法拍屋"><meta property="og:description" content="門牌精準定位、拍次顏色、開標倒數、附近生活機能，資料每日更新。">
@@ -180,7 +180,7 @@ a{color:inherit;text-decoration:none}
    <div class="seg" id="base"><button data-b="map" class="on">地圖</button><button data-b="photo">航照</button><button data-b="3d">3D</button></div>
    <div class="seg"><button id="loc" title="我的位置">定位</button></div>
   </div>
-  <div class="upd">更新 2026-11-26 02:34・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
+  <div class="upd">更新 2026-11-26 05:04・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
   <section id="list">
    <div class="lh"><span>此範圍 <b id="lc">0</b> 件</span><button id="lt" type="button">收合</button></div>
    <div class="cards" id="cards"></div>
@@ -346,7 +346,7 @@ function hashF(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;
 addEventListener("hashchange",function(){F.ft=F.nw=F.dv=0;F.ar="";F.r=[];hashF();apply();fit()});
 if(new URLSearchParams(location.search).get("embed"))document.documentElement.classList.add("emb");
 function load(){
- fetch("/i/map.json?v=202611260234").then(function(r){return r.json()}).then(function(d){
+ fetch("/i/map.json?v=202611260504").then(function(r){return r.json()}).then(function(d){
   ALL=d.items;hashF();apply();if(location.hash.length>1)fit();
   var id=new URLSearchParams(location.search).get("id");var x=id&&ALL.find(function(y){return y.i===id});
   if(x){MAP.jumpTo({center:[x.x,x.q],zoom:15});open(x)}
