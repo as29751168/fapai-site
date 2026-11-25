@@ -64,7 +64,9 @@ def _order(x):
     if x.get("資訊", {}).get("銷售狀態") == "待確認": return (2, 0, 0)   # 開標日期已過、待確認者排最後
     a = _age(x)
     return (0, a, 0) if a is not None and a <= 10 else (1, 0, {"台北": 0, "新北": 1, "桃園": 2}.get(x["區域"][:2], 3))
-ITEMS = sorted(D["104"], key=_order)
+EXCL_CITY = ("金門", "澎湖", "連江")   # 2026-11-25 Anna：金門、澎湖都不用放
+EXCL_IDS = {x["編號"] for x in D["104"] if x.get("區域", "")[:2] in EXCL_CITY}
+ITEMS = sorted([x for x in D["104"] if x["編號"] not in EXCL_IDS], key=_order)
 UPDATED = D["更新時間"]
 try:
     P = json.load(open("site/photos.json", encoding="utf-8"))
@@ -108,7 +110,9 @@ def deliver_of(x):
     return "不點交" if v.startswith("不點交") else "點交" if v.startswith("點交") else ("其他" if v else "")
 
 def first_price(x):
-    m = re.search(r"底標價[：:]\s*([\d.,]+)\s*(億|萬)?", x.get("資訊", {}).get("拍賣紀錄", "").split("\n")[0])
+    ln = x.get("資訊", {}).get("拍賣紀錄", "").split("\n")[0]
+    if not re.match(r"第\s*(1|一)\s*拍", ln): return 0   # 2026-11-25 Anna：降幅算不出來就不顯示（只有本次拍次時會誤算成 0%）
+    m = re.search(r"底標價[：:]\s*([\d.,]+)\s*(億|萬)?", ln)
     return price_num(m.group(1) + (m.group(2) or "")) if m else 0
 
 def upcoming(days=7):
@@ -252,21 +256,21 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <meta property="og:type" content="website"><meta property="og:site_name" content="{e(NAME)}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:url" content="{e(url)}"><meta property="og:locale" content="zh_TW">{og_img}
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
-<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="/api/line-login?next=/">LINE 登入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
+<header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
 {pre}<main>{body}</main>
 <footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script></body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
-          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="/api/line-login?next=/">LINE 登入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
+          '<a href="/">首頁</a><a href="/list">物件列表</a><a href="/new">本週新增・降價</a><a href="/list#areas">各區法拍屋</a><a href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><a href="/member#ask">委託代標留言</a><a href="/fees">服務與收費</a><a href="/#faq">常見問題</a><a href="/learn">法拍小教室</a>'
           f'<a href="{LINKS["LINE 社群"]}" target="_blank" rel="noopener">加入 LINE 社群</a><a href="{LINKS["粉絲專頁"]}" target="_blank" rel="noopener">粉絲專頁</a></div></div>'
           '<script>(function(){var d=document.getElementById("dr");function t(v){d.classList.toggle("on",v)}document.getElementById("mb").onclick=function(){t(true)};document.getElementById("dx").onclick=function(){t(false)};d.querySelector(".bk").onclick=function(){t(false)};d.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){t(false)})})})()</script>')
 
-GATE_JS = """<script>(function(){try{if(document.cookie.indexOf('tl=1')>-1)return;var g=document.getElementById('g');if(!g||g.children.length<=12)return;g.classList.add('gate');var d=document.createElement('div');d.className='gb';d.innerHTML='<b>登入 LINE，看全部物件</b><span>免費，約 10 秒完成。請先加入官方帳號。目前顯示前 12 筆。</span><a class="btn line" href="/api/line-login?next=/%23list">LINE 登入</a><a class="btn line" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">加入官方帳號</a>';g.parentNode.insertBefore(d,g);function lock(){var n=0;[].forEach.call(g.children,function(c){if(c.style.display==='none'){c.classList.remove('lk');return}n++;if(n>12)c.classList.add('lk');else c.classList.remove('lk')})}lock();['input','click','change'].forEach(function(ev){document.addEventListener(ev,function(){setTimeout(lock,50)},true)});setTimeout(lock,300)}catch(e){}})()</script>"""
+GATE_JS = ""   # 2026-11-25 LINE 登入停用，列表不再遮住第 13 筆以後
 
 def member_page():
     body = ('<h1>會員專區・委託代標留言</h1>'
             '<section class="box"><h2>會員登入／註冊</h2><p>會員可收藏物件、接收每週新案通知與降價提醒。請用 LINE 加入官方好友，我們為您建立會員資料，並用 LINE 推送新案與降價提醒。</p>'
-            f'<p><a class="btn line" href="/api/line-login?next=/member">LINE 登入</a><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">加入 LINE 官方好友</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
+            f'<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE@加入</a><a class="btn line" href="{e(LINKS["LINE 社群"])}" target="_blank" rel="noopener">加入 LINE 社群</a> <a class="btn" href="tel:0918313888">電話洽詢 黃先生 Pitt</a></p></section>'
             '<section class="box" id="ask"><h2>委託代標・物件諮詢留言</h2><p>留下需求，我們會盡快與您聯絡。</p><form class="mf" id="mf">'
             '<label>姓名</label><input id="mn" required autocomplete="name"><label>聯絡電話</label><input id="mp" type="tel" required autocomplete="tel">'
             '<label>想了解的物件（案號／地址，可留空）</label><input id="mo"><label>需求</label><select id="mt"><option>委託代標</option><option>產權調查／不點交處理</option><option>貸款諮詢</option><option>其他</option></select>'
@@ -328,11 +332,11 @@ def verify_box(addr, notes):
     """凶宅與點交查證：只寫筆錄裡有的字，查不到就照實說查不到。"""
     m = re.search(r"點交情形→([^●\n]+)", notes or "")
     dv = m.group(1).strip()[:120] if m else ""
-    h = _haunt_lines(notes)
-    rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。"),
-            ("非自然死亡", ("筆錄原文：" + "／".join(h) + "。查不到不等於沒有，投標前請向管委會確認。") if h else "法院筆錄未提到非自然死亡。查不到不等於沒有，投標前請向管委會確認。"),
-            ("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。")]
-    return (f'<section class="box" id="verify"><h2>{e(addr)}凶宅與點交查證</h2>' + kv(rows)
+    pos = _haunt_positive(notes)   # 2026-11-25 Anna：只有筆錄肯定記載才顯示這一列；否定句（載明無）不算
+    rows = [("點交", f"法院筆錄記載：{dv}" if dv else "筆錄未載明點交情形，以法院拍賣公告為準。")]
+    if pos: rows.append(("非自然死亡", "筆錄原文：" + "／".join(s[:160] for s in pos[:2])))
+    rows.append(("查證依據", f"法院筆錄與拍賣公告（資料更新 {UPDATED}）；以法院最新公告為準。"))
+    return (f'<section class="box" id="verify"><h2>{e(addr)}{"凶宅與點交查證" if pos else "點交查證"}</h2>' + kv(rows)
             + '</section>')   # 11/24 Anna：拿掉台灣凶宅網等外站連結
 
 def map_query(x):
@@ -428,8 +432,7 @@ def community_page(key, g):
         m = re.search(r"點交情形→([^●\n]+)", notes); h = _haunt_lines(notes)
         vrows += (f'<tr><td><a href="/h/{e(x["編號"])}">{e(inf.get("完整地址") or x["地址"])}</a></td><td>{e(("第%d拍" % round_of(x)) if round_of(x) else "")} {e(inf.get("開標日期", ""))}</td>'
                   f'<td>{e(re.sub(r"^售", "", x["價格"]))}</td><td>{e(m.group(1).strip()[:60] if m else "筆錄未載明")}</td><td>{e(("筆錄原文：" + "／".join(h)) if h else ("法院筆錄未提到非自然死亡" if notes else "沒有筆錄資料"))}</td></tr>')
-    vsec = (f'<section class="box" id="verify"><h2>{e(name)}凶宅與點交查證</h2><div style="overflow-x:auto"><table class="tbl"><tr><th>地址</th><th>拍次／開標</th><th>底價</th><th>點交（法院筆錄）</th><th>非自然死亡（法院筆錄）</th></tr>{vrows}</table></div>'
-            '<p>以上只照法院筆錄原文整理。查不到不等於沒有，投標前請向管委會確認。</p></section>') if cur else ""
+    vsec = ""   # 2026-11-25 Anna：不另外整理凶宅、點交判斷，以物件頁的法院筆錄全文為準
     prow = "".join(f'<tr><td>{e(v.get("gone", ""))}</td><td><a href="/h/{e(k)}">{e(v.get("addr", ""))}</a></td><td>{e(("第%s拍" % v["rd"]) if v.get("rd") else "")}</td><td>{e(re.sub(r"^售", "", v.get("ptxt", "")))}</td></tr>'
                    for k, v in sorted(past, key=lambda t: t[1].get("gone", ""), reverse=True))
     psec = (f'<section class="box"><h2>{e(name)}近半年已下架的法拍物件</h2><table class="tbl"><tr><th>下架日期</th><th>物件</th><th>最後拍次</th><th>最後底價</th></tr>{prow}</table>'
@@ -503,8 +506,7 @@ def detail_page(x):
             + (f"，第{inf['拍次']}拍" if inf.get("拍次") else "") + (f"，開標日期 {inf['開標日期']}" if inf.get("開標日期") else "")
             + "。以下整理法院公告的拍賣紀錄、筆錄與點交情形，實際內容以法院公告為準。") if (comm or rd) else ""
     _dv = deliver_of(x)
-    vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else "")
-             + ("凶宅查證：" + ("法院筆錄有相關記載，原文見頁內。" if _haunt_positive(notes) else ("法院筆錄載明無非自然死亡相關資料（查不到不等於沒有）。" if _haunt_lines(notes) else "法院筆錄未提到非自然死亡（查不到不等於沒有）。")) if notes else ""))
+    vline = ((f"點交情形：{_dv}。" if _dv in ("點交", "不點交") else ""))
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
@@ -522,7 +524,6 @@ def detail_page(x):
             rows.append(f"<tr><td>{e(m.group(1))}</td><td>{e(m.group(2) or '')}</td><td>{e(m.group(3))}</td></tr>" if m else f'<tr><td colspan="3">{e(ln)}</td></tr>')
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
     nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
-    nsec += verify_box((comm + " " if comm else "") + addr, notes)
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
@@ -813,6 +814,7 @@ CITIES = [
     ("kinmen", "金門", ["金門"], "金門法拍屋", "金門縣"),
     ("greater-taipei", "大台北", ["台北", "新北", "基隆"], "大台北法拍屋", "台北、新北、基隆"),
 ]
+ALL_CITY_SLUGS = [c[0] for c in CITIES]
 CITIES = [c for c in CITIES if any(x["區域"][:2] in c[2] for x in ITEMS)]   # 沒有物件的縣市不產生空頁
 
 def city_faq(kw, scope):
@@ -966,7 +968,10 @@ def write_gone(cur_ids, keep_days=365):   # 2026-11-21 Google 建議轉址與舊
     try: seen = json.load(open("data/seen.json", encoding="utf-8"))
     except Exception: return 0, 0
     red, n = [], 0
+    for k in EXCL_IDS - set(seen): red.append(f'/h/{k} / 301')
     for k, v in seen.items():
+        if k in EXCL_IDS or str(v.get("area", ""))[:2] in EXCL_CITY:
+            red.append(f'/h/{k} / 301'); continue   # 金門、澎湖、連江：轉首頁，不留 404
         if k in cur_ids or not v.get("addr"): continue
         if v.get("twin") in cur_ids:
             red.append(f'/h/{k} /h/{v["twin"]} 301'); continue
@@ -984,7 +989,9 @@ def lastmod(x):
     d = max(x.get("新增日") or "", x.get("異動日") or "")
     return d if re.fullmatch(r"\d{4}-\d{2}-\d{2}", d) else ""
 
+WRITTEN = set()
 def write(path, s):
+    WRITTEN.add(os.path.normpath(path))
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     open(path, "w", encoding="utf-8").write(s)
 
@@ -1224,5 +1231,14 @@ if __name__ == "__main__":
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
     write("site/member.html", member_page())
+    # 2026-11-25 舊的縣市／類型頁（這次沒產生的）刪掉，301 到該縣市頁或首頁，避免留著舊品牌、舊按鈕
+    live_c = {c[0] for c in CITIES}; red = []
+    for fn in sorted(os.listdir("site")):
+        stem = fn[:-5] if fn.endswith(".html") else ""
+        base = next((c for c in sorted(ALL_CITY_SLUGS, key=len, reverse=True) if stem == c or stem.startswith(c + "-")), None)
+        if not base or os.path.normpath("site/" + fn) in WRITTEN: continue
+        os.remove("site/" + fn); red.append(f"/{stem} " + (f"/{base}" if base in live_c else "/") + " 301")
+    if red: open("site/_redirects", "a", encoding="utf-8").write("".join(r + "\n" for r in red))
+    print("舊縣市／類型頁轉址:", len(red))
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/list">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls), "已下架頁:", ng, "轉址:", nr)
