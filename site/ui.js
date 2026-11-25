@@ -34,7 +34,8 @@
       if (days >= 0) tag(cv, 'l', days === 0 ? '今天開標' : '還有 ' + days + ' 天開標');
     }
     var f = +D.f, p = +D.p;
-    if (f && p && p < f) tag(cv, 'r', '較首拍降 ' + Math.round((1 - p / f) * 100) + '%');
+    var pct = f && p ? Math.round((1 - p / f) * 100) : 0;   // 2026-11-25：算不出來或 ≤0% 不顯示，也不顯示首拍金額
+    if (pct > 0) tag(cv, 'r', '較首拍降 ' + pct + '%');
     var id = c.getAttribute('href').split('/').pop().replace('.html', '');
     var b = document.createElement('button'); b.type = 'button'; b.className = 'fv'; b.setAttribute('aria-label', '收藏');
     b.addEventListener('click', function (e) {
