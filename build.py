@@ -132,6 +132,14 @@ def og_pick(ph):
     for u in ph[:4]:
         if og_dims(u): return u
     return SITE + "/og.jpg"
+PHOTO_DEAD = []
+def live_photos(ph):
+    """第一張讀得到就照原樣（個別失效由瀏覽器移除）；第一張失效就逐張檢查，只留還讀得到的透明房訊照片"""
+    if not ph or og_dims(ph[0]): return ph
+    og_prefetch(ph)
+    return [u for u in ph if u in OG_DIMS]
+NOPHOTO = '<div class="noimg">照片整理中，歡迎 LINE@ 詢問</div>'
+GAL_FB = "var g=this.parentNode;this.remove();if(g&&!g.querySelector('img'))g.outerHTML='<div class=noimg>照片整理中，歡迎 LINE@ 詢問</div>'"
 
 def e(s): return html.escape(str(s if s is not None else ""), quote=True)
 def jd(o): return json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
@@ -824,7 +832,8 @@ def utm(path, source, medium="", campaign="", content=""):
 def detail_page(x):
     inf = dict(x.get("資訊", {}))
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
-    ph = photos(x)
+    ph_all = photos(x); ph = live_photos(ph_all)
+    if ph_all and not ph: PHOTO_DEAD.append({"編號": x["編號"], "地址": x["地址"], "區域": x.get("區域", ""), "拍次": inf.get("拍次", ""), "開標日期": inf.get("開標日期", ""), "照片數": len(ph_all)})
     area = area_of(x)
     addr = inf.get("完整地址") or x["地址"]
     comm = community_of(x)
@@ -842,7 +851,7 @@ def detail_page(x):
     desc = (f'{comm}法拍屋，' if comm else "") + (f'{addr}法拍屋，{area}{x["類型"]}，{x["地址"]}，{x["格局坪數"]}，{x["價格"]}。'
             + (f'案號{inf["案號"]}，' if inf.get("案號") else "") + (f'第{inf["拍次"]}拍，' if inf.get("拍次") else "")
             + (f'開標日期{inf["開標日期"]}。' if inf.get("開標日期") else "") + vline + "提供代標、產權調查、貸款諮詢。")
-    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}" onerror="this.remove()">' for i, u in enumerate(ph)) + "</div>") if ph else '<div class="noimg">照片請洽業務</div>'
+    gal = ('<div class="gal">' + "".join(f'<img {"fetchpriority=high " if i==0 else "loading=lazy "}src="{e(u)}" alt="{e((comm + " ") if comm else "")}{e(addr)} 法拍屋照片{i+1}" onerror="{e(GAL_FB)}">' for i, u in enumerate(ph)) + "</div>") if ph else (NOPHOTO if ph_all else '<div class="noimg">照片請洽業務</div>')
     pr = (f'<s>{e(x["原價"])}</s>' if x["原價"] else "") + e(x["價格"])
     if is_flow(x) and x.get("_ying3"):
         pr = (f'第三拍流標，可能進入公告應買 {e(x["_flow"])}<small style="display:block;font-size:14px;font-weight:400;line-height:1.6">（第三拍流標後通常先公告應買，以第三拍底價承買；應買期間與條件尚未公告，實際依法院公告為準）</small>')
@@ -1613,4 +1622,6 @@ if __name__ == "__main__":
     print("pages:", len(urls), "已下架頁:", ng, "轉址:", nr)
     os.makedirs("data", exist_ok=True)
     json.dump(OG_DIMS, open("data/og_dims.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    json.dump(PHOTO_DEAD, open("data/photo_dead.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("照片全部失效：", len(PHOTO_DEAD), "件（清單 data/photo_dead.json）")
     print("og 圖尺寸：", len(OG_DIMS), "張（本次新查", OG_NEW[0], "）")
