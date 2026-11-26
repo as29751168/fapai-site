@@ -1,5 +1,5 @@
 """每日同步：透明房訊(104woo.com.tw)林小姐 Anna 的物件 -> 照片 site/photos.json，並補上 104法拍網列表沒有的物件"""
-import json, re, time, datetime, urllib.request, urllib.parse, html as H
+import json, re, time, datetime, urllib.request, urllib.error, urllib.parse, html as H
 
 MOBILE = "0986678928"
 BASE = "https://www.104woo.com.tw"
@@ -18,13 +18,55 @@ def post_items(city):
             time.sleep(3)
     return []
 
-def get_text(path):
-    try:
-        h = urllib.request.urlopen(urllib.request.Request(BASE + path, headers={"User-Agent": UA["User-Agent"]}), timeout=40).read().decode("utf-8", "ignore")
-    except Exception:
-        return ""
+BLOCKED = []   # 透明房訊回 403（短時間開太多頁被擋）後，這次執行就不再開物件頁，改用 data/detail.json
+
+def get_text(path, tries=2):
+    # 2026-11-27：每天一次開近千個物件頁，約 90 頁後透明房訊回 403，後面的坪數、屋齡、筆錄就全空。
+    # 改成：被擋就停（不硬重試），逾時才重試一次。
+    if BLOCKED: return ""
+    h = ""
+    for i in range(tries):
+        try:
+            h = urllib.request.urlopen(urllib.request.Request(BASE + path, headers={"User-Agent": UA["User-Agent"]}), timeout=40).read().decode("utf-8", "ignore")
+            break
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 429): BLOCKED.append(path); print("透明房訊回", e.code, "，這次不再開物件頁：", path); return ""
+            h = ""
+        except Exception:
+            h = ""
+        if i < tries - 1: time.sleep(5)
+    if not h: return ""
     h = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", h, flags=re.S)
     return re.sub(r"[ \t\r　]+", " ", H.unescape(re.sub(r"<[^>]+>", "\n", h)))
+
+# 2026-11-27：每天同步都是從零重建物件，當天物件頁抓不到時坪數、屋齡、筆錄就會變空白。
+# 抓到的詳細欄位存進 data/detail.json，下次抓不到就沿用上次透明房訊原文的值（抓得到一律用新的）。
+DETAIL_F = "data/detail.json"
+DETAIL_KEYS = ("總登記坪數", "屋齡", "所在樓層", "案號", "主建物", "附屬建物", "公共設施", "土地登記總坪數", "筆錄")
+MASKED_NAME = re.compile(r"[一-鿿](?:[O○〇＊*ＯΟО]{2}|[O○〇＊*ＯΟО](?![A-Za-z])[一-鿿]?|０{2}(?![０-９]))")   # 與 scrape.py 相同：存檔前先隱去遮罩姓名
+try: DETAIL = json.load(open(DETAIL_F, encoding="utf-8"))
+except Exception: DETAIL = {}
+DETAIL_STAT = {"沿用": 0, "仍缺": 0, "開頁": 0}
+
+def detail_key(c):   # 拍次、開標日、底價都沒變 → 公告沒換，物件頁不用重開
+    return f'{c.get("BID_COUNT") or ""}|{c.get("BID_DATE") or ""}|{c.get("TOTAL_PRICE") or ""}'
+
+def detail_fresh(c):
+    v = DETAIL.get(f"HW{c['NO']}") or {}
+    return v.get("_key") == detail_key(c) and all(v.get(k) for k in ("總登記坪數", "屋齡", "筆錄"))
+
+def detail_fill(no, info, key=""):
+    old = DETAIL.get(no, {}); used = False
+    for k in DETAIL_KEYS:
+        if not info.get(k) and old.get(k): info[k] = old[k]; used = True
+    if used: DETAIL_STAT["沿用"] += 1
+    if not all(info.get(k) for k in ("總登記坪數", "屋齡", "筆錄")): DETAIL_STAT["仍缺"] += 1
+    keep = {k: (MASKED_NAME.sub("（姓名已隱去）", info[k]) if k == "筆錄" else info[k]) for k in DETAIL_KEYS if info.get(k)}
+    if keep: DETAIL[no] = {**keep, "_key": key}
+
+def detail_save():
+    json.dump(DETAIL, open(DETAIL_F, "w", encoding="utf-8"), ensure_ascii=False, indent=0, sort_keys=True)
+    print("物件詳細欄位：開頁", DETAIL_STAT["開頁"], "次；沿用上次", DETAIL_STAT["沿用"], "件；三欄仍缺", DETAIL_STAT["仍缺"], "件；存檔", len(DETAIL), "件", "（被擋）" if BLOCKED else "")
 
 def norm(s): return re.sub(r"[\s　]|<[^>]*>", "", s or "")
 
@@ -105,7 +147,9 @@ def to_item(c):
     a = c.get("ADDRESS") or ""
     parts = t.rsplit(" ", 1)
     if len(parts) == 2 and parts[1] == a and a in parts[0]: t = parts[0].strip()
-    d = get_text(f"/Sales/{MOBILE}/{c['NO']}")
+    if detail_fresh(c): d = ""   # 已存好且公告沒換 → 不開頁，直接沿用 data/detail.json
+    else:
+        d = get_text(f"/Sales/{MOBILE}/{c['NO']}"); DETAIL_STAT["開頁"] += 1; time.sleep(1.5)
     g = lambda pat: (re.search(pat, d) or [None, ""])[1]
     total = g(r"總坪數\s*([\d.]+)"); age = g(r"屋齡\s*(\d+)"); fl = g(r"(\d+/\d+)樓"); dj = g(r"●點交情形→([^●\n]+)●")
     bid = c.get("BID_DATE") or ""
@@ -128,6 +172,9 @@ def to_item(c):
     fn = full_notes(d)
     if fn: info["筆錄"] = fn
     elif dj: info["筆錄"] = f"●點交情形→{dj}●"
+    detail_fill(f"HW{c['NO']}", info, detail_key(c) if d else (DETAIL.get(f"HW{c['NO']}") or {}).get("_key", ""))
+    total = (info.get("總登記坪數") or "").removesuffix("坪")
+    if total and pv and "每坪單價" not in info: info["每坪單價"] = f"{pv / float(total):.2f}萬/坪"
     if bm and rnd and pv: info["拍賣紀錄"] = f"第{rnd}拍 {int(bm[2]):02d}/{int(bm[3]):02d} 底標價：{pv:g} 萬"
     typ = c.get("TYPE") or ""
     return {"來源": "透明房訊", "編號": f"HW{c['NO']}", "地址": t, "區域": f"{city}{dist}-{typ}", "類型": typ,
@@ -161,12 +208,12 @@ def sync(items):
                 pl = photo_list(c)
                 if pl and P.get(key) != pl: P[key] = pl; pics += 1
                 continue
-            if hit["編號"].startswith("HW"):   # 自家物件：每次重抓完整筆錄
+            if hit["編號"].startswith("HW") and not detail_fresh(c):   # 自家物件：公告換了才重抓完整筆錄
                 try:
                     fn = full_notes(get_text(f"/Sales/{MOBILE}/{c['NO']}"))
                     if fn: hit["資訊"]["筆錄"] = fn
                 except Exception: pass
-                time.sleep(0.3)
+                time.sleep(1.5)
         else:
             x = to_item(c); items.append(x); key = x["編號"][2:]; extra += 1; time.sleep(0.3)
             ho = ho_ghost.get((cty, ft)) or next((k for k, v in ho_seen if len(s) >= 5 and v.get("area", "")[:2] == cty and s in norm(v.get("addr"))), None)
@@ -192,6 +239,8 @@ def sync(items):
     except Exception as e:
         print("他人物件照片同步失敗（略過）：", e)
     json.dump(P, open("site/photos.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    try: detail_save()
+    except Exception as e: print("detail.json 存檔失敗（略過）：", e)
     return items, pics, extra
 
 

@@ -100,6 +100,13 @@ def apply(items, rows=None, today=None):
             inf["拍次"] = re.sub(r"拍", "", r["round"]); inf["開標日期"] = f"{r['date'].year - 1911}/{r['date'].month}/{r['date'].day}"
             if r["base"]:
                 x["價格"] = "售" + r["base"]; inf["銷售狀態"] = "待標中"
+                # 2026-11-27：拍賣紀錄要和售價一致（原本售價改成公開清單 655.2 萬，拍賣紀錄還留 656 萬）
+                bv = re.search(r"[\d.]+", r["base"])
+                if bv and (not inf.get("拍賣紀錄") or inf["拍賣紀錄"].startswith("第")):
+                    rest = inf.get("拍賣紀錄", "").split("\n")[1:]
+                    inf["拍賣紀錄"] = "\n".join([f'第{inf["拍次"]}拍 {r["date"].month:02d}/{r["date"].day:02d} 底標價：{float(bv.group(0)):g} 萬'] + rest)
+                    tp = re.match(r"[\d.]+", inf.get("總登記坪數", ""))
+                    if tp and float(tp.group(0)) > 0: inf["每坪單價"] = f"{float(bv.group(0)) / float(tp.group(0)):.2f}萬/坪"
             x["狀態"] = "待標中"; stat["updated"] += 1; kept.append(x); continue
         if st in ("得標", "拍定", "承受") or st.startswith("撤"):
             stat["removed"] += 1   # 已拍定或撤回：不再顯示（11/19 Anna：拍定直接下架）
