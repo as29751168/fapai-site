@@ -1,6 +1,6 @@
 # Pitt & Anna 104法拍網團隊
 
-> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交。資料每日更新（2026-11-26 05:04）。
+> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、得標後點交處理。資料每日更新（2026-11-26 13:30）。
 
 ## 主要頁面
 - [物件列表](https://tomin104.com/list): 全部法拍屋物件與搜尋
@@ -36,7 +36,7 @@
 - [台中北區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8C%97%E5%8D%80): 9筆
 - [台中北屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8C%97%E5%B1%AF%E5%8D%80): 16筆
 - [台中南區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%8D%80): 10筆
-- [台中南屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%B1%AF%E5%8D%80): 11筆
+- [台中南屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%8D%97%E5%B1%AF%E5%8D%80): 9筆
 - [台中后里區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%90%8E%E9%87%8C%E5%8D%80): 2筆
 - [台中外埔區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%A4%96%E5%9F%94%E5%8D%80): 1筆
 - [台中大甲區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E5%A4%A7%E7%94%B2%E5%8D%80): 2筆
@@ -54,7 +54,7 @@
 - [台中烏日區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E7%83%8F%E6%97%A5%E5%8D%80): 3筆
 - [台中石岡區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E7%9F%B3%E5%B2%A1%E5%8D%80): 2筆
 - [台中神岡區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E7%A5%9E%E5%B2%A1%E5%8D%80): 3筆
-- [台中西區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%A5%BF%E5%8D%80): 11筆
+- [台中西區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%A5%BF%E5%8D%80): 9筆
 - [台中西屯區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%A5%BF%E5%B1%AF%E5%8D%80): 20筆
 - [台中豐原區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E8%B1%90%E5%8E%9F%E5%8D%80): 2筆
 - [台中霧峰區法拍屋](https://tomin104.com/area/%E5%8F%B0%E4%B8%AD%E9%9C%A7%E5%B3%B0%E5%8D%80): 1筆
@@ -136,7 +136,7 @@
 - [屏東九如鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E4%B9%9D%E5%A6%82%E9%84%89): 2筆
 - [屏東佳冬鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E4%BD%B3%E5%86%AC%E9%84%89): 2筆
 - [屏東內埔鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%85%A7%E5%9F%94%E9%84%89): 3筆
-- [屏東屏東市法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%B1%8F%E6%9D%B1%E5%B8%82): 11筆
+- [屏東屏東市法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E5%B1%8F%E6%9D%B1%E5%B8%82): 10筆
 - [屏東恆春鎮法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%81%86%E6%98%A5%E9%8E%AE): 5筆
 - [屏東新園鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%96%B0%E5%9C%92%E9%84%89): 3筆
 - [屏東枋寮鄉法拍屋](https://tomin104.com/area/%E5%B1%8F%E6%9D%B1%E6%9E%8B%E5%AF%AE%E9%84%89): 1筆
@@ -155,14 +155,14 @@
 - [彰化員林市法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%93%A1%E6%9E%97%E5%B8%82): 6筆
 - [彰化埔心鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%9F%94%E5%BF%83%E9%84%89): 1筆
 - [彰化埔鹽鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%9F%94%E9%B9%BD%E9%84%89): 2筆
-- [彰化埤頭鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%9F%A4%E9%A0%AD%E9%84%89): 3筆
+- [彰化埤頭鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%9F%A4%E9%A0%AD%E9%84%89): 4筆
 - [彰化大村鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%A4%A7%E6%9D%91%E9%84%89): 1筆
 - [彰化彰化市法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E5%BD%B0%E5%8C%96%E5%B8%82): 1筆
 - [彰化永靖鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E6%B0%B8%E9%9D%96%E9%84%89): 1筆
 - [彰化溪州鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E6%BA%AA%E5%B7%9E%E9%84%89): 3筆
 - [彰化溪湖鎮法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E6%BA%AA%E6%B9%96%E9%8E%AE): 1筆
 - [彰化田中鎮法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%94%B0%E4%B8%AD%E9%8E%AE): 3筆
-- [彰化田尾鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%94%B0%E5%B0%BE%E9%84%89): 2筆
+- [彰化田尾鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%94%B0%E5%B0%BE%E9%84%89): 1筆
 - [彰化福興鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%A6%8F%E8%88%88%E9%84%89): 2筆
 - [彰化秀水鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%A7%80%E6%B0%B4%E9%84%89): 2筆
 - [彰化竹塘鄉法拍屋](https://tomin104.com/area/%E5%BD%B0%E5%8C%96%E7%AB%B9%E5%A1%98%E9%84%89): 2筆
@@ -185,13 +185,13 @@
 - [新北永和區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B0%B8%E5%92%8C%E5%8D%80): 7筆
 - [新北汐止區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B1%90%E6%AD%A2%E5%8D%80): 9筆
 - [新北泰山區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B3%B0%E5%B1%B1%E5%8D%80): 1筆
-- [新北淡水區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B7%A1%E6%B0%B4%E5%8D%80): 16筆
+- [新北淡水區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E6%B7%A1%E6%B0%B4%E5%8D%80): 15筆
 - [新北瑞芳區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E7%91%9E%E8%8A%B3%E5%8D%80): 2筆
 - [新北石門區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E7%9F%B3%E9%96%80%E5%8D%80): 1筆
 - [新北萬里區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E8%90%AC%E9%87%8C%E5%8D%80): 5筆
 - [新北蘆洲區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E8%98%86%E6%B4%B2%E5%8D%80): 4筆
 - [新北鶯歌區法拍屋](https://tomin104.com/area/%E6%96%B0%E5%8C%97%E9%B6%AF%E6%AD%8C%E5%8D%80): 5筆
-- [新竹法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9): 20筆
+- [新竹法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9): 19筆
 - [新竹新埔鎮法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E6%96%B0%E5%9F%94%E9%8E%AE): 2筆
 - [新竹新豐鄉法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E6%96%B0%E8%B1%90%E9%84%89): 2筆
 - [新竹湖口鄉法拍屋](https://tomin104.com/area/%E6%96%B0%E7%AB%B9%E6%B9%96%E5%8F%A3%E9%84%89): 8筆
@@ -253,7 +253,7 @@
 - [高雄大寮區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%A4%A7%E5%AF%AE%E5%8D%80): 10筆
 - [高雄小港區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%B0%8F%E6%B8%AF%E5%8D%80): 3筆
 - [高雄岡山區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%B2%A1%E5%B1%B1%E5%8D%80): 4筆
-- [高雄左營區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%B7%A6%E7%87%9F%E5%8D%80): 7筆
+- [高雄左營區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%B7%A6%E7%87%9F%E5%8D%80): 6筆
 - [高雄彌陀區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E5%BD%8C%E9%99%80%E5%8D%80): 1筆
 - [高雄新興區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%96%B0%E8%88%88%E5%8D%80): 5筆
 - [高雄林園區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E6%9E%97%E5%9C%92%E5%8D%80): 8筆
@@ -268,12 +268,12 @@
 - [高雄路竹區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E8%B7%AF%E7%AB%B9%E5%8D%80): 1筆
 - [高雄阿蓮區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%98%BF%E8%93%AE%E5%8D%80): 3筆
 - [高雄鳥松區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%B3%A5%E6%9D%BE%E5%8D%80): 3筆
-- [高雄鳳山區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%B3%B3%E5%B1%B1%E5%8D%80): 16筆
+- [高雄鳳山區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%B3%B3%E5%B1%B1%E5%8D%80): 15筆
 - [高雄鹽埕區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%B9%BD%E5%9F%95%E5%8D%80): 3筆
 - [高雄鼓山區法拍屋](https://tomin104.com/area/%E9%AB%98%E9%9B%84%E9%BC%93%E5%B1%B1%E5%8D%80): 5筆
 
 ## 服務與收費
-- [服務與收費](https://tomin104.com/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議
+- [服務與收費](https://tomin104.com/fees): 全程代標費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚
 - [購屋流程](https://tomin104.com/process): 法拍屋 9 個步驟
 - [關於我們](https://tomin104.com/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問
 
@@ -286,7 +286,7 @@
 - [法拍屋得標後多久能交屋？](https://tomin104.com/learn/how-long-to-move-in): 點交物件走司法程序，從拍定到交屋通常要幾個月；不點交則取決於與占用人協商，時間難以預估。
 - [法拍屋為什麼會不點交？常見原因整理](https://tomin104.com/learn/why-not-delivered): 公告載明不點交，代表法院不負責把房子交到你手上。先弄清楚原因，再決定值不值得標。
 - [投標保證金少一塊錢會怎樣？](https://tomin104.com/learn/deposit-invalid): 保證金金額不足，或本票、印章有瑕疵，投標就會被判無效，出價再高也沒用。
-- [法拍屋代標費用怎麼算？三種方案、收費與服務內容](https://tomin104.com/learn/proxy-bid-process): 透明房訊提供三種委託方式：只聲請點交、包辦點交、全程代標。依你在哪個階段需要協助來選。
+- [法拍屋代標費用怎麼算？收費與服務內容](https://tomin104.com/learn/proxy-bid-process): 全程代標從投標前到交屋全程處理，費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚。
 - [法拍屋貸款怎麼買？代墊款、成數與利率一次看懂](https://tomin104.com/learn/auction-loan-and-advance): 法拍屋得標後要在期限內繳清尾款，一般貸款來不及撥款，所以要先用代墊款，過戶後再轉成一般房貸。
 - [法拍屋得標後要繳什麼？稅費與隱藏成本清單](https://tomin104.com/learn/auction-costs-after-winning): 法拍屋的拍定價不是總成本，得標後還有稅費、代墊利息、管理費和修繕預算，投標前先算進去才不會超支。
 - [法拍屋凶宅怎麼查？筆錄、凶宅網、管委會 3 步驟](https://tomin104.com/learn/haunted-house-check): 法拍屋多半不能進屋看，是不是凶宅要自己查清楚。法拍買受人對物的瑕疵沒有擔保請求權（強制執行法第 69 條），標到才發現很難救濟，所以投標前就要查。
@@ -339,7 +339,7 @@
 - [法拍屋拍次、八折與公告應買](https://tomin104.com/topic/rounds): 法拍屋每流標一次，下一拍底價通常再降，第三拍之後是公告應買。
 - [法拍屋優先購買權](https://tomin104.com/topic/priority): 有優先購買權的人可以用得標價把房子買走，投標前要先知道這件誰有權利。
 - [法拍屋凶宅怎麼查](https://tomin104.com/topic/haunted): 法拍屋是不是凶宅，先看法院筆錄，再向管委會確認。
-- [法拍屋代標流程與費用](https://tomin104.com/topic/proxy): 從看懂公告、評估總成本、投標到點交，可以全程委託，也可以只委託點交。
+- [法拍屋代標流程與費用](https://tomin104.com/topic/proxy): 從看懂公告、評估總成本、投標到點交，可以全程委託。
 
 ## 標籤集合頁（縣市）
 - [南投縣第一拍法拍屋](https://tomin104.com/tag/%E5%8D%97%E6%8A%95%E7%B8%A3/round1): 5件
@@ -347,32 +347,32 @@
 - [南投縣第三拍以上法拍屋](https://tomin104.com/tag/%E5%8D%97%E6%8A%95%E7%B8%A3/round3): 4件
 - [南投縣透天法拍屋](https://tomin104.com/tag/%E5%8D%97%E6%8A%95%E7%B8%A3/townhouse): 12件
 - [南投縣500萬以下法拍屋](https://tomin104.com/tag/%E5%8D%97%E6%8A%95%E7%B8%A3/u500): 11件
-- [台中市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/1000-2000): 40件
-- [台中市2000～3000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/2000-3000): 16件
-- [台中市500～1000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/500-1000): 45件
-- [台中市屋齡15年內法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/age15): 25件
+- [台中市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/1000-2000): 39件
+- [台中市2000～3000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/2000-3000): 15件
+- [台中市500～1000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/500-1000): 46件
+- [台中市屋齡15年內法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/age15): 33件
 - [台中市公寓法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/apartment): 10件
-- [台中市大樓法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/building): 63件
-- [台中市點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/delivery): 32件
-- [台中市熱門精選法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/hot): 19件
-- [台中市3000萬以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/o3000): 26件
-- [台中市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round1): 55件
-- [台中市第二拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round2): 39件
-- [台中市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round3): 52件
-- [台中市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round3-delivery): 8件
-- [台中市透天法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/townhouse): 66件
-- [台中市500萬以下法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/u500): 19件
-- [台北市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/1000-2000): 20件
-- [台北市2000～3000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/2000-3000): 22件
+- [台中市大樓法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/building): 60件
+- [台中市點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/delivery): 52件
+- [台中市熱門精選法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/hot): 22件
+- [台中市3000萬以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/o3000): 25件
+- [台中市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round1): 54件
+- [台中市第二拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round2): 37件
+- [台中市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round3): 51件
+- [台中市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/round3-delivery): 16件
+- [台中市透天法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/townhouse): 65件
+- [台中市500萬以下法拍屋](https://tomin104.com/tag/%E5%8F%B0%E4%B8%AD%E5%B8%82/u500): 17件
+- [台北市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/1000-2000): 21件
+- [台北市2000～3000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/2000-3000): 21件
 - [台北市500～1000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/500-1000): 6件
 - [台北市公寓法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/apartment): 27件
 - [台北市大樓法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/building): 30件
 - [台北市點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/delivery): 16件
 - [台北市3000萬以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/o3000): 28件
-- [台北市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round1): 28件
-- [台北市第二拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round2): 25件
-- [台北市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round3): 24件
-- [台北市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round3-delivery): 5件
+- [台北市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round1): 27件
+- [台北市第二拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round2): 24件
+- [台北市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round3): 26件
+- [台北市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/round3-delivery): 6件
 - [台北市透天法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8C%97%E5%B8%82/townhouse): 5件
 - [台南市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/1000-2000): 45件
 - [台南市2000～3000萬法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/2000-3000): 14件
@@ -383,18 +383,20 @@
 - [台南市點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/delivery): 42件
 - [台南市熱門精選法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/hot): 17件
 - [台南市3000萬以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/o3000): 12件
-- [台南市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round1): 46件
+- [台南市第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round1): 44件
 - [台南市第二拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round2): 32件
-- [台南市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round3): 78件
-- [台南市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round3-delivery): 20件
+- [台南市第三拍以上法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round3): 80件
+- [台南市第三拍點交法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/round3-delivery): 21件
 - [台南市透天法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/townhouse): 91件
 - [台南市500萬以下法拍屋](https://tomin104.com/tag/%E5%8F%B0%E5%8D%97%E5%B8%82/u500): 29件
 - [台東縣第一拍法拍屋](https://tomin104.com/tag/%E5%8F%B0%E6%9D%B1%E7%B8%A3/round1): 3件
 - [台東縣透天法拍屋](https://tomin104.com/tag/%E5%8F%B0%E6%9D%B1%E7%B8%A3/townhouse): 4件
 - [基隆市1000～2000萬法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/1000-2000): 5件
 - [基隆市500～1000萬法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/500-1000): 10件
+- [基隆市屋齡15年內法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/age15): 3件
 - [基隆市公寓法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/apartment): 25件
 - [基隆市大樓法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/building): 11件
+- [基隆市點交法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/delivery): 4件
 - [基隆市第一拍法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/round1): 10件
 - [基隆市第二拍法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/round2): 10件
 - [基隆市第三拍以上法拍屋](https://tomin104.com/tag/%E5%9F%BA%E9%9A%86%E5%B8%82/round3): 22件
@@ -403,18 +405,18 @@
 - [宜蘭縣1000～2000萬法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/1000-2000): 9件
 - [宜蘭縣2000～3000萬法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/2000-3000): 4件
 - [宜蘭縣500～1000萬法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/500-1000): 10件
-- [宜蘭縣屋齡15年內法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/age15): 6件
+- [宜蘭縣屋齡15年內法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/age15): 13件
 - [宜蘭縣大樓法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/building): 9件
-- [宜蘭縣點交法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/delivery): 16件
-- [宜蘭縣熱門精選法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/hot): 5件
+- [宜蘭縣點交法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/delivery): 25件
+- [宜蘭縣熱門精選法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/hot): 8件
 - [宜蘭縣3000萬以上法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/o3000): 4件
 - [宜蘭縣第一拍法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/round1): 8件
 - [宜蘭縣第二拍法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/round2): 10件
 - [宜蘭縣第三拍以上法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/round3): 19件
-- [宜蘭縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/round3-delivery): 6件
+- [宜蘭縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/round3-delivery): 10件
 - [宜蘭縣透天法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/townhouse): 25件
 - [宜蘭縣500萬以下法拍屋](https://tomin104.com/tag/%E5%AE%9C%E8%98%AD%E7%B8%A3/u500): 10件
-- [屏東縣1000～2000萬法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/1000-2000): 4件
+- [屏東縣1000～2000萬法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/1000-2000): 3件
 - [屏東縣500～1000萬法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/500-1000): 15件
 - [屏東縣屋齡15年內法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/age15): 6件
 - [屏東縣公寓法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/apartment): 3件
@@ -422,56 +424,57 @@
 - [屏東縣熱門精選法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/hot): 3件
 - [屏東縣第一拍法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round1): 10件
 - [屏東縣第二拍法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round2): 8件
-- [屏東縣第三拍以上法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round3): 24件
-- [屏東縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round3-delivery): 9件
-- [屏東縣透天法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/townhouse): 36件
+- [屏東縣第三拍以上法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round3): 23件
+- [屏東縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/round3-delivery): 8件
+- [屏東縣透天法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/townhouse): 35件
 - [屏東縣500萬以下法拍屋](https://tomin104.com/tag/%E5%B1%8F%E6%9D%B1%E7%B8%A3/u500): 22件
-- [彰化縣1000～2000萬法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/1000-2000): 9件
+- [彰化縣1000～2000萬法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/1000-2000): 8件
 - [彰化縣2000～3000萬法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/2000-3000): 3件
-- [彰化縣500～1000萬法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/500-1000): 18件
-- [彰化縣屋齡15年內法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/age15): 8件
-- [彰化縣點交法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/delivery): 10件
-- [彰化縣熱門精選法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/hot): 7件
+- [彰化縣500～1000萬法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/500-1000): 19件
+- [彰化縣屋齡15年內法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/age15): 13件
+- [彰化縣點交法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/delivery): 15件
+- [彰化縣熱門精選法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/hot): 11件
 - [彰化縣3000萬以上法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/o3000): 4件
 - [彰化縣第一拍法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/round1): 11件
 - [彰化縣第二拍法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/round2): 7件
 - [彰化縣第三拍以上法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/round3): 27件
-- [彰化縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/round3-delivery): 6件
+- [彰化縣第三拍點交法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/round3-delivery): 9件
 - [彰化縣透天法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/townhouse): 43件
 - [彰化縣500萬以下法拍屋](https://tomin104.com/tag/%E5%BD%B0%E5%8C%96%E7%B8%A3/u500): 11件
 - [新北市1000～2000萬法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/1000-2000): 51件
 - [新北市2000～3000萬法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/2000-3000): 18件
-- [新北市500～1000萬法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/500-1000): 30件
+- [新北市500～1000萬法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/500-1000): 29件
 - [新北市屋齡15年內法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/age15): 23件
 - [新北市公寓法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/apartment): 44件
-- [新北市大樓法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/building): 63件
+- [新北市大樓法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/building): 62件
 - [新北市點交法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/delivery): 25件
 - [新北市熱門精選法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/hot): 11件
 - [新北市3000萬以上法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/o3000): 20件
 - [新北市第一拍法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/round1): 28件
 - [新北市第二拍法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/round2): 42件
-- [新北市第三拍以上法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/round3): 67件
+- [新北市第三拍以上法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/round3): 66件
 - [新北市第三拍點交法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/round3-delivery): 9件
 - [新北市透天法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/townhouse): 10件
 - [新北市500萬以下法拍屋](https://tomin104.com/tag/%E6%96%B0%E5%8C%97%E5%B8%82/u500): 18件
-- [桃園市1000～2000萬法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/1000-2000): 25件
-- [桃園市2000～3000萬法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/2000-3000): 12件
+- [桃園市1000～2000萬法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/1000-2000): 26件
+- [桃園市2000～3000萬法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/2000-3000): 11件
 - [桃園市500～1000萬法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/500-1000): 36件
-- [桃園市屋齡15年內法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/age15): 12件
+- [桃園市屋齡15年內法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/age15): 23件
 - [桃園市公寓法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/apartment): 13件
 - [桃園市大樓法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/building): 44件
-- [桃園市點交法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/delivery): 17件
-- [桃園市熱門精選法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/hot): 7件
+- [桃園市點交法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/delivery): 36件
+- [桃園市熱門精選法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/hot): 16件
 - [桃園市第一拍法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round1): 21件
-- [桃園市第二拍法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round2): 26件
-- [桃園市第三拍以上法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round3): 42件
-- [桃園市第三拍點交法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round3-delivery): 10件
+- [桃園市第二拍法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round2): 25件
+- [桃園市第三拍以上法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round3): 43件
+- [桃園市第三拍點交法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/round3-delivery): 18件
 - [桃園市透天法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/townhouse): 26件
 - [桃園市500萬以下法拍屋](https://tomin104.com/tag/%E6%A1%83%E5%9C%92%E5%B8%82/u500): 14件
 - [花蓮縣1000～2000萬法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/1000-2000): 3件
 - [花蓮縣500～1000萬法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/500-1000): 5件
+- [花蓮縣屋齡15年內法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/age15): 3件
 - [花蓮縣大樓法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/building): 6件
-- [花蓮縣點交法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/delivery): 6件
+- [花蓮縣點交法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/delivery): 9件
 - [花蓮縣第一拍法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/round1): 11件
 - [花蓮縣第二拍法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/round2): 6件
 - [花蓮縣第三拍以上法拍屋](https://tomin104.com/tag/%E8%8A%B1%E8%93%AE%E7%B8%A3/round3): 5件
@@ -504,22 +507,21 @@
 - [雲林縣500萬以下法拍屋](https://tomin104.com/tag/%E9%9B%B2%E6%9E%97%E7%B8%A3/u500): 6件
 - [高雄市1000～2000萬法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/1000-2000): 37件
 - [高雄市2000～3000萬法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/2000-3000): 7件
-- [高雄市500～1000萬法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/500-1000): 46件
-- [高雄市屋齡15年內法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/age15): 14件
+- [高雄市500～1000萬法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/500-1000): 44件
+- [高雄市屋齡15年內法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/age15): 16件
 - [高雄市公寓法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/apartment): 16件
-- [高雄市大樓法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/building): 48件
-- [高雄市點交法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/delivery): 57件
-- [高雄市熱門精選法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/hot): 8件
+- [高雄市大樓法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/building): 47件
+- [高雄市點交法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/delivery): 61件
+- [高雄市熱門精選法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/hot): 9件
 - [高雄市3000萬以上法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/o3000): 10件
 - [高雄市第一拍法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round1): 49件
 - [高雄市第二拍法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round2): 41件
-- [高雄市第三拍以上法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round3): 45件
-- [高雄市第三拍點交法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round3-delivery): 15件
-- [高雄市透天法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/townhouse): 69件
+- [高雄市第三拍以上法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round3): 43件
+- [高雄市第三拍點交法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/round3-delivery): 17件
+- [高雄市透天法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/townhouse): 68件
 - [高雄市500萬以下法拍屋](https://tomin104.com/tag/%E9%AB%98%E9%9B%84%E5%B8%82/u500): 35件
 
 ## 社區法拍屋
-- [大地球廣場法拍屋](https://tomin104.com/c/%E5%8F%B0%E4%B8%AD-%E5%A4%A7%E5%9C%B0%E7%90%83%E5%BB%A3%E5%A0%B4): 2件待標
 - [瑞聯天廈法拍屋](https://tomin104.com/c/%E5%8F%B0%E4%B8%AD-%E7%91%9E%E8%81%AF%E5%A4%A9%E5%BB%88): 2件待標
 - [站前青世代三期法拍屋](https://tomin104.com/c/%E5%8F%B0%E4%B8%AD-%E7%AB%99%E5%89%8D%E9%9D%92%E4%B8%96%E4%BB%A3%E4%B8%89%E6%9C%9F): 2件待標
 - [精銳海德一號法拍屋](https://tomin104.com/c/%E5%8F%B0%E4%B8%AD-%E7%B2%BE%E9%8A%B3%E6%B5%B7%E5%BE%B7%E4%B8%80%E8%99%9F): 2件待標
