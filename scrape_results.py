@@ -1,4 +1,6 @@
 """每週拍定・停拍・撤回・流標：從 toro591 讀取法院開標結果（只取文字資料，不取照片與連結）-> data/results.json"""
+# 2026-11-26 停用：CLAUDE.md 規定不得做 toro 爬蟲、不得用 toro591 資料。排程與 build 都沒呼叫本檔；開標結果改由 scrape.py 讀透明房訊公開開標清單寫 data/results.json
+raise SystemExit("scrape_results.py 已停用（不得使用 toro591 資料）")
 import re, json, html, time, datetime, requests
 
 HOST = "https://www.toro591.com"

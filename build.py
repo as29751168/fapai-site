@@ -87,6 +87,52 @@ try:
 except Exception:
     P = {}
 
+# 2026-11-26 #30：FB 第一次抓圖是非同步的，沒寫尺寸會變無圖字卡；讀照片前 64KB 取得寬高，存 data/og_dims.json，之後只查新照片
+try:
+    OG_DIMS = json.load(open("data/og_dims.json", encoding="utf-8"))
+except Exception:
+    OG_DIMS = {}
+OG_NEW = [0]
+def _jpeg_wh(b):
+    if b[:4] == bytes([0x89, 0x50, 0x4E, 0x47]): return int.from_bytes(b[16:20], "big"), int.from_bytes(b[20:24], "big")
+    if b[:3] == b"GIF": return int.from_bytes(b[6:8], "little"), int.from_bytes(b[8:10], "little")
+    if b[:2] != bytes([0xFF, 0xD8]): return None
+    i = 2
+    while i + 9 < len(b):
+        if b[i] != 0xFF: i += 1; continue
+        m = b[i + 1]
+        if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            return int.from_bytes(b[i + 7:i + 9], "big"), int.from_bytes(b[i + 5:i + 7], "big")
+        if m in (0xD8, 0x01) or 0xD0 <= m <= 0xD7: i += 2; continue
+        i += 2 + int.from_bytes(b[i + 2:i + 4], "big")
+    return None
+def _fetch_wh(url):
+    try:
+        import urllib.request
+        rq = urllib.request.Request(url, headers={"Range": "bytes=0-131071", "User-Agent": "Mozilla/5.0"})
+        return url, _jpeg_wh(urllib.request.urlopen(rq, timeout=10).read(131072))
+    except Exception:
+        return url, None
+OG_TRIED = set()
+def og_prefetch(urls):
+    """新照片一次並行查完（16 條），查不到的這次就不寫尺寸"""
+    todo = [u for u in dict.fromkeys(urls) if u and u not in OG_DIMS and u not in OG_TRIED]
+    if not todo: return
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(16) as ex:
+        for u, wh in ex.map(_fetch_wh, todo):
+            OG_TRIED.add(u); OG_NEW[0] += 1
+            if wh: OG_DIMS[u] = list(wh)
+def og_dims(url):
+    if url not in OG_DIMS and url not in OG_TRIED:
+        og_prefetch([(photos(x) or [None])[0] for x in D["104"]] + [url])
+    return OG_DIMS.get(url)
+def og_pick(ph):
+    """分享圖用前 4 張裡第一張還讀得到的實拍照（照片失效就換下一張）；全部失效改用本站封面圖，FB 不會變無圖字卡"""
+    for u in ph[:4]:
+        if og_dims(u): return u
+    return SITE + "/og.jpg"
+
 def e(s): return html.escape(str(s if s is not None else ""), quote=True)
 def jd(o): return json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
 def photos(x):
@@ -245,8 +291,8 @@ ORG = {
     "telephone": ["+886-918-313-888", "+886-986-678-928"],
     "areaServed": "TW", "sameAs": list(LINKS.values())[1:],
     "employee": [{"@type": "Person", "name": "黃先生 Pitt", "jobTitle": "法拍代標顧問", "telephone": "+886-918-313-888"}, {"@type": "Person", "name": "林小姐 Anna", "jobTitle": "法拍代標顧問", "telephone": "+886-986-678-928"}],
-    "makesOffer": [{"@type": "Offer", "name": "聲請點交", "price": "50000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "包辦點交", "price": "120000", "priceCurrency": "TWD"}, {"@type": "Offer", "name": "全程代標", "description": "2% 到 5%，300 萬元以下固定 10 萬元，超過 300 萬元至 600 萬元最低 12 萬元"}],
-    "knowsAbout": ["法拍屋", "法拍屋代標", "投標諮詢", "聲請點交", "包辦點交"],
+    "makesOffer": [{"@type": "Offer", "name": "全程代標", "description": "費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚"}],
+    "knowsAbout": ["法拍屋", "法拍屋代標", "投標諮詢", "法拍屋點交"],
     # 2026-11-25 AI SEO：聯絡方式與公司全名給 AI 讀得到
     "contactPoint": [{"@type": "ContactPoint", "contactType": "customer service", "name": "LINE@", "url": LINKS["LINE"], "availableLanguage": "zh-TW", "areaServed": "TW"},
                      {"@type": "ContactPoint", "contactType": "sales", "name": "黃先生 Pitt", "telephone": "+886-918-313-888", "availableLanguage": "zh-TW"},
@@ -282,7 +328,7 @@ def item_faq(x):
     if inf.get("案號"):
         q.append((f"{name}的案號是多少？", f"案號 {inf['案號']}，詳細內容以法院公告為準。"))
     if q:
-        q.append(("可以委託代標嗎？", f"可以。{NAME}提供投標諮詢、全程代標、聲請點交／包辦點交，LINE@ {LINKS['LINE']} 或電話 {PHONE_P}（Pitt）、{PHONE_A}（Anna）。"))
+        q.append(("可以委託代標嗎？", f"可以。{NAME}提供投標諮詢、全程代標、得標後點交處理，LINE@ {LINKS['LINE']} 或電話 {PHONE_P}（Pitt）、{PHONE_A}（Anna）。"))
     return q
 
 def list_faq(label, xs):
@@ -409,7 +455,7 @@ TOPICS = [
      [("什麼是法拍屋的點交與不點交？", "點交是法院會協助把房屋交給得標人；不點交就要自己處理交屋和現住人的問題。每一件都要看法院公告與筆錄。"),
       ("不點交的法拍屋可以買嗎？", "不能一概而論。不點交要自行處理占用與交屋，風險與時間都比較難估，投標前要先看清楚公告與筆錄，再評估要不要標、標多少。"),
       ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
-      ("點交要找誰協助？費用多少？", "得標後可委託聲請點交（每件 5 萬元）或包辦點交（每件 12 萬元）；不點交、部分點交及持分案件費用另議。")],
+      ("點交要找誰協助？費用多少？", "可以委託我們處理，費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚。")],
      ["delivery-or-not", "why-not-delivered", "how-long-to-move-in"], [("/delivery", "點交法拍屋")]),
     ("deposit", "保證金與要準備的錢", "投標前要先準備保證金，得標後尾款期限很短，還有稅費與修繕要一起算。",
      [("投標要準備多少保證金？", "保證金約為法院底價的兩成，實際金額以法院公告為準，通常以銀行本票開立。"),
@@ -432,11 +478,10 @@ TOPICS = [
      [("法拍屋會不會是凶宅？", "我們會看法院公告與筆錄有沒有記載，也會查公開資料。但要說清楚，查不到不代表一定沒有。"),
       ("物件頁哪裡看得到這些資訊？", "每件物件頁都附法院筆錄全文，點交、使用情形與相關記載一律以筆錄原文為準。")],
      [], []),
-    ("proxy", "代標流程與費用", "從看懂公告、評估總成本、投標到點交，可以全程委託，也可以只委託點交。",
-     [("可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。"),
-      ("代標服務費怎麼算？", "全程代標收取 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；聲請點交 5 萬元、包辦點交 12 萬元。不含代書費、契稅、規費、貸款手續費；不點交、部分點交、持分案件費用另議。"),
-      ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。我們會用法院筆錄和公開資料幫你評估。"),
-      ("自己投標，可以只委託點交嗎？", "可以。聲請點交每件 5 萬元，包辦點交每件 12 萬元（另含代墊尾款、協調警員到場、鎖匠搬家、遷戶籍、恢復水電瓦斯等）。")],
+    ("proxy", "代標流程與費用", "從看懂公告、評估總成本、投標到點交，可以全程委託。",
+     [("可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、得標後點交處理。"),
+      ("代標服務費怎麼算？", "費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚。不含代書費、契稅、規費、貸款手續費。"),
+      ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。我們會用法院筆錄和公開資料幫你評估。"),],
      ["proxy-bid-process", "what-is-foreclosure-auction"], [("/fees", "服務與收費")]),
 ]
 
@@ -522,12 +567,14 @@ def contact_box():
     return f'''<section class="box" id="contact"><h2>聯絡我們</h2>
 <p><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a><br><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a></p>
 <p>LINE@ <a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a>（傳「案名」或地址就能問）</p>
-<p><b>{e(TEAM)}</b>｜{e(SLOGAN)}<br>全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交<br>{e(COMPANY)}</p><div>{btn}</div></section>'''
+<p><b>{e(TEAM)}</b>｜{e(SLOGAN)}<br>全台都有服務：投標諮詢、全程代標、得標後點交處理<br>{e(COMPANY)}</p><div>{btn}</div></section>'''
 
-def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True):
+def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True, image_alt=None):
     url = SITE + path
     ld = "".join(f'<script type="application/ld+json">{jd(o)}</script>' for o in (jsonld or []))
-    og_img = f'<meta property="og:image" content="{e(image)}"><meta name="twitter:card" content="summary_large_image">' if image else '<meta name="twitter:card" content="summary">'
+    wh = ((1200, 630) if image == SITE + "/og.jpg" else og_dims(image)) if image else None
+    og_img = (f'<meta property="og:image" content="{e(image)}">' + (f'<meta property="og:image:width" content="{wh[0]}"><meta property="og:image:height" content="{wh[1]}">' if wh else "")
+              + f'<meta property="og:image:alt" content="{e((image_alt if image != SITE + "/og.jpg" else None) or title)}"><meta name="twitter:card" content="summary_large_image">') if image else '<meta name="twitter:card" content="summary">'
     return f'''<!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title><meta name="description" content="{e(desc)}">
@@ -840,14 +887,14 @@ def detail_page(x):
     ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
     cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s)t+="（來源:"+s+"）";try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
-    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, ph[0] if ph else None, "<style>footer{padding-bottom:90px}</style>", "", False)
+    return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, og_pick(ph), "<style>footer{padding-bottom:90px}</style>", "", False, f'{x["地址"]} 法拍屋實拍照片')
 
 FAQ = [
     ("什麼是法拍屋的「點交」與「不點交」？", "點交是指拍定後，由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件是否點交，請見該物件的「法院筆錄」與執行公告。"),
     ("法拍屋的「拍次」是什麼意思？", "拍次是法院拍賣的次數。第一拍無人應買（流標）後，法院通常會減價再拍，實際底價與日期以各物件「拍賣紀錄」及法院公告為準。"),
-    ("可以委託代標嗎？需要準備什麼？", "可以。Pitt & Anna｜104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交，請透過電話或 LINE@ 聯絡黃先生 Pitt 或林小姐 Anna。"),
+    ("可以委託代標嗎？需要準備什麼？", "可以。Pitt & Anna｜104法拍網團隊全台都有服務，提供投標諮詢、全程代標、得標後點交處理，請透過電話或 LINE@ 聯絡黃先生 Pitt 或林小姐 Anna。"),
     ("法拍屋可以看屋嗎？", "一般法拍屋查封後無法入內參觀，可依建物平面圖推斷格局，或參考同棟樓上樓下。能看屋的物件會在資料中另行註明。"),
-    ("代標服務費怎麼算？", "全程代標收取 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；只需聲請點交為 50,000 元，包辦點交為 120,000 元。服務項目與附註請見「服務與收費」頁。"),
+    ("代標服務費怎麼算？", "費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚。服務項目請見「服務與收費」頁。"),
     ("法拍屋得標後多久能交屋？", "點交物件走司法程序，一般約 4 至 6 個月，有狀況會順延；不點交物件則取決於與占用人的協商，時間較難預估。"),
     ("投標保證金不夠或忘記附本票會怎樣？", "保證金未繳足、未附本票，或本票、印章有瑕疵，投標會被判為無效。投標前請逐項核對拍賣公告。"),
     ("得標後要在多久內繳尾款？可以貸款嗎？", "得標後通常需在 7 天內繳清價金。需要貸款或代墊尾款，請在投標前先告知，讓我們協助準備銀行徵信資料。"),
@@ -1036,7 +1083,7 @@ var go=$('go');function done(){if(document.activeElement)document.activeElement.
 F.forEach(function(i){$(i).addEventListener('input',function(){if(i==='c')areas();if(i==='pr')OVR=null;if(i==='y'){TY=[];TL=''}f()})});
 $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(function(i){$(i).value=''});areas();chipsOn();f()});var Q=new URLSearchParams(location.search);if(Q.get('c')){$('c').value=Q.get('c');areas()}var pq=Q.get('p');if(pq){var pp=pq.split('-');if([].some.call($('pr').options,function(o){return o.value===pq}))$('pr').value=pq;else if(pp.length===2&&!isNaN(pp[0])&&!isNaN(pp[1]))OVR=[+pp[0],+pp[1]]}if(Q.get('t')){TY=Q.get('t').split(',');TL=Q.get('tl')||Q.get('t')}areas();chipsOn();if(Q.get('q')){$('q').value=Q.get('q');nl()}f()})();</script>"""
     lead = (f'<h1 class="lh">全部法拍屋物件</h1><p class="ls">共 {len(ITEMS)} 筆，含拍次、開標日期、底標價與法院筆錄，每日更新。</p><div id="list"></div>' if list_mode else
-            f'<p>Pitt &amp; Anna 104法拍網團隊整理全台法拍屋、金拍屋物件資訊（資料來源：透明房訊），含拍次、開標日期、底標價與法院筆錄，並提供投標諮詢、全程代標、聲請點交／包辦點交。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
+            f'<p>Pitt &amp; Anna 104法拍網團隊整理全台法拍屋、金拍屋物件資訊（資料來源：透明房訊），含拍次、開標日期、底標價與法院筆錄，並提供投標諮詢、全程代標、得標後點交處理。目前共 {len(ITEMS)} 筆物件。</p>' + hero_html() + '<h2 class="sec" id="list">全部法拍屋物件</h2>')
     body = (lead +
             f'<div class="chips" id="rc"><b>拍次：</b><button type="button" data-v="" class="on">全部（{len(ITEMS)}）</button>'
             f'<button type="button" data-v="1">第1拍（{sum(1 for x in ITEMS if round_of(x)==1)}）</button><button type="button" data-v="2">第2拍（{sum(1 for x in ITEMS if round_of(x)==2)}）</button>'
@@ -1125,7 +1172,7 @@ CITIES = [c for c in CITIES if any(x["區域"][:2] in c[2] for x in ITEMS)]   # 
 def city_faq(kw, scope):
     return [
         (f"{kw}怎麼查詢？", f"在本頁可直接瀏覽{scope}目前的法拍屋物件，每筆都有拍次、開標日期、底標價與法院筆錄，資料每日更新。想縮小範圍可點下方各行政區。"),
-        (f"{kw}可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交，請電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
+        (f"{kw}可以委託代標嗎？", "可以。Pitt & Anna 104法拍網團隊全台都有服務，提供投標諮詢、全程代標、得標後點交處理，請電話或 LINE 聯絡黃先生 Pitt 或林小姐 Anna。"),
         (f"{kw}第三拍以上的物件為什麼值得注意？", "第一拍流標後，法院通常會降價再拍。第三拍以上價格往往較低，但仍須先查清產權、占用與點交情形，再評估合理出價。"),
         ("點交與不點交差在哪裡？", "點交是拍定後由法院協助將房屋點交給得標人；不點交則需得標人自行處理占用問題。各物件請看「法院筆錄」中的點交情形。"),
         ("法拍屋可以看屋嗎？", "一般查封後無法入內，可依建物平面圖推斷格局，或參考同棟其他樓層。能看屋的物件會另行註明。"),
@@ -1204,19 +1251,16 @@ FEE_ITEMS = [
  ("處理遺留神明、神主牌及祖先牌位", "協助寄託廟宇管理", 3), ("有價遺留物清點與保管", "以貨櫃屋或倉庫存放，通知權利人領取；未領取時，依法聲請拍賣", 3)]
 
 def fees_page():
-    cols = [("聲請點交", "50,000", "元", "服務項目 01–05", 1), ("包辦點交", "120,000", "元", "服務項目 01–11", 2), ("全程代標", "2–5%", "依案件難易評估", "服務項目 01–19；300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元", 3)]
-    th = "".join(f'<th style="text-align:center;color:#123;font-weight:700"><div>{e(n)}</div><div style="font-size:22px">{p}</div><div style="font-weight:400;color:#666;font-size:13px">{e(u)}<br>{e(s)}</div></th>' for n, p, u, s, _ in cols)
-    rows = ""
-    for i, (t, sub, lv) in enumerate(FEE_ITEMS, 1):
-        cells = "".join(f'<td style="text-align:center">{"●" if lv <= c[4] else "—"}</td>' for c in cols)
-        rows += f'<tr><td style="width:auto;color:#123"><b>{i:02d}　{e(t)}</b>' + (f'<div style="color:#666;font-size:13px;font-weight:400">{e(sub)}</div>' if sub else "") + f'</td>{cells}</tr>'
-    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契稅、規費及貸款手續費。", "點交保固書適用於服務費 5% 的案件。", "不點交、部分點交及持分案件，服務費另議，不適用 300 萬元以下固定 10 萬元。"]
+    # 2026-11-26：收費只寫代標「點交案約 2%～3%」，不寫聲請點交、包辦點交（11/25 規則）；舊收費圖含舊價格，頁面不再放
+    items = [(t, sub) for t, sub, lv in FEE_ITEMS if "保固書" not in t]
+    rows = "".join(f'<li><b>{e(t)}</b>' + (f'<div style="color:#666;font-size:13px">{e(sub)}</div>' if sub else "") + '</li>' for t, sub in items)
+    notes = ["服務費不含：過戶代書費、貸款設定代書費、過戶契稅、規費及貸款手續費。", "不點交、部分點交及持分案件，依難度評估，委託前會先說清楚。"]
     nh = "<ol>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ol>"
-    body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務費用與收費標準</h1><p>三種服務方案，依您的委託需求選擇。</p>'
-            f'<section class="box" style="text-align:center"><img src="/img/fees-chart.jpg" alt="Pitt &amp; Anna 104法拍網團隊服務費用與收費標準：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2–5%" width="1200" height="1870" loading="eager" style="width:100%;max-width:900px;height:auto;border-radius:8px"></section>'
-            f'<section class="box"><details><summary>文字版服務項目</summary><table><tr><th style="width:auto">服務項目</th>{th}</tr>{rows}</table></details></section>'
+    body = (f'<nav class="bc"><a href="/">首頁</a> › 服務與收費</nav><h1>服務與收費</h1>'
+            f'<section class="box"><h2>全程代標</h2><p style="font-size:20px"><b>一般點交案約 2%～3%</b></p><p>費用看案件；不點交、部分點交及持分案件依難度評估，委託前會先說清楚。</p></section>'
+            f'<section class="box"><h2>全程代標包含</h2><ol>{rows}</ol></section>'
             f'<section class="box"><h2>費用附註</h2>{nh}</section>' + know_box() + contact_box())
-    desc = "Pitt & Anna 104法拍網團隊代標服務收費：聲請點交 50,000 元、包辦點交 120,000 元、全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元），並列出各方案服務項目與費用附註。"
+    desc = "Pitt & Anna 104法拍網團隊全程代標收費：費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，並列出服務項目與費用附註。"
     ld = [ORG, {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋代標服務", "provider": {"@id": SITE + "/#org"}, "areaServed": "TW", "description": desc}]
     return page(f"服務與收費｜法拍屋代標費用｜{NAME}", desc, "/fees", body, ld, SITE + "/og.jpg")
 
@@ -1236,12 +1280,12 @@ def about_page():
             f'<p>{e(INTRO)}</p><p>本站每天更新法拍物件，實際內容以法院拍賣公告為準。</p>'
             '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p>'
             f'<p>經紀業：{e(COMPANY)}。<a href="/cases">看代標成交案例</a></p></section>'
-            '<section class="box"><h2>我們提供的服務</h2><ul><li>聲請點交：50,000 元</li><li>包辦點交：120,000 元</li><li>全程代標：2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）</li></ul><p><a href="/fees">查看完整服務項目與收費附註</a></p></section>'
+            '<section class="box"><h2>我們提供的服務</h2><ul><li>全程代標：費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚</li></ul><p><a href="/fees">查看服務項目與收費說明</a></p></section>'
             f'<section class="box"><h2>聯絡我們</h2><ul><li>林小姐 Anna：{e(PHONE_A)}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>LINE@：<a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a></li><li>服務範圍：全台都有服務</li><li>{e(COMPANY)}</li></ul></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於 Pitt & Anna｜104法拍網團隊", "url": SITE + "/about", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]
-    return page(f"關於我們｜Pitt & Anna 104法拍網團隊｜{SLOGAN}", "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴：全台都有服務，提供投標諮詢、全程代標、聲請點交／包辦點交。財欣不動產管理顧問有限公司。", "/about", body, ld, SITE + "/og.jpg")
+    return page(f"關於我們｜Pitt & Anna 104法拍網團隊｜{SLOGAN}", "Pitt & Anna｜104法拍網團隊，你的法拍購屋夥伴：全台都有服務，提供投標諮詢、全程代標、得標後點交處理。財欣不動產管理顧問有限公司。", "/about", body, ld, SITE + "/og.jpg")
 
 try: SOLD = json.load(open("data/sold.json", encoding="utf-8"))   # 透明房訊開標結果：拍定／承受／撤回
 except Exception: SOLD = {}
@@ -1439,49 +1483,9 @@ PROMO_FAQ = [
 ]
 
 def promo_page():
-    claim = e(PROMO_CLAIM); line = e(PROMO_LINE)
-    ended = _today() > PROMO_END
-    url = SITE + "/promo"
-    cta = (f'<div class="pm-cta"><a class="c1" href="{claim}" target="_blank" rel="noopener">領取 2 萬代標券<small>LINE@ 領券（限量 30 名）</small></a>'
-           f'<a class="c2" href="{line}" target="_blank" rel="noopener">加 LINE@ 好友<small>@635nftwk・傳「活動」也能領</small></a></div>')
-    answer = (f"{PROMO_COMPANY}（104法拍網，黃先生 Pitt、林小姐 Anna）推出「年前上車｜2 萬代標券」：委託全程代標，得標並收取服務費時折抵新台幣 20,000 元。"
-              "加入 LINE@（@635nftwk）領券、簽訂委託時出示即可使用；限量 30 張，送完即止，活動至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準。")
-    rows = [("主辦", PROMO_COMPANY), ("優惠內容", "全程代標服務折抵新台幣 20,000 元"), ("適用服務", "限「全程代標服務」"),
-            ("不適用", "單純聲請點交、包辦點交等其他服務"), ("什麼時候折", "得標並收取服務費時，自服務費中折抵；未得標不收取服務費，亦不予折抵"),
-            ("名額", "限量 30 張，送完即止，以 LINE@ 領取紀錄為準"), ("活動期間", "即日起至 2027/2/5（除夕）23:59 止，以簽訂委託書之日期為準"),
-            ("怎麼領", "加入 LINE@（@635nftwk）領券，簽訂委託時出示"), ("使用限制", "每一案件限用一張，每張限用一次，不得轉讓、不得與其他優惠併用；不得兌換現金、不找零"),
-            ("收費依據", "服務費依委託書約定之收費標準計算；優惠內容以委託書記載為準"),
-            ("資料來源與更新日", f"{PROMO_COMPANY}活動辦法定稿；更新日 {PROMO_UPDATED}")]
-    tbl = '<table class="pm-tbl">' + "".join(f"<tr><th>{e(k)}</th><td>{e(v)}</td></tr>" for k, v in rows) + "</table>"
-    faq = "".join(f"<details open><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in PROMO_FAQ)
-    notice = '<p class="pm-end">本活動已取消，不再發放代標券。服務與收費請見<a href="/fees">服務與收費</a>，有問題歡迎 LINE@ 詢問。</p>' if ended else ""
-    body = ('<nav class="bc"><a href="/">首頁</a> › 年前上車活動</nav><div class="pm">' + notice +
-            '<section class="pm-hero"><p class="eb">104法拍網・限時活動</p><h1>年前上車｜2 萬代標券</h1>'
-            '<p class="lead">委託全程代標，得標收費時折 20,000 元</p>'
-            '<p class="pm-tag">限量 30 名｜至 2027/2/5 除夕</p>' + ("" if ended else cta) +
-            f'<p class="pm-upd">最後更新：{PROMO_UPDATED}</p></section>'
-            f'<section class="box pm-ans"><h2>活動重點</h2><p>{e(answer)}</p>{tbl}</section>'
-            '<figure class="pm-img"><img src="/img/promo/nianqian-4x5.jpg" width="1080" height="1350" alt="年前上車｜2 萬代標券：委託全程代標，得標收費時折 20,000 元，限量 30 名，至 2027/2/5 除夕" loading="lazy"></figure>'
-            '<section class="box pm-rules" id="rules"><h2>※ 活動辦法</h2><ol>' + "".join(f"<li>{e(r)}</li>" for r in PROMO_RULES) + '</ol>'
-            f'<p class="pm-sign">{e(PROMO_SIGN)}</p></section>'
-            f'<section class="box" id="faq"><h2>常見問題</h2>{faq}</section>'
-            f'<section class="box pm-contact" id="contact"><h2>主辦與聯絡</h2><p class="pm-sign">{e(PROMO_COMPANY)}</p>'
-            f'<p><a href="tel:0918313888">黃先生 Pitt {PHONE_P}</a><a href="tel:0986678928">林小姐 Anna {PHONE_A}</a><a href="{line}" target="_blank" rel="noopener">LINE@ @635nftwk（lin.ee/Y2bGSIB）</a></p>'
-            + ("" if ended else cta) + '</section>'
-            '<section class="box areas"><h2>延伸閱讀</h2><a href="/fees">服務與收費</a><a href="/process">購屋流程</a><a href="/learn/proxy-bid-process">委託代標怎麼進行</a><a href="/about">關於我們</a></section></div>')
-    desc = "年前上車｜2 萬代標券：委託全程代標，得標並收取服務費時折抵 20,000 元，限量 30 張，至 2027/2/5（除夕）。加 LINE@ @635nftwk 領券。主辦：" + PROMO_COMPANY
-    org = {"@context": "https://schema.org", "@type": "Organization", "@id": url + "#org", "name": PROMO_COMPANY, "alternateName": "104法拍網", "url": SITE + "/",
-           "telephone": ["+886-918-313-888", "+886-986-678-928"],
-           "sameAs": [PROMO_LINE]}
-    svc = {"@context": "https://schema.org", "@type": "Service", "name": "法拍屋全程代標服務", "serviceType": "法拍屋代標", "areaServed": "TW", "provider": {"@id": url + "#org"},
-           "offers": {"@type": "Offer", "name": "年前上車｜2 萬代標券", "url": url,
-                      "description": "委託全程代標，得標並收取服務費時自服務費中折抵新台幣 20,000 元；未得標不收取服務費，亦不予折抵。限量 30 張，以簽訂委託書之日期為準。",
-                      "priceSpecification": {"@type": "PriceSpecification", "price": "-20000", "priceCurrency": "TWD", "description": "自服務費中折抵新台幣 20,000 元"},
-                      "validFrom": "2026-11-18", "validThrough": "2027-02-05T23:59:00+08:00", "inventoryLevel": {"@type": "QuantitativeValue", "value": 30},
-                      "availability": "https://schema.org/LimitedAvailability", "seller": {"@id": url + "#org"}}}
-    bc = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "年前上車活動", "item": url}]}
-    fq = {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in PROMO_FAQ]}
-    return page(f"年前上車｜2 萬代標券｜全程代標得標折 20,000 元・限量 30 名・至 2027/2/5｜{NAME}", desc, "/promo", body, [org, svc, bc, fq], SITE + "/img/promo/nianqian-4x5.jpg", PROMO_CSS) if not ended else page("年前上車活動已取消｜" + NAME, "年前上車代標券活動已取消。", "/promo", '<nav class="bc"><a href="/">首頁</a> › 活動</nav><h1>年前上車活動已取消</h1>' + notice).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
+    # 2026-11-26：代標券 11/19 已全面取消，活動頁只留取消公告（noindex）；原活動內容與 Offer 結構化資料一併拿掉
+    notice = '<p class="pm-end">本活動已取消，不再發放代標券。服務與收費請見<a href="/fees">服務與收費</a>，有問題歡迎 LINE@ 詢問。</p>'
+    return page("年前上車活動已取消｜" + NAME, "年前上車代標券活動已取消。", "/promo", '<nav class="bc"><a href="/">首頁</a> › 活動</nav><h1>年前上車活動已取消</h1>' + notice).replace("index,follow,max-image-preview:large,max-snippet:-1", "noindex,follow")
 
 def promo_banner():
     """首頁最上方活動橫幅：活動期間（至 2027/2/5）才出現，過期自動消失"""
@@ -1583,9 +1587,9 @@ if __name__ == "__main__":
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
           "".join(f"<url><loc>{e(SITE + u[0])}</loc>" + (f"<lastmod>{u[2] if len(u) > 2 else day}</lastmod>" if len(u) < 3 or u[2] else "") + f"<priority>{u[1]}</priority></url>\n" for u in urls) + "</urlset>\n")
     write("site/robots.txt", "".join(f"User-agent: {b}\nAllow: /\n\n" for b in ["*", "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot", "Google-Extended", "Applebot-Extended"]) + f"Sitemap: {SITE}/sitemap.xml\n")
-    write("site/llms.txt", f"# {NAME}\n\n> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、聲請點交／包辦點交。資料每日更新（{UPDATED}）。\n\n"
+    write("site/llms.txt", f"# {NAME}\n\n> Pitt & Anna｜104法拍網團隊（財欣不動產管理顧問有限公司）的法拍屋、金拍屋資訊網站，提供拍次、開標日期、底標價、法院筆錄；全台都有服務：投標諮詢、全程代標、得標後點交處理。資料每日更新（{UPDATED}）。\n\n"
           f"## 主要頁面\n- [物件列表]({SITE}/list): 全部法拍屋物件與搜尋\n- [本週新增法拍屋]({SITE}/new): 最近 7 天新上架，依日期分區、雙北在前\n- [第三拍法拍屋・最後底價]({SITE}/round3): 第三拍以上物件\n- [點交法拍屋]({SITE}/delivery): 法院筆錄記載點交的物件\n" + "".join(f"- [{c[3]}]({SITE}/{c[0]}): {c[4]}法拍屋最新物件\n" for c in CITIES) + "".join(f"- [{a}法拍屋]({SITE}/area/{slug(a)}): {len(xs)}筆\n" for a, xs in sorted(areas.items())) +
-          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 聲請點交 50,000 元；包辦點交 120,000 元；全程代標 2% 到 5%（300 萬元以下固定 10 萬元；超過 300 萬元至 600 萬元最低 12 萬元）；不點交、部分點交、持分案件另議\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
+          f"\n## 服務與收費\n- [服務與收費]({SITE}/fees): 全程代標費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚\n- [購屋流程]({SITE}/process): 法拍屋 9 個步驟\n- [關於我們]({SITE}/about): 黃先生 Pitt 與林小姐 Anna 夫妻雙人代標顧問\n"
           + "\n## 法拍小教室\n" + "".join(f"- [{t}]({SITE}/learn/{s}): {l}\n" for s, t, l, _ in LEARN)
           + "\n## 類型專區\n" + "".join(f"- [{c[1]}{t[1]}法拍屋]({SITE}/{c[0]}-{t[0]})\n" for c in CITIES if c[0] != "greater-taipei" for t in TYPES if len(type_items(c, t[2])) >= 3)
           + "\n## 法拍知識主題\n" + "".join(f"- [法拍屋{t[1]}]({SITE}/topic/{t[0]}): {t[2]}\n" for t in TOPICS)
@@ -1607,3 +1611,6 @@ if __name__ == "__main__":
     print("舊縣市／類型頁轉址:", len(red))
     write("site/404.html", page("找不到頁面｜" + NAME, "找不到這個頁面，請回到物件列表。", "/404", '<h1>找不到頁面</h1><p><a href="/list">回到法拍屋物件列表</a></p>'))
     print("pages:", len(urls), "已下架頁:", ng, "轉址:", nr)
+    os.makedirs("data", exist_ok=True)
+    json.dump(OG_DIMS, open("data/og_dims.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("og 圖尺寸：", len(OG_DIMS), "張（本次新查", OG_NEW[0], "）")
