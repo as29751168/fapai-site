@@ -231,7 +231,7 @@ h1{font-size:22px;line-height:1.4;margin:6px 0}h2{font-size:18px;margin:0 0 10px
 .btn{display:inline-block;margin:6px 8px 0 0;padding:9px 15px;border-radius:6px;background:#1f3a4d;color:#fff!important;text-decoration:none;font-size:14px}.btn.line{background:#06c755}
 .cd{margin:8px 0 0;color:var(--muted,#637581);font-size:15px}.cd b{display:inline-block;margin-left:10px;background:#9c3b32;color:#fff;border-radius:2px;padding:2px 10px;font-size:14px;font-weight:600}.cv{position:relative}.rd{position:absolute;left:8px;top:8px;background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700}.rd.n{background:#1f3a4d}
 .bar button{padding:9px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:6px;font-size:15px;cursor:pointer}
-.cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:8px 12px;display:flex;gap:8px;z-index:9}.cta a,.cta button{flex:1;text-align:center;padding:12px;border-radius:8px;font-size:16px;border:0;color:#fff;text-decoration:none;cursor:pointer;font-family:inherit}.cta .l{background:#06c755}.cta .t{background:#1f3a4d}
+.cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:8px 12px;display:flex;gap:8px;z-index:9}.cta a,.cta button{flex:1;text-align:center;padding:12px;border-radius:8px;font-size:16px;border:0;color:#fff;text-decoration:none;cursor:pointer;font-family:inherit}.cta .l{background:#06c755}.cta .t{background:#1f3a4d}.cta .sh{flex:0 0 72px;background:#fff;color:#1f3a4d;border:2px solid #1f3a4d}
 .hero{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.hero a{padding:10px 16px;border-radius:8px;color:#fff;text-decoration:none;font-size:15px;background:#1f3a4d}.hero a.l{background:#06c755}.hero a.f{background:#1877f2}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;align-items:center}.chips button{padding:8px 14px;border:1px solid #1f3a4d;background:#fff;color:#1f3a4d;border-radius:20px;font-size:15px;cursor:pointer;font-family:inherit}.chips button.on{background:#1f3a4d;color:#fff}
 .hd{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}header.top{background:#fff;border-bottom:1px solid #e6e2d8;position:sticky;top:0;z-index:20;color:#222;padding:0}
@@ -936,9 +936,13 @@ def detail_page(x):
     if item_faq(x): ld.append(faq_ld(item_faq(x)))
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
-    ask = f'我對物件 {x["編號"]}（{x["地址"]}）有興趣，想了解代標與細節。'
-    cta = (f'<div class="cta"><button class="l" id="ask" type="button">LINE 詢問此物件</button><a class="t" href="tel:0918313888">打電話</a></div>'
-           f'<script>document.getElementById("ask").onclick=function(){{var b=this,t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s)t+="（來源:"+s+"）";try{{navigator.clipboard.writeText(t)}}catch(e){{}};b.textContent="已複製詢問文字，開啟 LINE…";setTimeout(function(){{window.open({jd(LINKS["LINE"])},"_blank");b.textContent="LINE 詢問此物件"}},500)}};</script>')
+    # 2026-11-27 Anna「推上去」：客人從 lin.ee 進來沒帶案件，阿發看不出問哪一件；改用 oaMessage 連結，LINE 自動帶入「我想問 社區名（編號）」
+    ask = f'我想問 {comm or addr}（{x["編號"]}）'
+    oa = "https://line.me/R/oaMessage/%40635nftwk/?" + urllib.parse.quote(ask)
+    cta = (f'<div class="cta"><a class="l" id="ask" href="{e(oa)}" target="_blank" rel="noopener">LINE 詢問此物件</a><a class="t" href="tel:0918313888">打電話</a><button class="sh" id="share" type="button">分享</button></div>'
+           f'<script>document.getElementById("ask").onclick=function(){{var t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s){{t+="（來源:"+s+"）";this.href="https://line.me/R/oaMessage/%40635nftwk/?"+encodeURIComponent(t)}}}};'
+           # 2026-11-27 Anna「這個怎麼不能分享」：手機叫出系統分享（LINE、FB、Messenger…），電腦不支援就複製網址
+           f'document.getElementById("share").onclick=function(){{var b=this,u="{SITE}/h/{x["編號"]}",d={{title:document.title,url:u}};if(navigator.share){{navigator.share(d).catch(function(){{}})}}else{{try{{navigator.clipboard.writeText(u);b.textContent="已複製網址";setTimeout(function(){{b.textContent="分享"}},1500)}}catch(e){{prompt("複製這個網址",u)}}}}}};</script>')
     return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, og_pick(ph), "<style>footer{padding-bottom:90px}</style>", "", False, f'{x["地址"]} 法拍屋實拍照片')
 
 FAQ = [

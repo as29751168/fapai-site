@@ -55,7 +55,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
                 f'<div class="tk-price"><div><small>底價</small><b>{e(price(x))}</b></div>'
                 + (f'<div><small>每坪</small><b class="sm">{e(per.replace("萬/坪", " 萬"))}</b></div>' if per else "") + '</div>'
                 '<p class="tk-see">想投標請先到現場看房</p>'
-                f'<a class="tk-ask" href="{LINE}" target="_blank" rel="noopener">問同社區實登差價 →</a>'
+                f'<a class="tk-ask" href="https://line.me/R/oaMessage/%40635nftwk/?{q}" target="_blank" rel="noopener">問同社區實登差價 →</a>'
                 '</div></article>')
 
     TOP = ('<header class="hd"><div class="wrap hd-in"><a class="logo" href="/"><img src="/home/assets/pitt_anna.webp" alt="" width="44" height="44">'
