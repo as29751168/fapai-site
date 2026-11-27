@@ -44,7 +44,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
         per = inf.get("每坪單價", "")
         rd = inf.get("拍次", "")
         dj = "點交" if "點交" in (inf.get("點交情形") or inf.get("筆錄", "")[:200]) and "不點交" not in (inf.get("筆錄", "")[:200]) else ""
-        q = urllib.parse.quote(f"我想問 {name(x)}（{x['編號']}）同社區的實登行情")
+        q = urllib.parse.quote(f"我想問這間同社區的實登行情：{name(x)}\n{SITE}/h/{x['編號']}")
         return (f'<article class="tk" data-c="{e(x["區域"][:2])}">'
                 f'<a class="tk-img" href="/h/{e(x["編號"])}"><img loading="lazy" src="{e(ph[0])}" alt="{e(name(x))} 實拍照">'
                 f'<span class="tk-left">{left}</span></a>'
