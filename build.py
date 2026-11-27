@@ -34,6 +34,18 @@ _area_n = 0
 for _x in D.get("104", []):
     _t = (_x.get("資訊") or {}).get("總登記坪數", "")
     if _x.get("來源") == "透明房訊" and _t and _x.get("格局坪數") != _t: _x["格局坪數"] = _t; _area_n += 1
+# 2026-11-27：透明房訊案名是第一拍刊登時打的「底價1,336萬元」，換拍次後沒改（富旺天際寫 1336 萬，實際第三拍 1069 萬）。
+# 案名裡的底價跟現在售價差 1 萬以上就改成現在售價；只差四捨五入的保留公告小數。案名不寫拍次（CLAUDE.md），有就拿掉
+_name_n = 0
+for _x in D.get("104", []):
+    _a = _x.get("地址") or ""; _p = re.search(r"[\d.]+", (_x.get("價格") or "").replace(",", ""))
+    _m = re.search(r"底價([\d,.]+)萬元?", _a)
+    if _m and _p and abs(float(_m.group(1).replace(",", "")) - float(_p.group(0))) >= 1:
+        _a = _a[:_m.start()] + f"底價{float(_p.group(0)):g}萬" + _a[_m.end():]
+    _a = re.sub(r"[｜|]?\s*第?[一二三四五六1-6]拍\s*", lambda m: "｜" if m.group(0).startswith(("｜", "|")) else "", _a).replace("｜｜", "｜")
+    if _a != _x.get("地址"): _x["地址"] = _a; _name_n += 1
+_area_n += _name_n
+if _name_n: print("案名舊底價改寫:", _name_n, "件")
 _pii_n = 0
 for _x in D.get("104", []):
     _inf = _x.get("資訊") or {}
@@ -1605,6 +1617,12 @@ if __name__ == "__main__":
           + "\n## 標籤集合頁（縣市）\n" + "".join(f"- [{t[2]}{t[3]}法拍屋]({SITE}{t[0]}): {t[1]}件\n" for t in TAGS if t[1] >= 3 and t[2] in _CITY_FULL.values())
           + "\n## 社區法拍屋\n" + "".join(f"- [{g['name']}法拍屋]({SITE}/c/{slug(k)}): {len(g['cur'])}件待標\n" for k, g in sorted(community_groups().items()) if g["cur"])
           + f"\n## 聯絡\n- 黃先生 Pitt：{PHONE_P}\n- 林小姐 Anna：{PHONE_A}\n- LINE@：https://lin.ee/Y2bGSIB\n- 服務範圍：全台都有服務\n- {COMPANY}\n")
+    # 2026-11-27 雲端監督每天讀這個小檔（data.json 2.7MB 太大）：只放對帳要的六欄，緊湊格式壓在 300KB 內
+    def _st(x):
+        i = x.get("資訊") or {}; m = re.search(r"[\d.]+", (x.get("價格") or "").replace(",", ""))
+        return {"編號": x.get("編號", ""), "完整地址": i.get("完整地址") or x.get("地址", ""), "拍次": i.get("拍次", ""),
+                "開標日期": i.get("開標日期", ""), "銷售狀態": i.get("銷售狀態", ""), "底價": float(m.group(0)) if m else None}
+    write("site/status.json", json.dumps({"更新時間": UPDATED, "件數": len(D["104"]), "底價單位": "萬", "104": [_st(x) for x in D["104"]]}, ensure_ascii=False, separators=(",", ":")))
     write_home()
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
