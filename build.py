@@ -1604,6 +1604,7 @@ if __name__ == "__main__":
     write("site/promo.html", promo_page())
     if _today() <= PROMO_END: urls.append(("/promo", 0.8))
     write_learn(urls)
+    urls += [("/team/pitt", 0.6), ("/team/anna", 0.6)]   # 2026-11-27 Pitt、Anna 本人頁
     day = UPDATED[:10]
     write("site/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
           "".join(f"<url><loc>{e(SITE + u[0])}</loc>" + (f"<lastmod>{u[2] if len(u) > 2 else day}</lastmod>" if len(u) < 3 or u[2] else "") + f"<priority>{u[1]}</priority></url>\n" for u in urls) + "</urlset>\n")
@@ -1624,6 +1625,17 @@ if __name__ == "__main__":
                 "開標日期": i.get("開標日期", ""), "銷售狀態": i.get("銷售狀態", ""), "底價": float(m.group(0)) if m else None}
     write("site/status.json", json.dumps({"更新時間": UPDATED, "件數": len(D["104"]), "底價單位": "萬", "104": [_st(x) for x in D["104"]]}, ensure_ascii=False, separators=(",", ":")))
     write_home()
+    # 2026-11-27 Anna 說「推」：首頁換成 Pitt & Anna 版（和同業做出區隔）。舊首頁備份在 /home-old（不收錄），沿用它的 FAQ 等結構化資料
+    import home_v2
+    _old = open("site/index.html", encoding="utf-8").read()
+    write("site/home-old.html", _old.replace('<meta name="robots" content="index,follow,max-image-preview:large">', '<meta name="robots" content="noindex,follow">'))
+    _ld = []
+    for _j in re.findall(r'<script type="application/ld\+json">(.*?)</script>', _old, flags=re.S):
+        try: _g = json.loads(_j)
+        except ValueError: continue
+        _ld += [dict(n, **{"@context": "https://schema.org"}) for n in _g.get("@graph", [_g]) if n.get("@type") in ("WebSite", "Service", "FAQPage")]
+    home_v2.build(D, json.load(open("site/photos.json", encoding="utf-8")), write,
+                  (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).date(), _ld, CLICK_JS)
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
     write("site/member.html", member_page())
