@@ -21,6 +21,8 @@ a{color:inherit;text-decoration:none}
 /* 上方 */
 #top{flex:none;background:#fff;border-bottom:1px solid var(--line);padding:8px 10px 0;padding-top:max(8px,env(safe-area-inset-top));z-index:5}
 .row1{display:flex;align-items:center;gap:8px}
+.back{flex:0 0 auto;display:flex;align-items:center;gap:2px;height:38px;padding:0 12px 0 8px;background:var(--navy);color:#fff;border-radius:19px;font-size:15px;font-weight:700;white-space:nowrap;text-decoration:none}
+.back svg{width:18px;height:18px;stroke:#fff}
 .logo{font-family:"Noto Serif TC","Songti TC",serif;color:var(--navy);font-size:15px;letter-spacing:.08em;white-space:nowrap}
 .logo i{font-style:normal;color:var(--gold)}
 .logo b{display:block;font-size:11px;font-weight:400;letter-spacing:.04em;color:var(--muted);font-family:inherit}
@@ -144,11 +146,13 @@ a{color:inherit;text-decoration:none}
  .so .ctl{right:424px}.so .maplibregl-ctrl-bottom-right{right:414px}
  #filt .pn{left:50%;top:50%;bottom:auto;width:560px;transform:translate(-50%,-50%);border-radius:8px;max-height:84%}
 }
+@media(max-width:520px){.row1 .logo{display:none}}
 </style></head>
 <body>
 <div id="app">
  <header id="top">
   <div class="row1">
+   <a class="back" id="back" href="/" aria-label="返回上一頁"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>返回</a>
    <a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊<b>法拍地圖・每日更新</b></a>
    <label class="sbox"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="搜尋地址或社區" enterkeyhint="search" autocomplete="off"></label>
    <button class="fbtn" id="fopen" type="button">篩選<em id="fcnt">0</em></button>
@@ -182,7 +186,7 @@ a{color:inherit;text-decoration:none}
   </div>
   <div class="upd">更新 {{UPDATED}}・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
   <section id="list">
-   <div class="lh"><span>此範圍 <b id="lc">0</b> 件</span><button id="lt" type="button">收合</button></div>
+   <div class="lh"><span>此範圍 <b id="lc">載入中…</b> 件</span><button id="lt" type="button">收合</button></div>
    <div class="cards" id="cards"></div>
   </section>
   <section id="sheet" aria-live="polite"><div class="sx"><i></i><button id="sclose" type="button" aria-label="關閉">×</button></div><div id="sbody"></div></section>
@@ -204,6 +208,7 @@ var CITY=["台北","新北","桃園","基隆","新竹","苗栗","宜蘭","台中
 var TYPES=["公寓","大樓","華廈","透天","店面","一樓"];
 var PR=[[0,500,"500 萬以下"],[500,1000,"500–1,000 萬"],[1000,1500,"1,000–1,500 萬"],[1500,2000,"1,500–2,000 萬"],[2000,3000,"2,000–3,000 萬"],[3000,1e9,"3,000 萬以上"]];
 var SZ=[[0,20,"20 坪以下"],[20,35,"20–35 坪"],[35,50,"35–50 坪"],[50,1e9,"50 坪以上"]];
+var DP=fetch("{{JSON}}?v={{V}}").then(function(r){return r.json()});
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function rk(x){return x.r==="Y"?"Y":x.r>=3?3:x.r||0}
@@ -240,7 +245,7 @@ function apply(){
 function past(x){var n=days(x);return x.r!=="Y"&&n!==null&&n<0}
 function order(a,b){var pa=past(a)?1:0,pb=past(b)?1:0;if(pa!==pb)return pa-pb;var ra=a.r==="Y"?2.5:a.r||0,rb=b.r==="Y"?2.5:b.r||0;var g=(rb>=3?1:0)-(ra>=3?1:0);if(g)return g;var da=a.o||"9",db=b.o||"9";return da<db?-1:da>db?1:0}
 function list(){
- if(!MAP)return;var b=MAP.getBounds();
+ if(!MAP||!ALL.length)return;var b=MAP.getBounds();
  var xs=VIEW.filter(function(x){return b.contains([x.x,x.q])}).sort(order);
  $("#lc").textContent=xs.length;
  var h=xs.slice(0,80).map(function(x){var c=COL[rk(x)];return '<div class="cd'+(SEL&&SEL.i===x.i?" sel":"")+'" data-i="'+x.i+'"><div class="ph" style="'+(x.g?"background-image:url(\'"+esc(x.g)+"\')":"")+'"><span style="background:'+c+'">'+rname(x)+'</span></div><div class="bd"><div class="ad">'+esc(x.a)+'</div><div class="mt">'+esc([x.t,x.z?x.z+"坪":"",x.y!==null&&x.y!==undefined?x.y+"年":"",x.j==="其他"?"":x.j].filter(Boolean).join("｜"))+'</div><div class="pr"><b>'+money(x.p)+'</b><small>'+esc(cdtext(x))+'</small></div></div></div>'}).join("");
@@ -248,7 +253,7 @@ function list(){
 }
 /* 物件卡 */
 function open(x,fly){
- SEL=x;var c=COL[rk(x)];
+ SEL=x;var c=COL[rk(x)];add3d();
  MAP.getSource("sel").setData({type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[x.x,x.q]},properties:{}}]});
  var tags='<span class="tg" style="background:'+c+'">'+rname(x)+'</span>'+(x.j==='點交'||x.j==='不點交'?'<span class="tg o">'+esc(x.j)+'</span>':"")+(x.n?'<span class="tg o">新上架</span>':"")+(x.k?'<span class="tg o">降價降拍</span>':"")+'<span class="tg o">'+esc(x.c+x.d)+'</span>';
  var disc=x.f&&x.f>x.p?'比一拍底價少 <strong>'+Math.round((1-x.p/x.f)*100)+'%</strong><br>':"";
@@ -312,15 +317,17 @@ $("#sclose").onclick=closeSheet;
 var NL="https://wmts.nlsc.gov.tw/wmts/";
 var style={version:8,glyphs:"https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
  sources:{emap:{type:"raster",tiles:[NL+"EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}"],tileSize:256,maxzoom:19,attribution:"© 內政部國土測繪中心"},
-  photo:{type:"raster",tiles:[NL+"PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}"],tileSize:256,maxzoom:19,attribution:"© 內政部國土測繪中心"},
-  omt:{type:"vector",url:"https://tiles.openfreemap.org/planet",attribution:"© OpenFreeMap © OpenStreetMap"}},
- layers:[{id:"emap",type:"raster",source:"emap"},{id:"photo",type:"raster",source:"photo",layout:{visibility:"none"}},
-  {id:"bld",type:"fill-extrusion",source:"omt","source-layer":"building",minzoom:14,layout:{visibility:"none"},paint:{"fill-extrusion-color":"#e6e1d6","fill-extrusion-height":["coalesce",["get","render_height"],9],"fill-extrusion-base":["coalesce",["get","render_min_height"],0],"fill-extrusion-opacity":.82}},
-  {id:"poiq",type:"circle",source:"omt","source-layer":"poi",minzoom:14,paint:{"circle-radius":1,"circle-opacity":0}}]};
+  photo:{type:"raster",tiles:[NL+"PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}"],tileSize:256,maxzoom:19,attribution:"© 內政部國土測繪中心"}},
+ layers:[{id:"emap",type:"raster",source:"emap"},{id:"photo",type:"raster",source:"photo",layout:{visibility:"none"}}]};
+/* 2026-11-27 秒開：3D 建物與周邊 POI 圖資改成圖釘畫好之後才載入，不擋第一個畫面 */
+var OMT={type:"vector",url:"https://tiles.openfreemap.org/planet",attribution:"© OpenFreeMap © OpenStreetMap"};
+var BLD={id:"bld",type:"fill-extrusion",source:"omt","source-layer":"building",minzoom:14,layout:{visibility:"none"},paint:{"fill-extrusion-color":"#e6e1d6","fill-extrusion-height":["coalesce",["get","render_height"],9],"fill-extrusion-base":["coalesce",["get","render_min_height"],0],"fill-extrusion-opacity":.82}};
+var POIQ={id:"poiq",type:"circle",source:"omt","source-layer":"poi",minzoom:14,paint:{"circle-radius":1,"circle-opacity":0}};
+function add3d(){if(!MAP||!MAP.getSource("pts")||MAP.getSource("omt"))return;try{MAP.addSource("omt",OMT);MAP.addLayer(BLD,"cl");MAP.addLayer(POIQ);MAP.setLayoutProperty("bld","visibility",base==="3d"?"visible":"none")}catch(e){}}
 MAP=new maplibregl.Map({container:"map",style:style,center:[121.47,25.02],zoom:10.3,maxZoom:18.5,minZoom:6,dragRotate:true,pitchWithRotate:true,attributionControl:false,localIdeographFontFamily:"'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif"});
 MAP.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
 MAP.touchZoomRotate.disableRotation();
-MAP.on("load",function(){
+var _ini=0;function ini(){if(_ini)return;_ini=1;
  MAP.addSource("pts",{type:"geojson",data:geo(),cluster:true,clusterMaxZoom:13,clusterRadius:46});
  MAP.addSource("sel",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
  MAP.addLayer({id:"cl",type:"circle",source:"pts",filter:["has","point_count"],paint:{"circle-color":"#18354b","circle-opacity":.9,"circle-stroke-color":"#d9c39c","circle-stroke-width":2,"circle-radius":["step",["get","point_count"],15,10,19,50,24,150,30]}});
@@ -334,10 +341,11 @@ MAP.on("load",function(){
  ["cl","pt"].forEach(function(l){MAP.on("mouseenter",l,function(){MAP.getCanvas().style.cursor="pointer"});MAP.on("mouseleave",l,function(){MAP.getCanvas().style.cursor=""})});
  MAP.on("moveend",list);
  load();
-});
+}
+MAP.on("style.load",ini);MAP.on("load",ini);if(MAP.isStyleLoaded())ini();
 document.querySelectorAll("#base button").forEach(function(b){b.onclick=function(){base=b.dataset.b;document.querySelectorAll("#base button").forEach(function(o){o.classList.toggle("on",o===b)});
  MAP.setLayoutProperty("emap","visibility",base==="photo"?"none":"visible");MAP.setLayoutProperty("photo","visibility",base==="photo"?"visible":"none");
- MAP.setLayoutProperty("bld","visibility",base==="3d"?"visible":"none");
+ if(base==="3d")add3d();if(MAP.getLayer("bld"))MAP.setLayoutProperty("bld","visibility",base==="3d"?"visible":"none");
  if(base==="3d"){MAP.easeTo({pitch:60,bearing:-17,zoom:Math.max(MAP.getZoom(),16),duration:900});if(MAP.getZoom()<15)toast("放大地圖就能看到立體建物")}else if(MAP.getPitch()>0)MAP.easeTo({pitch:0,bearing:0,duration:600})}});
 $("#loc").onclick=function(){if(!navigator.geolocation){toast("這個瀏覽器不支援定位");return}toast("定位中…");navigator.geolocation.getCurrentPosition(function(p){var c=[p.coords.longitude,p.coords.latitude];if(!MAP._me)MAP._me=new maplibregl.Marker({color:"#2a7de1"});MAP._me.setLngLat(c).addTo(MAP);MAP.flyTo({center:c,zoom:14.5})},function(){toast("無法取得位置，請允許定位權限")},{enableHighAccuracy:true,timeout:10000})};
 function hashF(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;
@@ -346,12 +354,13 @@ function hashF(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;
 addEventListener("hashchange",function(){F.ft=F.nw=F.dv=0;F.ar="";F.r=[];hashF();apply();fit()});
 if(new URLSearchParams(location.search).get("embed"))document.documentElement.classList.add("emb");
 function load(){
- fetch("{{JSON}}?v={{V}}").then(function(r){return r.json()}).then(function(d){
-  ALL=d.items;hashF();apply();if(location.hash.length>1)fit();
+ DP.then(function(d){
+  ALL=d.items;setTimeout(add3d,2500);hashF();apply();if(location.hash.length>1)fit();
   var id=new URLSearchParams(location.search).get("id");var x=id&&ALL.find(function(y){return y.i===id});
   if(x){MAP.jumpTo({center:[x.x,x.q],zoom:15});open(x)}
  }).catch(function(){toast("資料載入失敗，請重新整理")});
 }
 })();
 </script>
+<script>document.getElementById("back").onclick=function(){if(history.length>1&&document.referrer.indexOf(location.host)>-1){history.back();return false}};</script>
 </body></html>
