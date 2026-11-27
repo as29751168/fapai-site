@@ -44,6 +44,24 @@ for _x in D.get("104", []):
         _a = _a[:_m.start()] + f"底價{float(_p.group(0)):g}萬" + _a[_m.end():]
     _a = re.sub(r"[｜|]?\s*第?[一二三四五六1-6]拍\s*", lambda m: "｜" if m.group(0).startswith(("｜", "|")) else "", _a).replace("｜｜", "｜")
     if _a != _x.get("地址"): _x["地址"] = _a; _name_n += 1
+# 2026-11-28 社群組回報：透明房訊遇到電腦打不出的字會寫成組字「（吉吉）」＝喆、「（又又）」＝雙，或直接打成「？」。
+# 社區名原本遇到括號就截掉，「華園天喆」變「華園天」、「麗寶雙璽」變「麗寶」；地址的「？」也直接上了標題。組字先還原，「？」用同一筆案名裡寫對的字補回
+_ZUZI = {"（吉吉）": "喆", "（又又）": "雙"}
+def _fixchar(t, ref):
+    for _k, _v in _ZUZI.items(): t = t.replace(_k, _v)
+    def _rp(m):
+        mm = re.search(re.escape(m.group(1)) + r"([一-鿿])" + re.escape(m.group(2)), ref)
+        return m.group(1) + mm.group(1) + m.group(2) if mm else m.group(0)
+    return re.sub(r"([一-鿿]{0,2})[？?]([一-鿿]{1,2})", _rp, t)
+for _x in D.get("104", []):
+    _inf = _x.get("資訊") or {}
+    _ref = _fixchar(_x.get("地址") or "", "") + " " + (_inf.get("完整地址") or "")
+    _ch = False
+    for _o, _f in ((_x, "地址"), (_inf, "完整地址"), (_inf, "社區/大樓")):
+        if _o.get(_f) and ("？" in _o[_f] or "?" in _o[_f] or "（" in _o[_f]):
+            _n = _fixchar(_o[_f], _ref)
+            if _n != _o[_f]: _o[_f] = _n; _ch = True
+    if _ch: _name_n += 1
 _area_n += _name_n
 if _name_n: print("案名舊底價改寫:", _name_n, "件")
 _pii_n = 0
@@ -155,9 +173,16 @@ GAL_FB = "var g=this.parentNode;this.remove();if(g&&!g.querySelector('img'))g.ou
 
 def e(s): return html.escape(str(s if s is not None else ""), quote=True)
 def jd(o): return json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
+# 2026-11-27 營運總管交辦：第一張是舊價海報或別戶海報就跳過，改用下一張透明房訊照片（清單在 data/poster_skip.json，海報重做後移除）
+try:
+    POSTER_SKIP = {k: set(v.get("skip", [])) for k, v in json.load(open("data/poster_skip.json", encoding="utf-8")).items() if k.startswith("HW")}
+except Exception:
+    POSTER_SKIP = {}
 def photos(x):
     v = P.get(x["編號"][2:], [])
     if isinstance(v, str): v = [v]
+    sk = POSTER_SKIP.get(x["編號"])
+    if sk: v = [p for p in v if p not in sk] or v   # 全部被跳過就保留原樣，不讓頁面沒照片
     return [(SITE + p if p.startswith("/") else PHOTO_BASE + urllib.parse.quote(p, safe="/")) for p in v]
 def is_ying(x):
     """公告應買（一買）：沒有開標日，先買先贏（2026-11-18 Anna）"""
@@ -1194,14 +1219,62 @@ def area_summary(a, xs):
     head = f"{a[2:] or a}法拍屋｜{a}{len(xs)}件待標" + (f"・底價{wan(ps[0])}～{wan(ps[-1])}" if ps else "") + (f"・最近{md(up[0])}開標" if up else "")
     return head, intro, (f'<h2>{e(a)}近期開標</h2><ul class="soon">{soon}</ul>' if soon else "")
 
+# 2026-11-28 營運總管 4.9 第 4 項（專題研究_Google與AI搜尋）：先做 6 個「區名＋法拍屋」落地頁。
+# 開頭 40～60 字直接回答、團隊依法院公告整理的區域觀察（數字全由資料算出，不寫查不到的行情）、區域專屬 FAQ、知識頁連結、實名整理人與更新日
+DIST6 = ["新北板橋區", "新北三重區", "新北中和區", "桃園桃園區", "桃園中壢區", "台北中山區"]
+def _ping(x):
+    m = re.match(r"[\d.]+", ((x.get("資訊") or {}).get("每坪單價") or "").replace(",", ""))
+    return float(m.group(0)) if m else 0
+def _pct(n, d): return f"{round(n * 100 / d)}%" if d else "—"
+def dist_parts(a, xs):
+    short = a[2:]; n = len(xs)
+    r3 = sum(1 for x in xs if round_of(x) >= 3)
+    dv = sum(1 for x in xs if deliver_of(x) == "點交"); nd = sum(1 for x in xs if deliver_of(x) == "不點交"); ot = n - dv - nd
+    ps = sorted(p for p in (price_num(x["價格"]) for x in xs) if p > 0)
+    pp = sorted(v for v in (_ping(x) for x in xs) if v > 0)
+    kinds = {}
+    for x in xs:
+        k = (x["類型"] or "其他").split("_")[0]; kinds[k] = kinds.get(k, 0) + 1
+    top = sorted(kinds.items(), key=lambda kv: -kv[1])[:3]
+    rr = {k: sum(1 for x in xs if min(round_of(x), 3) == k) for k in (1, 2, 3)}
+    lead = (f"{short}法拍屋目前有 {n} 件待標，第三拍以上 {r3} 件、點交 {dv} 件"
+            + (f"，底價約 {wan(ps[0])}～{wan(ps[-1])}" if ps else "") + "，每日更新。")   # 開頭 40～60 字直接回答
+    rows = [("待標件數", f"{n} 件"),
+            ("點交情形（法院筆錄）", f"點交 {dv} 件（{_pct(dv, n)}）、不點交 {nd} 件（{_pct(nd, n)}）" + (f"、其他或未載明 {ot} 件" if ot else "")),
+            ("拍次分布", f"第一拍 {rr[1]} 件、第二拍 {rr[2]} 件、第三拍以上 {rr[3]} 件"),
+            ("常見類型", "、".join(f"{k} {v} 件" for k, v in top))]
+    if ps: rows.append(("底價區間", f"{wan(ps[0])}～{wan(ps[-1])}，中間值約 {wan(ps[len(ps) // 2])}"))
+    if pp: rows.append(("底價換算每坪", f"{pp[0]:g}～{pp[-1]:g} 萬，中間值約 {pp[len(pp) // 2]:g} 萬（{len(pp)} 件有坪數可換算）"))
+    tbl = "".join(f"<tr><td>{e(k)}</td><td>{e(v)}</td></tr>" for k, v in rows)
+    obs = (f'<section class="box"><h2>{e(short)}法拍屋區域觀察</h2><table>{tbl}</table>'
+           f'<p class="note">以上由 {e(NAME)}依法院拍賣公告與查封筆錄整理，每日隨資料更新。底價不是成交價；同社區實價登錄行情差異大，想知道單一物件跟同社區行情差多少，請 LINE 問我們。</p></section>')
+    learn = [("delivery-or-not", "點交與不點交差在哪？"), ("auction-rounds", "第一拍到第三拍，底價怎麼變？"), ("how-to-bid", "第一次投標要準備什麼？"),
+             ("auction-costs-after-winning", "得標後要繳哪些稅費？"), ("risks", "買法拍屋常見的 5 個風險")]
+    lk = f'<section class="box areas"><h2>買{e(short)}法拍屋前先看</h2>' + "".join(f'<a href="/learn/{k}">{e(t)}</a>' for k, t in learn) + "</section>"
+    faq = [(f"{short}法拍屋去哪裡查？", f"本頁列出{a}目前 {n} 件待標法拍屋，每件都有拍次、開標日期、底價與法院筆錄，資料每日更新（{UPDATED}）；原始公告以司法院法拍屋查詢系統為準。"),
+           (f"{short}法拍屋點交的多嗎？", f"目前 {n} 件中，查封筆錄記載點交 {dv} 件（{_pct(dv, n)}）、不點交 {nd} 件（{_pct(nd, n)}）。點交是法院協助把房子交給得標人；不點交要得標人自己處理占用，投標前務必先看筆錄。")]
+    if pp: faq.append((f"{short}法拍屋每坪多少錢？", f"以底價換算，目前每坪約 {pp[0]:g}～{pp[-1]:g} 萬，中間值約 {pp[len(pp) // 2]:g} 萬。底價不等於成交價，熱門物件常會高於底價得標。"))
+    if r3: faq.append((f"{short}有第三拍以上的法拍屋嗎？", f"有 {r3} 件。第三拍底價通常比第一拍低約三成多，但第三拍流標後會進入公告應買，仍要先查清產權與點交。"))
+    faq.append((f"{short}法拍屋可以委託代標嗎？", f"可以。{NAME}（黃先生 Pitt、林小姐 Anna）提供{short}法拍屋投標諮詢、全程代標與得標後點交處理，LINE@ {LINKS['LINE']}，電話 {PHONE_P}（Pitt）、{PHONE_A}（Anna）。"))
+    by = f'<p class="note">整理：黃先生 Pitt、林小姐 Anna（{e(NAME)}）｜最後更新 {e(UPDATED)}｜資料來源：透明房訊、法院拍賣公告</p>'
+    return lead, obs, lk, faq, by
+
 def area_page(a, xs):
     head, intro, soon = area_summary(a, xs)
     title = f"{head}｜{NAME}"
     desc = intro[:150]
-    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1><p>{e(intro)}</p>'
-            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + faq_html(list_faq(a + "法拍屋", xs)) + contact_box())
+    plus = dist_parts(a, xs) if a in DIST6 else None
+    if plus: desc = plus[0] + "含拍次、開標日、法院筆錄、每坪底價與代標諮詢。"
+    city = next((c for c in CITIES if a[:2] in c[2] and len(c[2]) == 1), None)
+    crumb = f'<a href="/{city[0]}">{e(city[3])}</a> › ' if plus and city else ""
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {crumb}{e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1>' + (f'<p class="lead"><strong>{e(plus[0])}</strong></p>' if plus else "") + f'<p>{e(intro)}</p>' + (plus[1] if plus else "") +
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + (plus[2] if plus else "") + faq_html(plus[3] if plus else list_faq(a + "法拍屋", xs)) + (plus[4] if plus else "") + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{a}法拍屋", "url": f"{SITE}/area/{slug(a)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
-          {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}, faq_ld(list_faq(a + "法拍屋", xs))]
+          {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}, faq_ld(plus[3] if plus else list_faq(a + "法拍屋", xs))]
+    if plus:
+        bl = [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}] + ([{"@type": "ListItem", "position": 2, "name": city[3], "item": f"{SITE}/{city[0]}"}] if city else []) + [{"@type": "ListItem", "position": 3 if city else 2, "name": f"{a}法拍屋", "item": f"{SITE}/area/{slug(a)}"}]
+        ld.append({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": bl})
+        ld[1]["author"] = [{"@type": "Person", "name": "黃先生 Pitt"}, {"@type": "Person", "name": "林小姐 Anna"}]; ld[1]["publisher"] = {"@id": SITE + "/#org"}
     return title, page(title, desc, f"/area/{slug(a)}", body, ld, SITE + "/og.jpg")
 
 CITIES = [
