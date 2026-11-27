@@ -60,7 +60,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
 
     TOP = ('<header class="hd"><div class="wrap hd-in"><a class="logo" href="/"><img src="/home/assets/pitt_anna.webp" alt="" width="44" height="44">'
            '<span><b>Pitt &amp; Anna</b><small>104法拍網團隊</small></span></a>'
-           '<nav><a href="/list">找物件</a><a href="/#countdown">3～14 天內開標</a><a href="/learn">法拍小教室</a><a href="/fees">收費</a><a href="/team/pitt">認識我們</a></nav>'
+           '<nav><a href="/list">找物件</a><a href="/map">法拍地圖</a><a href="/#countdown">3～14 天內開標</a><a href="/learn">法拍小教室</a><a href="/fees">收費</a><a href="/team/pitt">認識我們</a></nav>'
            f'<a class="hd-line" href="{LINE}" target="_blank" rel="noopener">LINE@ 問物件</a></div></header>')
     FOOT = ('<footer class="ft"><div class="wrap"><p><b>Pitt &amp; Anna 104法拍網團隊</b>｜你的法拍購屋夥伴</p>'
             '<p>黃先生 Pitt <a href="tel:0918313888">0918-313-888</a>　林小姐 Anna <a href="tel:0986678928">0986-678-928</a>　'
@@ -79,6 +79,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
     .hero-top{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap}
     .hero-who{display:flex;align-items:center;gap:14px}.hero-who img{width:96px;height:96px;border-radius:18px;object-fit:cover;object-position:50% 15%;background:#dbe9f7;border:3px solid #ffd84d}
     .hero h1{margin:0;font-size:34px;line-height:1.25}.hero h1 mark{background:linear-gradient(transparent 58%,#ffd84d 58%);color:inherit;padding:0 2px}
+    .maplink{display:block;margin-top:16px;background:#ffd84d;color:#12324f;text-decoration:none;font-weight:700;font-size:17px;text-align:center;border-radius:12px;padding:12px 14px}.maplink:hover{background:#ffe27a}
     .hero-sub{margin:6px 0 0;color:#c8d6e5;font-size:15px}
     .hero-k{margin-left:auto;display:flex;gap:10px}.hero-k a{background:#fff;color:#12324f;text-decoration:none;border-radius:12px;padding:8px 14px;text-align:center;font-weight:700;min-width:84px}
     .hero-k a b{display:block;font-size:24px;color:#e2553b;line-height:1.1}.hero-k a small{font-size:12px;color:#5b6875}
@@ -151,6 +152,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
       '<div class="hero-top"><div class="hero-who"><img src="/home/assets/pitt_anna.webp" alt="Pitt 與 Anna（Q 版）">'
       '<div><h1 class="hand">你的<mark>法拍購屋夥伴</mark></h1><p class="hero-sub">Pitt &amp; Anna 夫妻雙人顧問｜看懂公告、算清總成本、陪你到點交</p></div></div>'
       f'<div class="hero-k"><a href="/list?c=台北"><b>{city_cnt.get("台北", 0)}</b><small>台北</small></a><a href="/list?c=新北"><b>{city_cnt.get("新北", 0)}</b><small>新北</small></a><a href="/list?c=桃園"><b>{city_cnt.get("桃園", 0)}</b><small>桃園</small></a></div></div>'
+      f'<a class="maplink" href="/map">打開法拍地圖，在地圖上找全台法拍屋 →</a>'
       f'<div class="cd-head"><h2 class="hand"><span>倒數</span>雙北桃園 3～14 天內開標</h2>'
       f'<div class="chips" role="group" aria-label="選縣市"><button aria-pressed="true" data-c="">全部 {len(soon)}</button>'
       + "".join(f'<button aria-pressed="false" data-c="{c}">{c} {cnt[c]}</button>' for c in TW) + '</div></div>'

@@ -945,7 +945,7 @@ def detail_page(x):
     cta = (f'<div class="cta"><a class="l" id="ask" href="{e(oa)}" target="_blank" rel="noopener">LINE 詢問此物件</a><a class="t" href="tel:0918313888">打電話</a><button class="sh" id="share" type="button">分享</button></div>'
            f'<script>document.getElementById("ask").onclick=function(){{var t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s){{t+=" （來源:"+s+"）";this.href="https://line.me/R/oaMessage/%40635nftwk/?"+encodeURIComponent(t)}}}};'
            # 2026-11-27 Anna「這個怎麼不能分享」：手機叫出系統分享（LINE、FB、Messenger…），電腦就複製；內容照 Anna 給的格式＝第一行案名、第二行網址
-           f'document.getElementById("share").onclick=function(){{var b=this,t={jd(share_name + chr(10) + SITE + "/h/" + x["編號"])};if(navigator.share){{navigator.share({{text:t}}).catch(function(){{}})}}else{{try{{navigator.clipboard.writeText(t);b.textContent="已複製";setTimeout(function(){{b.textContent="分享"}},1500)}}catch(e){{prompt("複製這段文字",t)}}}}}};</script>')
+           f'document.getElementById("share").onclick=function(){{var b=this,t={jd("我發現這個物件，想跟你分享" + chr(10) + share_name + chr(10) + SITE + "/h/" + x["編號"])};if(navigator.share){{navigator.share({{text:t}}).catch(function(){{}})}}else{{try{{navigator.clipboard.writeText(t);b.textContent="已複製";setTimeout(function(){{b.textContent="分享"}},1500)}}catch(e){{prompt("複製這段文字",t)}}}}}};</script>')
     return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, og_pick(ph), "<style>footer{padding-bottom:90px}</style>", "", False, f'{x["地址"]} 法拍屋實拍照片')
 
 FAQ = [
