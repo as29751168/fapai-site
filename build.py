@@ -841,6 +841,37 @@ def utm(path, source, medium="", campaign="", content=""):
     q = urllib.parse.urlencode([(k, v) for k, v in (("utm_source", source), ("utm_medium", medium), ("utm_campaign", campaign), ("utm_content", content)) if v])
     return SITE + path + ("&" if "?" in path else "?") + q
 
+# 2026-11-27 Anna：做好的影片要放上官網。來源是營運總管的「影片平台總表」（影片製作\影片平台總表.csv），複製一份到 data/videos.csv
+# 只放我們自己頻道的影片；tomin104編號 有填的才放到那一案的詳情頁；按了才載入 YouTube（頁面不變慢）
+def _load_videos():
+    import csv
+    try: rows = list(csv.DictReader(open("data/videos.csv", encoding="utf-8-sig")))
+    except FileNotFoundError: return {}, []
+    by, know = {}, []
+    for r in rows:
+        vid = (r.get("youtube_id") or "").strip()
+        if not re.fullmatch(r"[\w-]{11}", vid) or (r.get("YouTube") or "").strip() not in ("", "公開"): continue
+        t = re.sub(r"\s*#\S+", "", r.get("標題") or "").strip()
+        for n in re.split(r"[、,，\s]+", (r.get("tomin104編號") or "").strip()):
+            if re.fullmatch(r"HW\d+", n): by.setdefault(n, []).append((vid, t))
+        if (r.get("類型") or "").strip() == "知識": know.append((vid, t))
+    return by, know
+VIDEOS, VIDEOS_KNOW = _load_videos()
+YT_JS = ('<script>document.addEventListener("click",function(ev){var a=ev.target.closest&&ev.target.closest("a[data-yt]");if(!a)return;ev.preventDefault();'
+         'var f=document.createElement("iframe");f.src="https://www.youtube-nocookie.com/embed/"+a.dataset.yt+"?autoplay=1&rel=0";f.title=a.title;f.allow="autoplay; encrypted-media; picture-in-picture";f.allowFullscreen=true;'
+         'f.style.cssText="width:100%;aspect-ratio:16/9;border:0;border-radius:10px;display:block";a.replaceWith(f)})</script>')
+YT_CSS = ('<style>.ytw{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.yt{position:relative;display:block;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000}'
+          '.yt img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92}.yt span{position:absolute;left:50%;top:50%;width:64px;height:44px;margin:-22px 0 0 -32px;background:#e62117;border-radius:12px}'
+          '.yt span:after{content:"";position:absolute;left:26px;top:13px;border-left:16px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}.ytt{font-size:14px;margin:6px 0 0;line-height:1.5}</style>')
+def yt_card(vid, t):
+    return (f'<div><a class="yt" href="https://www.youtube.com/watch?v={e(vid)}" data-yt="{e(vid)}" title="{e(t)}" target="_blank" rel="noopener">'
+            f'<img loading="lazy" src="https://i.ytimg.com/vi/{e(vid)}/hqdefault.jpg" alt="{e(t)}"><span></span></a><p class="ytt">{e(t)}</p></div>')
+def video_box(x):
+    vs = VIDEOS.get(x["編號"], [])[:3]
+    if not vs: return ""
+    return (YT_CSS + '<section class="box"><h2>影片介紹</h2><div class="ytw">' + "".join(yt_card(v, t) for v, t in vs) + '</div>'
+            '<p style="font-size:13px;color:#666;margin:8px 0 0">影片是製作當時的資訊；底價、拍次、開標日以本頁最新資料與法院公告為準。</p></section>' + YT_JS)
+
 def detail_page(x):
     inf = dict(x.get("資訊", {}))
     notes, sched = inf.pop("筆錄", ""), inf.pop("拍賣紀錄", "")
@@ -884,7 +915,7 @@ def detail_page(x):
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
-            f'<section class="box"><h1>{e(h1)}</h1><p>{e(x["地址"])}</p>' + (f'<p>{e(lead)}</p>' if lead else "") + f'<div>{tags}</div>{countdown(x)}<div class="price">{pr}</div>{gal}</section>'
+            f'<section class="box"><h1>{e(h1)}</h1><p>{e(x["地址"])}</p>' + (f'<p>{e(lead)}</p>' if lead else "") + f'<div>{tags}</div>{countdown(x)}<div class="price">{pr}</div>{gal}</section>{video_box(x)}'
             f'<section class="box" id="tools" data-price="{price_num(x["價格"])}" data-addr="{e(x["地址"])}" data-map="{e(map_query(x))}" data-id="{e(x["編號"])}"></section>'
             f'<section class="box"><h2>物件資料</h2>{top}</section>'
             + (f'<section class="box"><h2>詳細資料</h2>{det}</section>' if det else "")
@@ -1635,7 +1666,7 @@ if __name__ == "__main__":
         except ValueError: continue
         _ld += [dict(n, **{"@context": "https://schema.org"}) for n in _g.get("@graph", [_g]) if n.get("@type") in ("WebSite", "Service", "FAQPage")]
     home_v2.build(D, json.load(open("site/photos.json", encoding="utf-8")), write,
-                  (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).date(), _ld, CLICK_JS)
+                  (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).date(), _ld, CLICK_JS, VIDEOS, VIDEOS_KNOW, YT_CSS, YT_JS, yt_card)
     write("site/post.html", post_page())
     write("site/helper.html", helper_page())
     write("site/member.html", member_page())

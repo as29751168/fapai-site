@@ -10,7 +10,7 @@ FB = "https://www.facebook.com/share/1CnLq9vuJd/?mibextid=wwXIfr"
 e = lambda s: html.escape(str(s or ""), quote=True)
 TW = ("台北", "新北", "桃園")
 
-def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS=""):
+def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(), YT_CSS="", YT_JS="", yt_card=None):
     OLD_LD = list(OLD_LD)
 
     def open_date(x):
@@ -130,6 +130,16 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS=""):
     cities = sorted(city_cnt.items(), key=lambda t: ({"台北": 0, "新北": 1, "桃園": 2}.get(t[0], 3), -t[1]))
     total = sum(city_cnt.values())
     board = "".join(card(d, x) for d, x in soon[:12])
+    vids, seen = [], set()
+    for x in sorted([x for x in D["104"] if (VIDEOS or {}).get(x["編號"]) and open_date(x) and open_date(x) >= TODAY], key=open_date):
+        for v, t in VIDEOS[x["編號"]][:1]:
+            if v not in seen: seen.add(v); vids.append((v, t))
+    for v, t in VIDEOS_KNOW:
+        if v not in seen: seen.add(v); vids.append((v, t))
+    vids = vids[:6]
+    vsec = ('<section class="sec"><div class="wrap"><h2 class="hand">看 Pitt &amp; Anna 講法拍</h2><p class="lead">我們自己做的案件解說與法拍知識影片。'
+            f'更多影片在 <a href="{YT}" target="_blank" rel="noopener">YouTube「我的法拍屋最新情報」</a></p>'
+            + YT_CSS + '<div class="ytw">' + "".join(yt_card(v, t) for v, t in vids) + '</div></div></section>' + YT_JS) if vids and yt_card else ""
 
     ORG = {"@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#organization", "legalName": "財欣不動產管理顧問有限公司", "name": "Pitt & Anna 104法拍網團隊", "url": SITE,
            "telephone": "+886-986-678-928", "parentOrganization": {"@type": "Organization", "name": "財欣不動產管理顧問有限公司"},
@@ -151,7 +161,8 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS=""):
       '<div><h2 class="hand">我們是 Pitt &amp; Anna</h2><p class="lead">夫妻雙人顧問。你只要決定喜不喜歡，公告、筆錄、點交、要準備多少錢，我們幫你拆清楚。</p>'
       '<div class="ppl"><a class="pp" href="/team/pitt"><b>黃先生 Pitt</b><p>產權調查、現場勘查、標價評估</p><span class="tel">0918-313-888</span></a>'
       '<a class="pp" href="/team/anna"><b>林小姐 Anna</b><p>投標諮詢、委託流程、點交與交屋協助</p><span class="tel">0986-678-928</span></a></div></div></div></section>'
-      '<section class="sec" style="background:#fbfaf3"><div class="wrap"><h2 class="hand">買法拍，最常卡在這三件事</h2><p class="lead">先看懂，再決定要不要標。</p><div class="notes">'
+      + vsec +
+  '<section class="sec" style="background:#fbfaf3"><div class="wrap"><h2 class="hand">買法拍，最常卡在這三件事</h2><p class="lead">先看懂，再決定要不要標。</p><div class="notes">'
       '<a class="note" href="/learn/delivery-or-not"><h3 class="hand">點交還是不點交？</h3><p>差在得標後法院幫不幫你把人請出去。公告的「使用情形」要看正本。</p><span>看說明 →</span></a>'
       '<a class="note" href="/learn/auction-costs-after-winning"><h3 class="hand">總共要準備多少錢？</h3><p>底價之外，還有保證金、尾款、稅費、代書費。先算清楚再出價。</p><span>看說明 →</span></a>'
       '<a class="note" href="/learn/auction-rounds"><h3 class="hand">第幾拍最划算？</h3><p>每流標一次底價通常再降，但等越久，被別人標走的機會也越高。</p><span>看說明 →</span></a>'
