@@ -341,7 +341,16 @@ header.top a.lg{font-size:14px;font-weight:650;letter-spacing:.03em}
 .notes.nrd{white-space:normal}.notes p{margin:0 0 14px}.notes p b{color:var(--navy)}
 .notes .nh{font-weight:700;color:var(--navy);background:var(--paper);border-left:3px solid var(--gold);padding:8px 14px;margin:4px 0 16px}
 .btn,.cta a,.cta button,.fab a,.goback,.lg,.tel{transition:transform .12s ease}.btn:active,.cta a:active,.cta button:active,.fab a:active,.goback:active,.lg:active,.tel:active{transform:scale(.97)}@media(prefers-reduced-motion:reduce){.btn:active,.cta a:active,.cta button:active,.fab a:active,.goback:active{transform:none}}
-@media(max-width:640px){.box{padding:20px 18px}.box p,.notes p{font-size:16px;line-height:1.85}}"""
+@media(max-width:640px){.box{padding:20px 18px}.box p,.notes p{font-size:16px;line-height:1.85}}
+/* 2026-11-28 長輩好讀好按（unslop 健檢第 1 步）：手機最小 14px、按鈕至少 44px */
+.fv{width:44px!important;height:44px!important;font-size:20px!important;line-height:44px!important}
+.calc input,main select,main input{min-height:44px;font-size:16px}
+summary{padding:10px 0;line-height:1.5}
+main p a[href^="tel:"],footer a[href^="tel:"]{display:inline-block;padding:10px 2px}
+nav.bc{font-size:14px}nav.bc a{display:inline-block;padding:10px 0}
+@media(max-width:640px){.card .m,.ch,.rd2{font-size:14px}.card .b h3{font-size:17px}.note{font-size:13px}}
+@media(max-width:640px){.card .tg,.cv .tg,.tg.l,.tg.r{font-size:14px!important;padding:3px 8px!important}}
+.mb{min-width:44px;min-height:44px}.areas a{display:inline-block;padding:10px 0}@media(max-width:640px){.tag{font-size:14px;padding:3px 8px}label{font-size:14px}}"""
 
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
