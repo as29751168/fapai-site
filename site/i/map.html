@@ -2,14 +2,14 @@
 <html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>法拍地圖｜台北・新北・桃園法拍屋地圖找屋（每日更新）｜Pitt &amp; Anna 104法拍網團隊</title>
-<meta name="description" content="在地圖上找法拍屋：門牌精準定位、拍次顏色一眼看懂、開標倒數、底價與每坪單價、附近捷運學校市場、3D 立體建物與航照。目前 1066 件，資料每日更新（2026-11-28 11:22）。">
+<meta name="description" content="在地圖上找法拍屋：門牌精準定位、拍次顏色一眼看懂、開標倒數、底價與每坪單價、附近捷運學校市場、3D 立體建物與航照。目前 1066 件，資料每日更新（2026-11-28 14:43）。">
 <link rel="canonical" href="https://tomin104.com/map">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Pitt &amp; Anna 104法拍網團隊">
 <meta property="og:title" content="法拍地圖｜看地圖找法拍屋"><meta property="og:description" content="門牌精準定位、拍次顏色、開標倒數、附近生活機能，資料每日更新。">
 <meta property="og:url" content="https://tomin104.com/map"><meta property="og:image" content="https://tomin104.com/og.jpg"><meta property="og:locale" content="zh_TW">
 <meta name="theme-color" content="#18354b">
 <meta name="robots" content="noindex,nofollow"><script>(function(){try{if(localStorage.getItem("i1")==="1")return;var h=function(s){var n=5381,i;for(i=0;i<s.length;i++)n=((n*33)+s.charCodeAt(i))>>>0;return n};var t=prompt("104法拍網 內部地圖・請輸入密碼");if(t&&h(t)===2008841021){localStorage.setItem("i1","1")}else{document.documentElement.innerHTML="<body style=\"font-family:sans-serif;padding:40px;text-align:center;color:#334\">密碼錯誤或已取消，請重新整理再試。</body>"}}catch(e){}})();</script>
-<script>window.DP0=fetch("/i/map.json?v=202611281122").then(function(r){return r.json()});</script>
+<script>window.DP0=fetch("/i/map.json?v=202611281443").then(function(r){return r.json()});</script>
 <link rel="preload" href="/vendor/maplibre-gl-4.7.1.js" as="script" fetchpriority="low">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Pitt &amp; Anna 104法拍網團隊 法拍地圖","url":"https://tomin104.com/map","applicationCategory":"RealEstate","operatingSystem":"Web","inLanguage":"zh-Hant","offers":{"@type":"Offer","price":"0","priceCurrency":"TWD"},"provider":{"@type":"Organization","name":"Pitt & Anna 104法拍網團隊","url":"https://tomin104.com"}}</script>
 <style>
@@ -76,18 +76,18 @@ a{color:inherit;text-decoration:none}
 /* 物件卡 */
 #sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#fff;border-radius:12px 12px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.18);max-height:64%;overflow-y:auto;transform:translateY(105%);transition:transform .22s ease;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 #sheet.on{transform:none}
-.sx{position:sticky;top:0;display:flex;justify-content:center;padding:7px 0 3px;background:#fff;z-index:1}
+.sx{position:sticky;top:0;display:flex;align-items:center;gap:8px;padding:8px 54px 8px 12px;background:#fff;z-index:1;border-bottom:1px solid var(--line)}.sx .nv{height:42px;padding:0 14px;border:1px solid #b9c6cd;border-radius:999px;font-size:16px;color:var(--navy);background:#fff;font-weight:600}.sx .nv:disabled{opacity:.35}#spos{flex:1;text-align:center;font-size:14px;color:var(--muted)}
 .sx i{width:38px;height:4px;border-radius:2px;background:#cfd6da}
-.sx button{position:absolute;right:8px;top:2px;width:36px;height:36px;font-size:22px;color:var(--muted)}
+#sclose{position:absolute;right:8px;top:8px;width:42px;height:42px;font-size:26px;color:var(--navy);border:1px solid #b9c6cd;border-radius:50%;background:#fff}
 .sp{position:relative;aspect-ratio:16/9;background:#eef1f2 center/cover no-repeat;margin:0 12px;border-radius:6px}
 .sp.no{display:none}
 @media(max-width:899px){.sp{aspect-ratio:auto;height:150px;background-size:contain;background-color:#f3f1ec}}
 .sc{padding:10px 14px 4px}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px}
-.tg{font-size:12px;padding:2px 8px;border-radius:2px;color:#fff;background:var(--navy)}
+.tg{font-size:13.5px;padding:2px 8px;border-radius:2px;color:#fff;background:var(--navy)}
 .tg.o{background:#fff;color:var(--navy);border:1px solid #b9c6cd}
-.sc h2{font-family:"Noto Serif TC","Songti TC",serif;font-size:18px;color:var(--navy);line-height:1.4;letter-spacing:.02em}
-.sc .mt{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.sc h2{font-family:"Noto Serif TC","Songti TC",serif;font-size:20px;color:var(--navy);line-height:1.4;letter-spacing:.02em}
+.sc .mt{font-size:15px;color:var(--muted);margin:4px 0 10px}
 .pbox{display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;gap:10px}
 .pbox .l small{display:block;font-size:12px;color:var(--gold)}
 .pbox .l b{font-size:26px;color:var(--navy);font-family:"Noto Serif TC","Songti TC",serif}
@@ -96,8 +96,8 @@ a{color:inherit;text-decoration:none}
 .cdn{margin:10px 0 0;font-size:14px;color:var(--ink)}
 .cdn b{color:var(--r3)}
 .note{font-size:12px;color:var(--muted);margin-top:6px}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 4px}
-.acts a,.acts button{height:44px;display:flex;align-items:center;justify-content:center;border:1px solid #b9c6cd;border-radius:3px;font-size:14px;color:var(--navy);background:#fff}
+.acts{display:grid;grid-template-columns:1fr;gap:10px;padding:12px 14px 4px}.mini{display:flex;justify-content:center;gap:26px;padding:10px 14px 4px}.mini a,.mini button{font-size:15px;color:var(--navy);text-decoration:underline;background:none;border:0}
+.acts a,.acts button{height:52px;display:flex;align-items:center;justify-content:center;border:1px solid #b9c6cd;border-radius:6px;font-size:17px;color:var(--navy);background:#fff}
 .acts .pri{grid-column:1/-1;background:var(--navy);border-color:var(--navy);color:#fff}
 .acts .ln{background:var(--gold-l);border-color:var(--gold-l);color:var(--navy);font-weight:600}
 .nb{margin:10px 14px 6px;border:1px solid var(--line);border-radius:6px;padding:10px 12px}
@@ -192,7 +192,7 @@ a{color:inherit;text-decoration:none}
    <div class="seg" id="base"><button data-b="map" class="on">地圖</button><button data-b="photo">航照</button><button data-b="3d">3D</button></div>
    <div class="seg"><button id="loc" title="我的位置">定位</button></div>
   </div>
-  <div class="upd">更新 2026-11-28 11:22・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
+  <div class="upd">更新 2026-11-28 14:43・以法院公告為準｜© 國土測繪中心・OpenFreeMap・OSM</div>
   <section id="list">
    <div class="lh"><span>此範圍 <b id="lc">載入中…</b> 件</span><button id="lt" type="button">收合</button></div>
    <div class="cards" id="cards"></div>
@@ -208,14 +208,14 @@ a{color:inherit;text-decoration:none}
      <li>點物件卡看拍次、底價、開標倒數，再點進物件頁看完整法院筆錄與點交情形。</li>
     </ul>
     <h2>資料來源</h2>
-    <p>物件資料由 Pitt &amp; Anna 104法拍網團隊依法院拍賣公告整理（透明房訊），每天自動更新，最後更新 2026-11-28 11:22。圖釘依門牌地址定位，定位不到門牌的物件會標成空心圖釘，代表位置是依路段推估。底圖來自內政部國土測繪中心、OpenFreeMap 與 OpenStreetMap。拍次、底價和開標日期都可能變動，投標前請以法院最新公告為準。</p>
+    <p>物件資料由 Pitt &amp; Anna 104法拍網團隊依法院拍賣公告整理（透明房訊），每天自動更新，最後更新 2026-11-28 14:43。圖釘依門牌地址定位，定位不到門牌的物件會標成空心圖釘，代表位置是依路段推估。底圖來自內政部國土測繪中心、OpenFreeMap 與 OpenStreetMap。拍次、底價和開標日期都可能變動，投標前請以法院最新公告為準。</p>
     <h2>常見問題</h2>
     <p><b>「此範圍」的件數為什麼會變？</b>只計算目前地圖畫面裡的物件，移動或縮放地圖就會重新計算。</p>
     <p><b>點交、不點交在哪裡看？</b>點物件卡進入物件頁，「法院筆錄」裡有點交情形；也可以用上方「點交」快速篩選。</p>
     <p><b>看到喜歡的物件怎麼辦？</b>把案名傳到 LINE@，黃先生 Pitt、林小姐 Anna 會協助看公告、算總成本與代標評估。</p>
    </details>
   </section>
-  <section id="sheet" aria-live="polite"><div class="sx"><i></i><button id="sclose" type="button" aria-label="關閉">×</button></div><div id="sbody"></div></section>
+  <section id="sheet" aria-live="polite"><div class="sx"><button class="nv" id="sprev" type="button">‹ 上一件</button><span id="spos"></span><button class="nv" id="snext" type="button">下一件 ›</button><button id="sclose" type="button" aria-label="關閉">×</button></div><div id="sbody"></div></section>
  </div>
 </div>
 <div id="filt"><div class="bk"></div><div class="pn">
@@ -234,7 +234,7 @@ var TYPES=["公寓","大樓","華廈","透天","店面","一樓"];
 var PR=[[0,500,"500 萬以下"],[500,1000,"500–1,000 萬"],[1000,1500,"1,000–1,500 萬"],[1500,2000,"1,500–2,000 萬"],[2000,3000,"2,000–3,000 萬"],[3000,1e9,"3,000 萬以上"]];
 var SZ=[[0,20,"20 坪以下"],[20,35,"20–35 坪"],[35,50,"35–50 坪"],[50,1e9,"50 坪以上"]];
 /* 2026-11-27 秒開第二版：清單和件數不等地圖；地圖程式庫非同步載入；國土測繪底圖 3 秒沒好自動換 OSM */
-var DP=window.DP0||fetch("/i/map.json?v=202611281122").then(function(r){return r.json()});
+var DP=window.DP0||fetch("/i/map.json?v=202611281443").then(function(r){return r.json()});
 var C0=[121.47,25.02],Z0=10.3;
 function b0(){var e=document.getElementById("map"),w=e.clientWidth||innerWidth,h=e.clientHeight||innerHeight,s=512*Math.pow(2,Z0),dx=w/2*360/s,Y=(1-Math.log(Math.tan(Math.PI/4+C0[1]*Math.PI/360))/Math.PI)/2*s;function lat(y){return Math.atan(Math.sinh(Math.PI*(1-2*y/s)))*180/Math.PI}var n=lat(Y-h/2),so=lat(Y+h/2);return{contains:function(p){return p[0]>=C0[0]-dx&&p[0]<=C0[0]+dx&&p[1]>=so&&p[1]<=n}}}
 var $=function(s){return document.querySelector(s)};
@@ -282,9 +282,9 @@ function list(){
 /* 物件卡 */
 var PEND=null;
 function open(x,fly){
- if(!MAP||!MAP.getSource("sel")){PEND=x;return}
- SEL=x;var c=COL[rk(x)];add3d();
- MAP.getSource("sel").setData({type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[x.x,x.q]},properties:{}}]});
+ var RDY=MAP&&MAP.getSource("sel");PEND=RDY?null:x;
+ SEL=x;var c=COL[rk(x)];if(RDY){add3d();
+ MAP.getSource("sel").setData({type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[x.x,x.q]},properties:{}}]})}
  var tags='<span class="tg" style="background:'+c+'">'+rname(x)+'</span>'+(x.j==='點交'||x.j==='不點交'?'<span class="tg o">'+esc(x.j)+'</span>':"")+(x.n?'<span class="tg o">新上架</span>':"")+(x.k?'<span class="tg o">降價降拍</span>':"")+'<span class="tg o">'+esc(x.c+x.d)+'</span>';
  var disc=x.f&&x.f>x.p?'比一拍底價少 <strong>'+Math.round((1-x.p/x.f)*100)+'%</strong><br>':"";
  var ll=x.q+","+x.x, cd=cdtext(x);
@@ -293,19 +293,25 @@ function open(x,fly){
   '<div class="pbox"><div class="l"><small>底價</small><b>'+money(x.p)+'</b></div><div class="r">'+disc+(x.u?"每坪 "+x.u+" 萬<br>":"")+'編號 '+esc(x.i)+'</div></div>'+
   (cd?'<p class="cdn"><b>'+esc(cd)+'</b>'+(x.r!=="Y"&&days(x)>0?'・保證金約 '+money(Math.round(x.p*0.2))+'，請提早準備':"")+'</p>':"")+
   (x.e<2?'<p class="note">地圖位置為路段推估，實際門牌以物件頁為準。</p>':"")+'</div>'+
-  '<div class="acts"><a class="pri" href="/h/'+esc(x.i)+'">看物件詳情・法院筆錄</a><button class="ln" id="aline" type="button">LINE 問這間</button><a href="https://www.google.com/maps/dir/?api=1&destination='+ll+'" target="_blank" rel="noopener">導航過去</a><a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+ll+'" target="_blank" rel="noopener">Google 街景</a><button id="ashare" type="button">分享物件</button></div>'+
+  '<div class="acts"><a class="pri" href="/h/'+esc(x.i)+'">看詳細資料（照片・法院筆錄）</a><button class="ln" id="aline" type="button">LINE 問這間</button></div>'+'<div class="mini"><a href="https://www.google.com/maps/dir/?api=1&destination='+ll+'" target="_blank" rel="noopener">導航</a><a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+ll+'" target="_blank" rel="noopener">街景</a><button id="ashare" type="button">分享</button></div>'+
   (MODE==="internal"?intBlock(x):"")+
   '<div class="nb" id="nb"><h3>附近生活機能（步行約略時間）</h3><ul id="nbl"><li>查詢中…</li></ul><div class="q">'+["捷運站","國小","市場","超市","公園"].map(function(k){return '<a href="https://www.google.com/maps/search/'+encodeURIComponent(k)+'/@'+ll+',16z" target="_blank" rel="noopener">'+k+'</a>'}).join("")+'</div></div>'+
   '<p class="cta">想知道這間值不值得標？LINE 傳編號給 Pitt & Anna，幫你看行情與點交風險。</p>';
+ if(!SQ0||SQ0.indexOf(x)<0)SQ0=seq(x);var SQ=SQ0,ix=SQ.indexOf(x);$("#spos").textContent=ix>-1?"第 "+(ix+1)+" / "+SQ.length+" 件":"";$("#sprev").disabled=ix<1;$("#snext").disabled=ix<0||ix>=SQ.length-1;
  $("#sheet").classList.add("on");$("#main").classList.add("so");$("#sheet").scrollTop=0;
  $("#aline").onclick=function(){var t="我想詢問法拍物件 "+x.i+"｜"+x.a;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast("已複製物件編號，貼到 LINE 傳給我們")},function(){}).finally(function(){setTimeout(function(){location.href=LINE},500)})};
  $("#ashare").onclick=function(){var u="https://tomin104.com/map?id="+x.i;if(navigator.share)navigator.share({title:x.a+" 法拍屋",text:rname(x)+"・底價 "+money(x.p),url:u}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(u).then(function(){toast("連結已複製")})};
  try{history.replaceState(null,"","/map?id="+x.i)}catch(e){}
  document.querySelectorAll(".cd").forEach(function(e){e.classList.toggle("sel",e.dataset.i===x.i)});
+ if(!RDY)return;
  if(fly!==false){var mob=innerWidth<900;MAP.flyTo({center:[x.x,x.q],zoom:Math.max(MAP.getZoom(),16),offset:mob?[0,-innerHeight*0.2]:[-200,0],duration:700})}
  MAP.once("idle",function(){near(x)});
 }
-function closeSheet(){$("#sheet").classList.remove("on");$("#main").classList.remove("so");SEL=null;MAP.getSource("sel").setData({type:"FeatureCollection",features:[]});document.querySelectorAll(".cd.sel").forEach(function(e){e.classList.remove("sel")});try{history.replaceState(null,"","/map")}catch(e){}}
+function seq(x){var ids=[].map.call(document.querySelectorAll("#cards .cd"),function(e){return e.dataset.i});if(ids.indexOf(x.i)<0||ids.length<5){return VIEW.slice().sort(function(a,b){return dist(x.x,x.q,a.x,a.q)-dist(x.x,x.q,b.x,b.q)})}var m={};VIEW.forEach(function(v){m[v.i]=v});return ids.map(function(i){return m[i]}).filter(Boolean)}
+var SQ0=null;function step(d){if(!SEL||!SQ0)return;var i=SQ0.indexOf(SEL)+d;if(i>=0&&i<SQ0.length)open(SQ0[i])}
+$("#sprev").onclick=function(){step(-1)};$("#snext").onclick=function(){step(1)};
+(function(){var sx=0,sy=0,el=document.getElementById("sheet");el.addEventListener("touchstart",function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});el.addEventListener("touchend",function(e){var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx<0?1:-1)},{passive:true})})();
+function closeSheet(){SQ0=null;$("#sheet").classList.remove("on");$("#main").classList.remove("so");SEL=null;if(MAP&&MAP.getSource("sel"))MAP.getSource("sel").setData({type:"FeatureCollection",features:[]});document.querySelectorAll(".cd.sel").forEach(function(e){e.classList.remove("sel")});try{history.replaceState(null,"","/map")}catch(e){}}
 /* 附近生活機能：讀 3D 圖資裡的 POI，免另外呼叫 API */
 function dist(a,b,c,d){var R=6371000,r=Math.PI/180,x=(c-a)*r*Math.cos((b+d)/2*r),y=(d-b)*r;return Math.sqrt(x*x+y*y)*R}
 function near(x){
@@ -357,7 +363,7 @@ function add3d(){if(!MAP||!MAP.getSource("pts")||MAP.getSource("omt"))return;try
 function boot(){if(MAP)return;window.__bootMs=Math.round(performance.now());
 MAP=new maplibregl.Map({container:"map",style:style,center:C0,zoom:Z0,maxZoom:18.5,minZoom:6,dragRotate:true,pitchWithRotate:true,attributionControl:false,localIdeographFontFamily:"'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif"});
 MAP.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
-MAP.touchZoomRotate.disableRotation();
+MAP.touchZoomRotate.disableRotation();if(innerWidth<900)MAP.touchPitch.disable();
 var _ini=0;function ini(){if(_ini)return;_ini=1;
  MAP.addSource("pts",{type:"geojson",data:geo(),cluster:true,clusterMaxZoom:13,clusterRadius:46});
  MAP.addSource("ptl",{type:"geojson",data:geo(),cluster:true,clusterMaxZoom:13,clusterRadius:46});
@@ -372,13 +378,14 @@ var _ini=0;function ini(){if(_ini)return;_ini=1;
  MAP.on("click","pt",function(e){var id=e.features[0].properties.i;var x=ALL.find(function(y){return y.i===id});if(x){open(x,false);var c=document.querySelector('.cd[data-i="'+id+'"]');if(c)c.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"})}});
  ["cl","pt"].forEach(function(l){MAP.on("mouseenter",l,function(){MAP.getCanvas().style.cursor="pointer"});MAP.on("mouseleave",l,function(){MAP.getCanvas().style.cursor=""})});
  MAP.on("moveend",list);
- DATA.then(function(){var g=geo();MAP.getSource("pts").setData(g);MAP.getSource("ptl").setData(g);list();setTimeout(add3d,2500);if(location.hash.length>1)fit();var id=new URLSearchParams(location.search).get("id");var x=id&&ALL.find(function(y){return y.i===id});if(x){MAP.jumpTo({center:[x.x,x.q],zoom:15});open(x)}else if(PEND)open(PEND)});
+ DATA.then(function(){var g=geo();MAP.getSource("pts").setData(g);MAP.getSource("ptl").setData(g);list();if(location.hash.length>1)fit();var id=new URLSearchParams(location.search).get("id");var x=id&&ALL.find(function(y){return y.i===id});if(x){MAP.jumpTo({center:[x.x,x.q],zoom:15});open(x)}else if(PEND&&SEL===PEND)open(PEND)});
 }
 MAP.on("style.load",ini);MAP.on("load",ini);if(MAP.isStyleLoaded())ini();
  MAP.on("sourcedata",function(e){if(e.sourceId==="pts"&&e.isSourceLoaded&&ALL.length&&!window.__pinMs)window.__pinMs=Math.round(performance.now())});
  setTimeout(function(){try{if(MAP.getSource("emap")&&!MAP.isSourceLoaded("emap")&&!MAP.getSource("osm")){MAP.addSource("osm",{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256,maxzoom:19,attribution:"© OpenStreetMap"});MAP.addLayer({id:"osm",type:"raster",source:"osm"},"emap")}}catch(e){}},3000);
 document.querySelectorAll("#base button").forEach(function(b){b.onclick=function(){if(!MAP)return;base=b.dataset.b;document.querySelectorAll("#base button").forEach(function(o){o.classList.toggle("on",o===b)});
  MAP.setLayoutProperty("emap","visibility",base==="photo"?"none":"visible");MAP.setLayoutProperty("photo","visibility",base==="photo"?"visible":"none");
+ if(innerWidth<900){if(base==="3d"){MAP.touchZoomRotate.enableRotation();MAP.touchPitch.enable()}else{MAP.touchZoomRotate.disableRotation();MAP.touchPitch.disable()}}
  if(base==="3d")add3d();if(MAP.getLayer("bld"))MAP.setLayoutProperty("bld","visibility",base==="3d"?"visible":"none");
  if(base==="3d"){MAP.easeTo({pitch:60,bearing:-17,zoom:Math.max(MAP.getZoom(),16),duration:900});if(MAP.getZoom()<15)toast("放大地圖就能看到立體建物")}else if(MAP.getPitch()>0)MAP.easeTo({pitch:0,bearing:0,duration:600})}});
 }
