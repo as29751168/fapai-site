@@ -240,7 +240,7 @@ body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,
 *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#222;background:#f6f6f4;line-height:1.6}
 a{color:#1f3a4d}header.top{background:#1f3a4d;color:#fff;padding:14px 16px}header.top a{color:#fff;text-decoration:none;font-weight:700;font-size:18px}
 header.top small{display:block;opacity:.8;font-weight:400;font-size:13px}
-main{max-width:1100px;margin:0 auto;padding:16px}nav.bc{font-size:13px;color:#666;margin-bottom:10px}nav.bc a{color:#666}
+main{max-width:1100px;margin:0 auto;padding:16px}.goback{display:inline-block;margin:0 0 10px;padding:7px 14px 7px 10px;border:1px solid #c9c2b2;border-radius:999px;color:#1d3b53;font-size:15px;text-decoration:none;background:#fff}.goback:active{background:#f3efe6}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#1d3b53;color:#fff;padding:10px 16px;border-radius:8px;font-size:15px;z-index:20;max-width:90%;text-align:center}nav.bc{font-size:13px;color:#666;margin-bottom:10px}nav.bc a{color:#666}
 h1{font-size:22px;line-height:1.4;margin:6px 0}h2{font-size:18px;margin:0 0 10px}
 .box{background:#fff;border:1px solid #e2e2de;border-radius:8px;padding:16px;margin-bottom:16px}
 .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:#e8eef2;color:#1f3a4d;margin-right:6px}
@@ -611,8 +611,11 @@ def contact_box():
     btn = "".join(f'<a class="btn{" line" if k=="LINE" else ""}" href="{e(v)}" target="_blank" rel="noopener">{e(k)}</a>' for k, v in LINKS.items())
     return f'''<section class="box" id="contact"><h2>聯絡我們</h2>
 <p><b>黃先生 Pitt</b>　<a href="tel:0918313888">{PHONE_P}</a><br><b>林小姐 Anna</b>　<a href="tel:0986678928">{PHONE_A}</a></p>
-<p>LINE@ <a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a>（傳「案名」或地址就能問）</p>
+<p><a class="btn line" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">一鍵加入 LINE@ 詢問</a>　加好友後傳「案名」或地址就能問</p>
 <p><b>{e(TEAM)}</b>｜{e(SLOGAN)}<br>全台都有服務：投標諮詢、全程代標、得標後點交處理<br>{e(COMPANY)}</p><div>{btn}</div></section>'''
+
+# 2026-11-28 Anna「每一個面要要回上頁」：首頁以外每頁左上加「‹ 回上頁」；從站內來就回上一頁，直接進來就回麵包屑上一層
+BACK = ('<a class="goback" href="/" onclick="var r=document.referrer;if(r&&r.indexOf(location.host)>-1&&history.length>1){history.back();return false}var b=document.querySelectorAll(&quot;nav.bc a&quot;);if(b.length){location.href=b[b.length-1].href;return false}">‹ 回上頁</a>')
 
 def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True, image_alt=None):
     url = SITE + path
@@ -628,7 +631,7 @@ def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre=""
 <link rel="alternate" type="text/plain" href="{SITE}/llms.txt" title="llms.txt">{extra_head}
 <style>{CSS}</style>{ld}</head><body>
 <header class="top"><div class="hd"><a class="logo" href="/">Pitt &amp; Anna<i> </i>104法拍網團隊</a><nav><a href="/list">物件列表</a><a href="/map">法拍地圖</a><a href="/list#areas">地區</a><a href="/fees">服務收費</a><a href="/#faq">常見問題</a><a href="/#contact">聯絡我們</a></nav><a class="tel" href="tel:0918313888">電話諮詢</a><a class="lg" href="https://lin.ee/Y2bGSIB" target="_blank" rel="noopener">LINE@加入</a><button class="mb" id="mb" type="button" aria-label="選單">☰</button></div></header>{DRAWER}
-{pre}<main>{body}</main>
+{pre}<main>{"" if path == "/" else BACK}{body}</main>
 <footer>© {e(TEAM)}｜{e(COMPANY)}｜林小姐 Anna <a href="tel:0986678928">0986-678-928</a>｜黃先生 Pitt <a href="tel:0918313888">0918-313-888</a><br>物件資料來源：透明房訊，每日更新（{e(UPDATED)}），實際拍賣內容請以法院公告為準。</footer>{FAB if fab else ""}<script src="/ui.js" defer></script>{CLICK_JS}</body></html>'''
 
 DRAWER = ('<div id="dr"><div class="bk"></div><div class="pn"><button class="x" type="button" id="dx">×</button><div style="clear:both"></div>'
@@ -961,14 +964,15 @@ def detail_page(x):
     if item_faq(x): ld.append(faq_ld(item_faq(x)))
     for o in ld:
         for k in [k for k, v in o.items() if v is None]: del o[k]
+    # 2026-11-28 Anna「Line 加入詢問 不用顯示帳號 應該是直覺一鍵式加入」：按鈕改直接開 lin.ee 加好友，同時把「我想問這間＋網址」複製起來，加完貼上就好
     # 2026-11-27 Anna「推上去」：客人從 lin.ee 進來沒帶案件，阿發看不出問哪一件；改用 oaMessage 連結，LINE 自動帶入「我想問 社區名（編號）」
     # 11/27 Anna「給那個代號誰會知道？」：不給編號，給看得懂的「社區名法拍屋｜地址」＋網址（阿發也能從網址認出是哪一件）
     _sa = re.sub(r"^..[縣市](?=..?[市區鄉鎮])", "", addr)
     share_name = f"{comm}法拍屋｜{_sa}" if comm else f"{_sa}法拍屋"
     ask = f'我想問這間：{share_name}' + chr(10) + f'{SITE}/h/{x["編號"]}'
     oa = "https://line.me/R/oaMessage/%40635nftwk/?" + urllib.parse.quote(ask)
-    cta = (f'<div class="cta"><a class="l" id="ask" href="{e(oa)}" target="_blank" rel="noopener">LINE 詢問此物件</a><a class="t" href="tel:0918313888">打電話</a><button class="sh" id="share" type="button">分享</button></div>'
-           f'<script>document.getElementById("ask").onclick=function(){{var t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s){{t+=" （來源:"+s+"）";this.href="https://line.me/R/oaMessage/%40635nftwk/?"+encodeURIComponent(t)}}}};'
+    cta = (f'<div class="cta"><a class="l" id="ask" href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">LINE 加入詢問</a><a class="t" href="tel:0918313888">打電話</a><button class="sh" id="share" type="button">分享</button></div>'
+           f'<script>document.getElementById("ask").onclick=function(){{var t={jd(ask)},s="";try{{s=sessionStorage.getItem("tm_src")||""}}catch(e){{}};if(s)t+=" （來源:"+s+"）";try{{navigator.clipboard.writeText(t)}}catch(e){{}}var m=document.createElement("div");m.className="toast";m.textContent="已複製這間的資料，加好友後貼上送出就好";document.body.appendChild(m);setTimeout(function(){{m.remove()}},4000)}};'
            # 2026-11-27 Anna「這個怎麼不能分享」：手機叫出系統分享（LINE、FB、Messenger…），電腦就複製；內容照 Anna 給的格式＝第一行案名、第二行網址
            f'document.getElementById("share").onclick=function(){{var b=this,t={jd("我發現這個物件，想跟你分享" + chr(10) + share_name + chr(10) + SITE + "/h/" + x["編號"])};if(navigator.share){{navigator.share({{text:t}}).catch(function(){{}})}}else{{try{{navigator.clipboard.writeText(t);b.textContent="已複製";setTimeout(function(){{b.textContent="分享"}},1500)}}catch(e){{prompt("複製這段文字",t)}}}}}};</script>')
     return page(full_title, desc, f'/h/{x["編號"]}', body + team3_box() + cta, ld, og_pick(ph), "<style>footer{padding-bottom:90px}</style>", "", False, f'{x["地址"]} 法拍屋實拍照片')
@@ -1413,7 +1417,7 @@ def about_page():
             '<section class="box"><h2>我們的團隊</h2><p>黃先生 Pitt 與林小姐 Anna 夫妻雙人顧問，協助產權調查、現場勘查、標價評估、投標、點交與交屋。</p>'
             f'<p>經紀業：{e(COMPANY)}。<a href="/cases">看代標成交案例</a></p></section>'
             '<section class="box"><h2>我們提供的服務</h2><ul><li>全程代標：費用看案件，一般點交案約 2%～3%；不點交、部分點交及持分案件依難度評估，委託前會先說清楚</li></ul><p><a href="/fees">查看服務項目與收費說明</a></p></section>'
-            f'<section class="box"><h2>聯絡我們</h2><ul><li>林小姐 Anna：{e(PHONE_A)}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>LINE@：<a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">https://lin.ee/Y2bGSIB</a></li><li>服務範圍：全台都有服務</li><li>{e(COMPANY)}</li></ul></section>'
+            f'<section class="box"><h2>聯絡我們</h2><ul><li>林小姐 Anna：{e(PHONE_A)}</li><li>黃先生 Pitt：{e(PHONE_P)}</li><li>LINE@：<a href="{e(LINKS["LINE"])}" target="_blank" rel="noopener">一鍵加入好友</a></li><li>服務範圍：全台都有服務</li><li>{e(COMPANY)}</li></ul></section>'
             f'<section class="box" id="faq"><h2>常見問題</h2>{fh}</section>' + know_box() + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "AboutPage", "name": "關於 Pitt & Anna｜104法拍網團隊", "url": SITE + "/about", "inLanguage": "zh-TW"},
           {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in ABOUT_FAQ]}]

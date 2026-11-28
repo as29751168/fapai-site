@@ -55,7 +55,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
                 f'<div class="tk-price"><div><small>底價</small><b>{e(price(x))}</b></div>'
                 + (f'<div><small>每坪</small><b class="sm">{e(per.replace("萬/坪", " 萬"))}</b></div>' if per else "") + '</div>'
                 '<p class="tk-see">想投標請先到現場看房</p>'
-                f'<a class="tk-ask" href="https://line.me/R/oaMessage/%40635nftwk/?{q}" target="_blank" rel="noopener">問同社區實登差價 →</a>'
+                f'<a class="tk-ask" href="{LINE}" data-q="{q}" onclick="try{{navigator.clipboard.writeText(decodeURIComponent(this.dataset.q))}}catch(e){{}}" target="_blank" rel="noopener">問同社區實登差價 →</a>'
                 '</div></article>')
 
     TOP = ('<header class="hd"><div class="wrap hd-in"><a class="logo" href="/"><img src="/home/assets/pitt_anna.webp" alt="" width="44" height="44">'
@@ -207,7 +207,7 @@ def build(D, P, write, TODAY, OLD_LD=(), CLICK_JS="", VIDEOS=None, VIDEOS_KNOW=(
                   {"@type": "ListItem", "position": 2, "name": f'{p["zh"]} {p["n"]}', "item": f"{SITE}/team/{k}"}]}]
         pg = (HEAD(f'{p["zh"]} {p["n"]}｜法拍代標顧問｜Pitt & Anna 104法拍網團隊', f'{p["zh"]} {p["n"]}，Pitt & Anna 104法拍網團隊法拍代標顧問。' + "、".join(d.split("：")[0] for d in p["do"]) + f'。電話 {p["tel"]}。', ld, f"/team/{k}")
           + TOP + '<section class="sec"><div class="wrap duo"><img src="/home/assets/pitt_anna.webp" alt="Pitt 與 Anna（Q 版）">'
-          f'<div><p style="margin:0;color:#5b6875">首頁 › 認識我們</p><h1 class="hand" style="font-size:34px;margin:4px 0">{p["zh"]} {p["n"]}</h1>'
+          f'<div><p style="margin:0 0 6px"><a href="/" onclick="if(document.referrer.indexOf(location.host)>-1&&history.length>1){{history.back();return false}}" style="display:inline-block;padding:7px 14px 7px 10px;border:1px solid #c9c2b2;border-radius:999px;color:#1d3b53;text-decoration:none;background:#fff">‹ 回上頁</a></p><p style="margin:0;color:#5b6875">首頁 › 認識我們</p><h1 class="hand" style="font-size:34px;margin:4px 0">{p["zh"]} {p["n"]}</h1>'
           f'<p class="lead">法拍代標顧問｜Pitt &amp; Anna 104法拍網團隊（夫妻雙人顧問）</p>'
           f'<p style="font-size:18px;background:#fff6c7;padding:12px 16px;border-radius:6px" class="hand">「{e(p["say"])}」</p>'
           '<h2 style="font-size:20px;margin:18px 0 6px">我負責</h2><ul>' + "".join(f"<li>{e(d)}</li>" for d in p["do"]) + '</ul>'
