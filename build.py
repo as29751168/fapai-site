@@ -169,6 +169,9 @@ def live_photos(ph):
     og_prefetch(ph)
     return [u for u in ph if u in OG_DIMS]
 NOPHOTO = '<div class="noimg">照片整理中，歡迎 LINE@ 詢問</div>'
+NOIMG_CARD = '<div class="noimg">實拍照整理中</div>'
+# 2026-11-28 Anna「很零亂」：清單裡沒照片的案排到最後，有照片的先看
+def ph_first(xs): return sorted(xs, key=lambda x: not live_photos(photos(x)))
 GAL_FB = "var g=this.parentNode;this.remove();if(g&&!g.querySelector('img'))g.outerHTML='<div class=noimg>照片整理中，歡迎 LINE@ 詢問</div>'"
 
 def e(s): return html.escape(str(s if s is not None else ""), quote=True)
@@ -190,7 +193,7 @@ def is_ying(x):
 YING = "公告應買｜先買先贏"
 # 照片載入失敗時自動換下一張，全部失敗就換成「照片請洽業務」（2026-11-18 Anna：卡片不可出現問號破圖）
 IMG_FB = ("var a=(this.dataset.alt||'').split('|').filter(Boolean);if(a.length){this.src=a.shift();this.dataset.alt=a.join('|')}"
-          "else{this.onerror=null;var d=document.createElement('div');d.className='noimg';d.textContent='照片請洽業務';this.replaceWith(d)}")
+          "else{this.onerror=null;var d=document.createElement('div');d.className='noimg';d.textContent='實拍照整理中';this.replaceWith(d)}")
 def img_fb(ph):
     return f' data-alt="{e("|".join(ph[1:4]))}" onerror="{e(IMG_FB)}"'
 def price_num(s):
@@ -328,7 +331,17 @@ footer{background:var(--navy-deep);color:#9fb0bb;text-align:left;padding:30px 24
 header.top a.lg{font-size:14px;font-weight:650;letter-spacing:.03em}
 .tg{border-radius:2px!important;font-size:12px!important;letter-spacing:.04em}.tg.l{background:var(--gold)!important}.tg.r{background:#9c3b32!important}
 @media(max-width:640px){.bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bar #q,.bar #go{grid-column:1/-1}.bar select,.bar button{width:100%;min-width:0}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}}"""
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}}
+/* 2026-11-28 學 DNSchool：閱讀排版（行高 1.75、字距、標題左側色條、段落間距）＋平板寬度頁首不再擠成直排 */
+@media(max-width:1180px){.hd nav{display:none}.hd{justify-content:space-between}header.top a.logo{white-space:nowrap}}
+@media(max-width:760px){header.top a.tel{display:none}}
+.box h2{border-left:4px solid var(--navy);padding:1px 0 1px 14px;margin:0 0 20px;line-height:1.45}
+.box p,.notes p{color:#3a4c58;line-height:1.8;letter-spacing:.02em;max-width:44em}
+.box>p{margin:0 0 14px}
+.notes.nrd{white-space:normal}.notes p{margin:0 0 14px}.notes p b{color:var(--navy)}
+.notes .nh{font-weight:700;color:var(--navy);background:var(--paper);border-left:3px solid var(--gold);padding:8px 14px;margin:4px 0 16px}
+.btn,.cta a,.cta button,.fab a,.goback,.lg,.tel{transition:transform .12s ease}.btn:active,.cta a:active,.cta button:active,.fab a:active,.goback:active,.lg:active,.tel:active{transform:scale(.97)}@media(prefers-reduced-motion:reduce){.btn:active,.cta a:active,.cta button:active,.fab a:active,.goback:active{transform:none}}
+@media(max-width:640px){.box{padding:20px 18px}.box p,.notes p{font-size:16px;line-height:1.85}}"""
 
 ORG = {
     "@context": "https://schema.org", "@type": "RealEstateAgent", "@id": SITE + "/#org",
@@ -395,9 +408,9 @@ def collection_page(path, h1, intro, xs, groups=None, crumb=None):
     """自動集合頁：導言、物件卡、FAQ、CollectionPage／ItemList／FAQPage 結構化資料"""
     faq = list_faq(h1, xs)
     if groups:
-        cards = "".join(f'<h2>{e(g)}（{len(gx)}件）</h2><div class="grid">{"".join(card(x) for x in gx)}</div>' for g, gx in groups if gx)
+        cards = "".join(f'<h2>{e(g)}（{len(gx)}件）</h2><div class="grid">{"".join(card(x) for x in ph_first(gx))}</div>' for g, gx in groups if gx)
     else:
-        cards = f'<div class="grid">{"".join(card(x) for x in xs)}</div>'
+        cards = f'<div class="grid">{"".join(card(x) for x in ph_first(xs))}</div>'
     mp = {"/new": "new", "/round3": "round3", "/delivery": "delivery"}.get(path)
     body = (f'<nav class="bc"><a href="/">首頁</a> › {e(crumb or h1)}</nav><h1>{e(h1)}（{len(xs)}件）</h1><p>{e(intro)}</p>' + (f'<p><a class="btn" href="/map#{mp}">在地圖上看這些物件</a></p>' if mp else "") + cards + faq_html(faq) + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": h1, "url": SITE + path, "description": intro[:150], "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
@@ -561,11 +574,26 @@ CASES = [
      "note": "每件法拍屋條件不同，過去成交不代表未來結果；投標前要先查清產權、占用與點交情形。"},
 ]
 
+# 2026-11-28 Anna「成交案例要刷一排」：自家案例不能編（廣告要真實），改把透明房訊公開開標清單裡真實的「拍定」排成一排，
+# 清楚標明是法院公開結果、不是本團隊代標；去掉持分、土地、凶宅字樣與無門牌的
+def recent_sold_row(n=10):
+    xs = []
+    for f in ("data/results.json",):
+        try: xs += json.load(open(f, encoding="utf-8")).get("items", [])
+        except Exception: pass
+    xs = [x for x in xs if x.get("status") == "拍定" and not x.get("land") and re.search(r"[路街道段]", x.get("addr", "")) and not re.search(r"持分|凶|土地", x.get("addr", "") + x.get("type", ""))]
+    xs.sort(key=lambda x: [int(v) for v in re.findall(r"\d+", x.get("date", "0/0/0"))[:3]], reverse=True)
+    if not xs: return ""
+    cards = "".join(f'<div class="sold"><b>{e(re.sub(r"(\d+號).*", r"\1", x["addr"]))}</b><span>{e("｜".join(filter(None, [x.get("type",""), "第" + x.get("round","").replace("拍","") + "拍", x.get("deliver","")])))}</span><span>底價 <strong>{e(x.get("base",""))}</strong></span><small>{e(x.get("date",""))} 拍定</small></div>' for x in xs[:n])
+    return ('<section class="box"><h2>近期法院拍定結果</h2><p class="note" style="text-align:left">以下是法院公開開標結果中已「拍定」的物件（資料來源：透明房訊公開開標清單），不是本團隊代標的案例；樓層門牌只寫到號。</p>'
+            '<div class="soldrow">' + cards + '</div></section>'
+            '<style>.soldrow{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px}.sold{flex:0 0 220px;scroll-snap-align:start;border:1px solid #d9d4c7;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;background:#fff}.sold b{color:#1d3b53;font-size:15px}.sold span{font-size:14px;color:#444}.sold strong{color:#1d3b53;font-size:17px}.sold small{color:#888}</style>')
+
 def cases_page():
     secs = "".join(f'<section class="box"><h2>{e(c["title"])}</h2>' + kv(c["rows"]) + f'<p class="note">{e(c["note"])}</p></section>' for c in CASES)
     body = ('<nav class="bc"><a href="/">首頁</a> › 代標成交案例</nav><h1>代標成交案例｜Pitt & Anna 104法拍網團隊</h1>'
             f'<p>以下是 {e(NAME)} 協助客戶投標的真實案例，只寫拍賣紀錄與公開的實價登錄，不公開社區名、案號與客戶身分。</p>'
-            + secs + '<section class="box areas"><h2>延伸閱讀</h2><a href="/about">關於我們</a><a href="/fees">服務與收費</a><a href="/topic/proxy">代標流程與費用</a></section>' + contact_box())
+            + secs + recent_sold_row() + '<section class="box areas"><h2>延伸閱讀</h2><a href="/about">關於我們</a><a href="/fees">服務與收費</a><a href="/topic/proxy">代標流程與費用</a></section>' + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": "代標成交案例", "url": SITE + "/cases", "inLanguage": "zh-TW", "publisher": {"@id": SITE + "/#org"}},
           {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": SITE + "/"}, {"@type": "ListItem", "position": 2, "name": "代標成交案例", "item": SITE + "/cases"}]}]
     return page(f"代標成交案例｜{NAME}", "Pitt & Anna 104法拍網團隊代標成交案例：樹林一間金服第三拍得標 590 萬，只寫拍賣紀錄與公開實價登錄。", "/cases", body, ld)
@@ -615,6 +643,18 @@ def contact_box():
 <p><b>{e(TEAM)}</b>｜{e(SLOGAN)}<br>全台都有服務：投標諮詢、全程代標、得標後點交處理<br>{e(COMPANY)}</p><div>{btn}</div></section>'''
 
 # 2026-11-28 Anna「每一個面要要回上頁」：首頁以外每頁左上加「‹ 回上頁」；從站內來就回上一頁，直接進來就回麵包屑上一層
+def notes_html(t):
+    """2026-11-28 學 DNSchool 排版：筆錄一點一段、●標題做成小標，不再整片擠在一起（文字原樣，不改內容）"""
+    out = []
+    for ln in str(t).splitlines():
+        ln = ln.strip()
+        if not ln: continue
+        if ln.startswith("●"):
+            out.append(f'<p class="nh">{e(ln.strip("● "))}</p>')
+        else:
+            out.append("<p>" + re.sub(r"^(\d{1,2}[・．.、‧·])", r"<b>\1</b>", e(ln)) + "</p>")
+    return "".join(out)
+
 BACK = ('<a class="goback" href="/" onclick="var r=document.referrer;if(r&&r.indexOf(location.host)>-1&&history.length>1){history.back();return false}var b=document.querySelectorAll(&quot;nav.bc a&quot;);if(b.length){location.href=b[b.length-1].href;return false}">‹ 回上頁</a>')
 
 def page(title, desc, path, body, jsonld=None, image=None, extra_head="", pre="", fab=True, image_alt=None):
@@ -658,7 +698,8 @@ def card(x):
     r = round_of(x)
     dv = deliver_of(x)
     badge = f'<span class="rd2">{e("｜".join(filter(None, [YING if is_ying(x) else ("第%d拍" % r) if r else "拍次洽詢", dv])))}</span>'
-    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片"{img_fb(ph)}>' if ph else '<div class="noimg">照片請洽業務</div>'
+    ph = live_photos(ph)   # 2026-11-28 Anna 截圖：透明房訊刪圖的案不要出現灰框「照片請洽業務」
+    img = f'<img loading="lazy" src="{e(ph[0])}" alt="{e(x["地址"])} 法拍屋照片"{img_fb(ph)}>' if ph else NOIMG_CARD
     price = re.sub(r"^售", "", x["價格"])
     old = f'<s>{e(re.sub(r"^售", "", x["原價"]))}</s>' if x["原價"] else ""
     top = "｜".join(filter(None, ["先買先贏" if is_ying(x) else inf.get("開標日期", ""), x["狀態"], "新上架" if _within(x.get("新增日", "")) else "", "降價" if _within(x.get("異動日", "")) and x.get("降價前", 0) else ""]))
@@ -817,7 +858,7 @@ def community_page(key, g):
     links = "".join(f'<a href="/area/{slug(a)}">{e(a)}法拍屋</a>' for a in areas) + (f'<a href="/{cc[0]}">{e(cc[3])}</a>' if cc else "")
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'{e(name)}法拍屋</nav>'
             f'<h1>{e(name)}法拍屋｜{e(a0)}（{len(cur)}件）</h1><p>{e(intro)}</p>'
-            + (f'<h2>{e(name)}法拍物件</h2><div class="grid">{"".join(card(x) for x in cur)}</div>' if cur else "") + vsec + psec
+            + (f'<h2>{e(name)}法拍物件</h2><div class="grid">{"".join(card(x) for x in ph_first(cur))}</div>' if cur else "") + vsec + psec
             + faq_html(list_faq(name + "法拍屋", cur)) + f'<section class="box areas"><h2>附近法拍屋</h2>{links}</section>' + contact_box())
     desc = intro[:150]
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{name}法拍屋", "url": f"{SITE}/c/{slug(key)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
@@ -939,7 +980,7 @@ def detail_page(x):
             m = re.match(r"(第.{1,2}拍)\s*([\d/]+)?\s*底標價[：:]\s*(.+)", ln)
             rows.append(f"<tr><td>{e(m.group(1))}</td><td>{e(m.group(2) or '')}</td><td>{e(m.group(3))}</td></tr>" if m else f'<tr><td colspan="3">{e(ln)}</td></tr>')
         srows = '<section class="box"><h2>拍賣紀錄（拍次／拍賣日期／底標價）</h2><table><tr><th>拍次</th><th>日期（月/日）</th><th>底標價</th></tr>' + "".join(rows) + "</table></section>"
-    nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes">{e(notes)}</div></section>' if notes else ""
+    nsec = f'<section class="box"><h2>法院筆錄</h2><div class="notes nrd">{notes_html(notes)}</div></section>' if notes else ""
     sim = related_box(x, comm, area)
     cc = city_of(x)
     body = (f'<nav class="bc"><a href="/">首頁</a> › ' + (f'<a href="/{cc[0]}">{e(cc[3])}</a> › ' if cc else "") + f'<a href="/area/{slug(area)}">{e(area)}法拍屋</a> › {e(x["類型"])}</nav>'
@@ -1193,7 +1234,7 @@ $('rs').addEventListener('click',function(){TY=[];TL='';OVR=null;F.forEach(funct
 
 def list_page(path, h1, desc, xs):
     title = f"{h1}｜{len(xs)}筆｜{NAME}"
-    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(h1)}</nav><h1>{e(h1)}（{len(xs)}筆）</h1><p>{e(desc)}</p><div class="grid">{"".join(card(x) for x in xs)}</div>' + contact_box())
+    body = (f'<nav class="bc"><a href="/">首頁</a> › {e(h1)}</nav><h1>{e(h1)}（{len(xs)}筆）</h1><p>{e(desc)}</p><div class="grid">{"".join(card(x) for x in ph_first(xs))}</div>' + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "ItemList", "name": h1, "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}]
     return page(title, desc, path, body, ld, SITE + "/og.jpg")
 
@@ -1272,7 +1313,7 @@ def area_page(a, xs):
     city = next((c for c in CITIES if a[:2] in c[2] and len(c[2]) == 1), None)
     crumb = f'<a href="/{city[0]}">{e(city[3])}</a> › ' if plus and city else ""
     body = (f'<nav class="bc"><a href="/">首頁</a> › {crumb}{e(a)}法拍屋</nav><h1>{e(a[2:] or a)}法拍屋｜{e(a)}法拍物件整理（{len(xs)}件）</h1>' + (f'<p class="lead"><strong>{e(plus[0])}</strong></p>' if plus else "") + f'<p>{e(intro)}</p>' + (plus[1] if plus else "") +
-            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in xs)}</div>' + (plus[2] if plus else "") + faq_html(plus[3] if plus else list_faq(a + "法拍屋", xs)) + (plus[4] if plus else "") + contact_box())
+            f'<p>{e(a)}法拍屋代標、產權調查與點交評估，可電話或 LINE 諮詢。</p>{soon}{comm_links(lambda g, a=a: any(area_of(x) == a for x in g["cur"]), a + "社區法拍屋")}{tag_links(a)}' + (f'<section class="box"><h2>{e(a)}法拍地圖</h2><iframe src="/map?embed=1#area-{slug(a)}" title="{e(a)}法拍地圖" loading="lazy" style="width:100%;height:420px;border:0;border-radius:6px"></iframe><p><a href="/map#area-{slug(a)}">開大地圖看{e(a)}</a></p></section>' if a in MAP_AREAS else "") + f'<h2>{e(a)}全部法拍物件</h2><div class="grid">{"".join(card(x) for x in ph_first(xs))}</div>' + (plus[2] if plus else "") + faq_html(plus[3] if plus else list_faq(a + "法拍屋", xs)) + (plus[4] if plus else "") + contact_box())
     ld = [ORG, {"@context": "https://schema.org", "@type": "CollectionPage", "name": f"{a}法拍屋", "url": f"{SITE}/area/{slug(a)}", "description": desc, "inLanguage": "zh-TW", "dateModified": UPDATED.replace(" ", "T") + ":00+08:00"},
           {"@context": "https://schema.org", "@type": "ItemList", "name": f"{a}法拍屋", "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/h/{x["編號"]}', "name": x["地址"]} for i, x in enumerate(xs)]}, faq_ld(plus[3] if plus else list_faq(a + "法拍屋", xs))]
     if plus:
@@ -1334,7 +1375,7 @@ def city_page(slug_, short, prefixes, kw, scope):
             + (tag_links(_CITY_FULL.get(prefixes[0], prefixes[0])) if len(prefixes) == 1 else "")
             + (lambda cc: f'<section class="box areas"><h2>依類型找{e(short)}法拍屋</h2>' + "".join(f'<a href="/{cc[0]}-{t[0]}">{e(short + t[1])}法拍屋（{len(type_items(cc, t[2]))}）</a>' for t in TYPES if len(type_items(cc, t[2])) >= 3) + '</section>')(next(c for c in CITIES if c[0] == slug_))
             +
-            f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in xs)}</div>'
+            f'<h2 class="sec">{e(kw)}物件列表（第三拍以上優先）</h2><div class="grid">{"".join(card(x) for x in ph_first(xs))}</div>'
             f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
             f'<section class="box areas"><h2>其他地區</h2>{others}</section>' + know_box() + contact_box())
     ld = [ORG,
@@ -1365,7 +1406,7 @@ def type_page(c, t):
     fh = "".join(f"<details><summary>{e(q)}</summary><p>{e(a)}</p></details>" for q, a in faq)
     intro = f'<p>{e(kw)}專區：目前共 {len(xs)} 筆，其中第三拍以上 {n3} 筆，資料{e(UPDATED[:10])}更新。每筆列出拍次、開標日期、底標價與法院筆錄。</p>'
     body = (f'<nav class="bc"><a href="/">首頁</a> › <a href="/{c[0]}">{e(c[3])}</a> › {e(kw)}</nav><h1>{e(kw)}（{len(xs)}筆）</h1>{intro}'
-            f'<div class="grid">{"".join(card(x) for x in xs)}</div>'
+            f'<div class="grid">{"".join(card(x) for x in ph_first(xs))}</div>'
             f'<section class="box" id="faq"><h2>{e(kw)}常見問題</h2>{fh}</section>'
             f'<section class="box areas"><h2>其他類型與地區</h2><a href="/{c[0]}">{e(c[3])}</a>{others}</section>' + know_box() + contact_box())
     ld = [ORG,
